@@ -81,38 +81,3 @@
 #define MATERIAL_COMPUTER		31			// computers/electronic equipment
 #define MATERIAL_LAST			32			// number of materials
 
-// Defined as a macro here so one change will affect all the relevant files
-
-#define MATERIALS	\
-	"none",			\
-	"solidwood",	\
-	"hollowwood",	\
-	"solidmetal",	\
-	"hollowmetal",	\
-	"shortgrass",	\
-	"longgrass",	\
-	"dirt",	   		\
-	"sand",	   		\
-	"gravel",		\
-	"glass",		\
-	"concrete",		\
-	"marble",		\
-	"water",		\
-	"snow",	   		\
-	"ice",			\
-	"flesh",		\
-	"mud",			\
-	"bpglass",		\
-	"dryleaves",	\
-	"greenleaves",	\
-	"fabric",		\
-	"canvas",		\
-	"rock",			\
-	"rubber",		\
-	"plastic",		\
-	"tiles",		\
-	"carpet",		\
-	"plaster",		\
-	"shatterglass",	\
-	"armor",		\
-	"computer"
