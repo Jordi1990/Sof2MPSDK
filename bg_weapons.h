@@ -227,7 +227,7 @@ typedef struct  ammoData_s
 extern char *weaponNames[WP_NUM_WEAPONS];
 extern weaponData_t weaponData[WP_NUM_WEAPONS];
 extern char *ammoNames[AMMO_MAX];
-extern ammoData_t ammoData[AMMO_MAX];
+extern ammoData_t ammoData[AMMO_MAX+2];
 
 // Specific weapon information
 
