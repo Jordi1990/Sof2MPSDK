@@ -56,7 +56,7 @@ char *ammoNames[AMMO_MAX] =
 	"ANM14" 		//	AMMO_ANM14,
 };
 
-ammoData_t ammoData[AMMO_MAX];
+ammoData_t ammoData[AMMO_MAX+2];
 
 static bool BG_ParseAmmoStats(ammo_t ammoNum, void *group)
 {
