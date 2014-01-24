@@ -790,7 +790,7 @@ void G_ClientCleanName ( const char *in, char *out, int outSize, bool colors )
 	// don't allow empty names
 	if( *p == 0 || colorlessLen == 0 ) 
 	{
-		Q_strncpyz( p, "UnnamedPlayer", outSize );
+		strncpy( p, "UnnamedPlayer", outSize );
 	}
 }
 
@@ -992,7 +992,7 @@ void ClientUserinfoChanged( int clientNum )
 	}
 
 	// set name
-	Q_strncpyz ( oldname, client->pers.netname, sizeof( oldname ) );
+	strncpy ( oldname, client->pers.netname, sizeof( oldname ) );
 	s = Info_ValueForKey (userinfo, "name");
 	G_ClientCleanName( s, client->pers.netname, sizeof(client->pers.netname), level.gametypeData->teams?false:true );
 
@@ -1000,7 +1000,7 @@ void ClientUserinfoChanged( int clientNum )
 	{
 		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) 
 		{
-			Q_strncpyz( client->pers.netname, "scoreboard", sizeof(client->pers.netname) );
+			strncpy( client->pers.netname, "scoreboard", sizeof(client->pers.netname) );
 		}
 	}
 
@@ -1011,11 +1011,11 @@ void ClientUserinfoChanged( int clientNum )
 	if ( level.gametypeData->teams && (g_entities[clientNum].r.svFlags & SVF_BOT)) 
 	{
 		s = Info_ValueForKey( userinfo, "team" );
-		if ( !Q_stricmp( s, "red" ) || !Q_stricmp( s, "r" ) ) 
+		if ( !strcmp( s, "red" ) || !strcmp( s, "r" ) ) 
 		{
 			team = TEAM_RED;
 		} 
-		else if ( !Q_stricmp( s, "blue" ) || !Q_stricmp( s, "b" ) ) 
+		else if ( !strcmp( s, "blue" ) || !strcmp( s, "b" ) ) 
 		{
 			team = TEAM_BLUE;
 		} 
@@ -1043,7 +1043,7 @@ void ClientUserinfoChanged( int clientNum )
 		if ( team != TEAM_SPECTATOR )
 		{
 			// No identity or a team mismatch means they dont get to be that skin
-			if ( !client->pers.identity || Q_stricmp ( level.gametypeTeam[team], client->pers.identity->mTeam ) )
+			if ( !client->pers.identity || strcmp ( level.gametypeTeam[team], client->pers.identity->mTeam ) )
 			{
 				// Get first matching team identity
 				client->pers.identity = BG_FindTeamIdentity ( level.gametypeTeam[team], -1 );
@@ -1184,7 +1184,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	{
 		// check for a password
 		value = Info_ValueForKey (userinfo, "password");
-		if ( g_password.string[0] && Q_stricmp( g_password.string, "none" ) &&
+		if ( g_password.string[0] && strcmp( g_password.string, "none" ) &&
 			strcmp( g_password.string, value) != 0) 
 		{
 			return va("Invalid password: %s", value );

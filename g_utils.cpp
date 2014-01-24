@@ -23,7 +23,7 @@ void AddRemap(const char *oldShader, const char *newShader, float timeOffset)
 
 	for (i = 0; i < remapCount; i++) 
 	{
-		if (Q_stricmp(oldShader, remappedShaders[i].oldShader) == 0) 
+		if (strcmp(oldShader, remappedShaders[i].oldShader) == 0) 
 		{
 			// found it, just update this one
 			strcpy(remappedShaders[i].newShader,newShader);
@@ -49,8 +49,8 @@ const char *BuildShaderStateConfig(void)
   
 	memset(buff, 0, MAX_STRING_CHARS*4);
 	for (i = 0; i < remapCount; i++) {
-		Com_sprintf(out, (MAX_QPATH * 2) + 5, "%s=%s:%5.2f@", remappedShaders[i].oldShader, remappedShaders[i].newShader, remappedShaders[i].timeOffset);
-		Q_strcat( buff, sizeof( buff ), out);
+		sprintf_s(out, (MAX_QPATH * 2) + 5, "%s=%s:%5.2f@", remappedShaders[i].oldShader, remappedShaders[i].newShader, remappedShaders[i].timeOffset);
+		strncat(buff, out, sizeof(buff));
 	}
 	return buff;
 }
@@ -180,7 +180,7 @@ gentity_t *G_Find (gentity_t *from, int fieldofs, const char *match)
 		s = *(char **) ((byte *)from + fieldofs);
 		if (!s)
 			continue;
-		if (!Q_stricmp (s, match))
+		if (!strcmp (s, match))
 			return from;
 	}
 
@@ -337,7 +337,7 @@ char	*vtos( const vec3_t v ) {
 	s = str[index];
 	index = (index + 1)&7;
 
-	Com_sprintf (s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+	sprintf_s (s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
 
 	return s;
 }

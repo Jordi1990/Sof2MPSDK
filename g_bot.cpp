@@ -52,7 +52,7 @@ int G_ParseInfos( const char *buf, int max, char *infos[] ) {
 			if ( !strcmp( token, "}" ) ) {
 				break;
 			}
-			Q_strncpyz( key, token, sizeof( key ) );
+			strncpy( key, token, sizeof( key ) );
 
 			token = COM_ParseExt( &buf, false );
 			if ( !token[0] ) 
@@ -150,7 +150,7 @@ const char *G_GetArenaInfoByMap( const char *map )
 
 	for( n = 0; n < g_numArenas; n++ ) 
 	{
-		if( Q_stricmp( Info_ValueForKey( g_arenaInfos[n], "map" ), map ) == 0 ) 
+		if( strcmp( Info_ValueForKey( g_arenaInfos[n], "map" ), map ) == 0 ) 
 		{
 			return g_arenaInfos[n];
 		}
@@ -176,7 +176,7 @@ bool G_DoesMapSupportGametype ( const char* gametype )
 	// Figure out the current map name first
 	if ( RMG.integer )
 	{
-		Com_sprintf ( mapname, MAX_QPATH, "*random" );
+		sprintf_s ( mapname, MAX_QPATH, "*random" );
 	}
 	else
 	{
@@ -203,36 +203,11 @@ bool G_DoesMapSupportGametype ( const char* gametype )
 			break;
 		}
 
-		if ( Q_stricmp ( gametype, token ) == 0 )
+		if ( strcmp ( gametype, token ) == 0 )
 		{
 			return true;
 		}
 	}
 
 	return false;
-}
-
-/*
-=================
-PlayerIntroSound
-=================
-*/
-static void PlayerIntroSound( const char *modelAndSkin ) {
-	char	model[MAX_QPATH];
-	char	*skin;
-
-	Q_strncpyz( model, modelAndSkin, sizeof(model) );
-	skin = Q_strrchr( model, '/' );
-	if ( skin ) {
-		*skin++ = '\0';
-	}
-	else {
-		skin = model;
-	}
-
-	if( Q_stricmp( skin, "default" ) == 0 ) {
-		skin = model;
-	}
-
-	trap_SendConsoleCommand( EXEC_APPEND, va( "play sound/player/announce/%s.wav\n", skin ) );
 }

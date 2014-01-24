@@ -15,137 +15,95 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ai_main.c">
+    <ClCompile Include="bg_gametype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ai_util.c">
+    <ClCompile Include="bg_misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ai_wpnav.c">
+    <ClCompile Include="bg_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_gametype.c">
+    <ClCompile Include="bg_pmove.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_lib.c">
+    <ClCompile Include="bg_slidemove.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_misc.c">
+    <ClCompile Include="bg_weapons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_player.c">
+    <ClCompile Include="g_active.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_pmove.c">
+    <ClCompile Include="g_antilag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_slidemove.c">
+    <ClCompile Include="g_bot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bg_weapons.c">
+    <ClCompile Include="g_client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_active.c">
+    <ClCompile Include="g_cmds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_antilag.c">
+    <ClCompile Include="g_combat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_bot.c">
+    <ClCompile Include="g_gametype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_client.c">
+    <ClCompile Include="g_items.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_cmds.c">
+    <ClCompile Include="g_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_combat.c">
+    <ClCompile Include="g_misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_gametype.c">
+    <ClCompile Include="g_missile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_items.c">
+    <ClCompile Include="g_mover.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_main.c">
+    <ClCompile Include="g_session.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_misc.c">
+    <ClCompile Include="g_spawn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_missile.c">
+    <ClCompile Include="g_svcmds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_mover.c">
+    <ClCompile Include="g_syscalls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_session.c">
+    <ClCompile Include="g_target.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_spawn.c">
+    <ClCompile Include="g_team.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_svcmds.c">
+    <ClCompile Include="g_trigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_syscalls.c">
+    <ClCompile Include="g_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_target.c">
+    <ClCompile Include="g_weapon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_team.c">
+    <ClCompile Include="q_math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_trigger.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_utils.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_weapon.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="q_shared.c">
+    <ClCompile Include="q_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ai_main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="anims.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_aas.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_char.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_chat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_gen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_goal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_move.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ai_weap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="be_ea.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bg_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -153,24 +111,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bg_weapons.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="botlib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\cgame\cg_local.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\cgame\cg_public.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="chars.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\qcommon\disablewarnings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ghoul2\G2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_local.h">
@@ -185,25 +125,13 @@
     <ClInclude Include="inv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="match.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ui\menudef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="q_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="surfaceflags.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="syn.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\qcommon\tags.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\cgame\tr_types.h">
+    <ClInclude Include="G2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -211,9 +139,5 @@
     <CustomBuild Include="SoF2_game.def">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="game.bat">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="game.q3asm" />
   </ItemGroup>
 </Project>

@@ -375,7 +375,7 @@ void G_UpdateCvars( void )
 			if ( cv->modificationCount != cv->vmCvar->modificationCount ) 
 			{
 				// Handle any modified cvar checks
-				if ( !Q_stricmp ( cv->cvarName, "sv_fps" ) )
+				if ( !strcmp ( cv->cvarName, "sv_fps" ) )
 				{
 					if ( cv->vmCvar->integer > 50 )
 					{
@@ -642,7 +642,7 @@ void G_ShutdownGame( int restart )
 
 #ifndef GAME_HARD_LINKED
 
-void QDECL Com_Error ( int level, const char *fmt, ... ) 
+void  Com_Error ( int level, const char *fmt, ... ) 
 {
 	va_list		argptr;
 	char		text[1024];
@@ -654,7 +654,7 @@ void QDECL Com_Error ( int level, const char *fmt, ... )
 	trap_Error( text );
 }
 
-void QDECL Com_Printf( const char *msg, ... ) 
+void  Com_Printf( const char *msg, ... ) 
 {
 	va_list		argptr;
 	char		text[1024];
@@ -673,7 +673,7 @@ void QDECL Com_Printf( const char *msg, ... )
 SortRanks
 =============
 */
-int QDECL SortRanks( const void *a, const void *b ) 
+int  SortRanks( const void *a, const void *b ) 
 {
 	gclient_t	*ca;
 	gclient_t	*cb;
@@ -1091,7 +1091,7 @@ G_LogPrintf
 Print to the logfile with a time stamp if it is open
 =================
 */
-void QDECL G_LogPrintf( const char *fmt, ... ) {
+void  G_LogPrintf( const char *fmt, ... ) {
 	va_list		argptr;
 	char		string[1024];
 	int			min, tens, sec;
@@ -1103,7 +1103,7 @@ void QDECL G_LogPrintf( const char *fmt, ... ) {
 	tens = sec / 10;
 	sec -= tens * 10;
 
-	Com_sprintf( string, sizeof(string), "%fi:%i%i ", min, tens, sec );
+	sprintf_s( string, sizeof(string), "%fi:%i%i ", min, tens, sec );
 
 	va_start( argptr, fmt );
 	vsprintf( string +8 , fmt,argptr );
@@ -1570,7 +1570,7 @@ void CheckCvars( void )
 	if ( g_password.modificationCount != lastMod ) 
 	{
 		lastMod = g_password.modificationCount;
-		if ( *g_password.string && Q_stricmp( g_password.string, "none" ) ) 
+		if ( *g_password.string && strcmp( g_password.string, "none" ) ) 
 		{
 			trap_Cvar_Set( "g_needpass", "1" );
 		} else 

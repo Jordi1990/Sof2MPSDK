@@ -185,7 +185,7 @@ TInventoryTemplate *BG_ParseInventory ( TGPGroup group )
 		trap_GPG_GetName ( subGroup, temp );
 
 		// If the group name isnt item then 'Item' then its not an inventory item
-		if ( Q_stricmp ( temp, "Item") == 0)
+		if ( strcmp ( temp, "Item") == 0)
 		{
 			inv = (TInventoryTemplate *)trap_VM_LocalAlloc ( sizeof(*inv));
 
@@ -198,7 +198,7 @@ TInventoryTemplate *BG_ParseInventory ( TGPGroup group )
 			inv->mBolt = trap_VM_LocalStringAlloc ( temp );
 
 			trap_GPG_FindPairValue ( subGroup, "mp_onback||onback", "no", temp );
-			if ( !Q_stricmp ( temp, "yes" ) )
+			if ( !strcmp ( temp, "yes" ) )
 			{
 				inv->mOnBack = true;
 			}
@@ -254,7 +254,7 @@ TSkinTemplate *BG_ParseSkins( TCharacterTemplate* character, TGPGroup group )
 		trap_GPG_GetName ( subGroup, temp );
 
 		// If the groups name isnt 'Skin' then skip it
-		if ( Q_stricmp( temp, "Skin") == 0 )
+		if ( strcmp( temp, "Skin") == 0 )
 		{
 			// Allocate memory for the skin
 			skin = (TSkinTemplate *) trap_VM_LocalAlloc ( sizeof(*skin) );
@@ -267,7 +267,7 @@ TSkinTemplate *BG_ParseSkins( TCharacterTemplate* character, TGPGroup group )
 			f = 0;
 			validSkin = true;
 #else
-			Com_sprintf( temp, sizeof(temp), "models/characters/skins/%s.g2skin", skin->mSkin );
+			sprintf_s( temp, sizeof(temp), "models/characters/skins/%s.g2skin", skin->mSkin );
 			len = trap_FS_FOpenFile( temp, &f, FS_READ );
 			if (f != 0) 
 			{
@@ -420,11 +420,11 @@ bool BG_ParseItemFile ( void )
 	{
 		trap_GPG_GetName ( subGroup, temp );
 
-		if (Q_stricmp( temp, "item") == 0)
+		if (strcmp( temp, "item") == 0)
 		{
 			// Is this item used for deathmatch?
 			trap_GPG_FindPairValue ( subGroup, "Deathmatch", "yes", temp );
-			if (Q_stricmp( temp, "no") == 0)
+			if (strcmp( temp, "no") == 0)
 			{
 				subGroup = trap_GPG_GetNext(subGroup);
 				continue;
@@ -452,7 +452,7 @@ bool BG_ParseItemFile ( void )
 				trap_GPV_GetName ( pairs, temp );
 
 				// Surface off?
-				if ( Q_stricmpn ( temp, "offsurf", 7) == 0)
+				if ( strncmp ( temp, "offsurf", 7) == 0)
 				{
 					// Allocate the surface structure and link it into the list
 					surf = (TSurfaceList *) trap_VM_LocalAlloc ( sizeof(*surf) );
@@ -464,7 +464,7 @@ bool BG_ParseItemFile ( void )
 					surf->mName = trap_VM_LocalStringAlloc ( temp );
 				}
 				// Surface on?
-				else if ( Q_stricmpn( temp, "onsurf", 6) == 0)
+				else if ( strncmp( temp, "onsurf", 6) == 0)
 				{
 					// Allocate the surface structure and link it into the list
 					surf = (TSurfaceList *) trap_VM_LocalAlloc(sizeof(*surf));
@@ -512,7 +512,7 @@ TCharacterTemplate *BG_FindCharacterTemplate (const char *name)
 	current = bg_characterTemplates;
 	while(current)
 	{
-		if (Q_stricmp(name, current->mName) == 0)
+		if (strcmp(name, current->mName) == 0)
 		{
 			return current;
 		}
@@ -546,7 +546,7 @@ TItemTemplate *BG_FindItemTemplate(const char *name)
 	current = bg_itemTemplates;
 	while(current)
 	{
-		if (Q_stricmp(name, current->mName) == 0)
+		if (strcmp(name, current->mName) == 0)
 		{
 			return current;
 		}
@@ -656,7 +656,7 @@ bool BG_ParseNPCFiles ( void )
 		// Grab the length so we can skip this file later
 		filelen = strlen(fileptr);
 
-		Com_sprintf(fileName, sizeof(fileName),"NPCs/%s", fileptr );
+		sprintf_s(fileName, sizeof(fileName),"NPCs/%s", fileptr );
 
 		// Create the generic parser so the item file can be parsed
 		NPCFile = trap_GP_ParseFile( fileName, true, false );
@@ -673,7 +673,7 @@ bool BG_ParseNPCFiles ( void )
 			trap_GPG_GetName ( subGroup, temp );
 
 			// Look for a parent template if this is the group info
-			if ( Q_stricmp( temp, "GroupInfo") == 0)
+			if ( strcmp( temp, "GroupInfo") == 0)
 			{
 				currentParent = NULL;
 
@@ -685,7 +685,7 @@ bool BG_ParseNPCFiles ( void )
 				}
 			}
 			// A new character template
-			else if ( Q_stricmp( temp, "CharacterTemplate") == 0)
+			else if ( strcmp( temp, "CharacterTemplate") == 0)
 			{
 				// Allocate the new template and link it into the global list.
 				newTemplate = (TCharacterTemplate *)trap_VM_LocalAlloc (sizeof(*newTemplate));
@@ -694,7 +694,7 @@ bool BG_ParseNPCFiles ( void )
 
 				// Exclude from deathmatch?
 				trap_GPG_FindPairValue ( subGroup, "DeathMatch", "yes", temp );
-				if ( Q_stricmp( temp, "no") == 0)
+				if ( strcmp( temp, "no") == 0)
 				{
 					newTemplate->mDeathmatch = false;
 				}
@@ -783,7 +783,7 @@ TModelSounds* BG_GetModelSoundsGroup ( const char* Identity, const char* SoundGr
 		while ( sounds )
 		{
 			// Match?
-			if ( !Q_stricmp ( sounds->mName, SoundGroup ) )
+			if ( !strcmp ( sounds->mName, SoundGroup ) )
 			{
 				return sounds;
 			}
@@ -869,7 +869,7 @@ TIdentity *BG_FindIdentity ( const char *identityName )
 	// Linear search through all of the parsed identities
 	for ( i = 0; i < bg_identityCount; i ++ )
 	{
-		if (Q_stricmp(identityName, bg_identities[i].mName) == 0)
+		if (strcmp(identityName, bg_identities[i].mName) == 0)
 		{
 			return &bg_identities[i];
 		}
@@ -902,7 +902,7 @@ TIdentity* BG_FindTeamIdentity ( const char* teamName, int index )
 	// Linear search through all of the parsed identities
 	for ( i = 0, count = 0; i < bg_identityCount && count < MAX_TEAM_IDENTS; i ++ )
 	{
-		if (Q_stricmp(teamName, bg_identities[i].mTeam) == 0)
+		if (strcmp(teamName, bg_identities[i].mTeam) == 0)
 		{
 			idents[count++] = &bg_identities[i];
 		}
@@ -963,7 +963,7 @@ int BG_ParseSkin ( const char* filename, char* pairs, int pairsSize )
 		trap_GPG_GetName ( group, name );
 
 		// Parse the material
-		if ( Q_stricmp ( name, "material") == 0)
+		if ( strcmp ( name, "material") == 0)
 		{
 			char	matName[MAX_QPATH];
 			char	shaderName[MAX_QPATH];
@@ -984,7 +984,7 @@ int BG_ParseSkin ( const char* filename, char* pairs, int pairsSize )
 			{
 				int size;
 
-				size = Com_sprintf(end, pairsSize, "%s %s ", matName, shaderName);
+				size = sprintf_s(end, pairsSize, "%s %s ", matName, shaderName);
 				end += size;
 				pairsSize -= size;
 				numPairs++;
@@ -1285,7 +1285,7 @@ bool BG_ParseAnimationFile ( const char *filename, animation_t* animations )
 	char			*token;
 	float			fps;
 	int				skip;
-	char			text[20000];
+	char			*text;
 	fileHandle_t	f;
 	int				animNum;
 
@@ -1295,7 +1295,7 @@ bool BG_ParseAnimationFile ( const char *filename, animation_t* animations )
 	{
 		return false;
 	}
-
+	text = (char *)trap_VM_LocalTempAlloc(len + 1);
 	trap_FS_Read( text, len, f );
 	trap_FS_FCloseFile( f );
 
@@ -1376,7 +1376,7 @@ bool BG_ParseAnimationFile ( const char *filename, animation_t* animations )
 
 		animations[animNum].initialLerp = ceil(1000.0f / fabs(fps));
 	}
-
+	trap_VM_LocalTempFree(len + 1);
 	return true;
 }
 
@@ -1398,7 +1398,7 @@ void BG_SetAvailableOutfitting ( const char* available )
 	}
 
 	// IF the availability has changed force a reload of the outfitting groups
-	if ( Q_strncmp ( available, bg_availableOutfitting, min((int)sizeof(bg_availableOutfitting),len) ) )
+	if ( strncmp ( available, bg_availableOutfitting, min((int)sizeof(bg_availableOutfitting),len) ) )
 	{
 		bg_outfittingCount = 0;
 	}
@@ -1645,7 +1645,7 @@ bool BG_ParseOutfittingTemplate ( const char* fileName, goutfitting_t* outfittin
 			// Lookup the weapon number
 			for( i = WP_NONE + 1, item=NULL; i < WP_NUM_WEAPONS; i++ )
 			{
-				if ( Q_stricmp(bg_weaponNames[i], temp ) == 0)
+				if ( strcmp(bg_weaponNames[i], temp ) == 0)
 				{					
 					// translate the weapon index into an item index.
 					item = BG_FindWeaponItem ( (weapon_t) i );					
@@ -1726,7 +1726,7 @@ int BG_ParseOutfittingTemplates ( bool force )
 		// Grab the length so we can skip this file later
 		filelen = strlen(fileptr);
 
-		Com_sprintf ( fileName, sizeof(fileName), "scripts/%s", fileptr );
+		sprintf_s ( fileName, sizeof(fileName), "scripts/%s", fileptr );
 
 		// Parse the outfitting template
 		if ( BG_ParseOutfittingTemplate ( fileName, &bg_outfittings[bg_outfittingCount]	) )

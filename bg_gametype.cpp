@@ -20,7 +20,7 @@ static bool BG_ParseGametypePhotos ( int gametypeIndex, TGPGroup group )
 {
 	TGPGroup photo;
 	int		 index;
-	char	 temp[MAX_TOKENLENGTH];
+	char	 temp[1024];
 
 	// Convienience check
 	if ( !group )
@@ -104,32 +104,32 @@ static bool BG_ParseGametypeInfo ( int gametypeIndex )
 
 	// Are pickups enabled?
 	trap_GPG_FindPairValue ( gtGroup, "pickups", "yes", temp );
-	if ( !Q_stricmp ( temp, "no" ) )
+	if ( !strcmp ( temp, "no" ) )
 	{
 		gametype->pickupsDisabled = true;
 	}
 
 	// Are teams enabled?
 	trap_GPG_FindPairValue ( gtGroup, "teams", "yes", temp );
-	if ( !Q_stricmp ( temp, "yes" ) )
+	if ( !strcmp ( temp, "yes" ) )
 	{
 		gametype->teams = true;
 	}
 
 	// Display kills
 	trap_GPG_FindPairValue ( gtGroup, "showkills", "no", temp );
-	if ( !Q_stricmp ( temp, "yes" ) )
+	if ( !strcmp ( temp, "yes" ) )
 	{
 		gametype->showKills = true;
 	}
 
 	// Look for the respawn type
 	trap_GPG_FindPairValue ( gtGroup, "respawn", "normal", temp );
-	if ( !Q_stricmp ( temp, "none" ) )
+	if ( !strcmp ( temp, "none" ) )
 	{
 		gametype->respawnType = RT_NONE;
 	}
-	else if ( !Q_stricmp ( temp, "interval" ) )
+	else if ( !strcmp ( temp, "interval" ) )
 	{
 		gametype->respawnType = RT_INTERVAL;
 	}
@@ -218,7 +218,7 @@ int BG_FindGametype ( const char* name )
 	for ( i = 0; i < bg_gametypeCount; i ++ )
 	{
 		// Do the names match?
-		if ( !Q_stricmp ( bg_gametypeData[i].name, name )  )
+		if ( !strcmp ( bg_gametypeData[i].name, name )  )
 		{
 			return i;
 		}

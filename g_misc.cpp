@@ -252,12 +252,12 @@ void SP_misc_bsp(gentity_t *ent)
 	G_SpawnInt( "flatten", "0", &tempint);
 	ent->s.time = tempint;
 
-	Com_sprintf(temp, MAX_QPATH, "#%s", out);
+	sprintf_s(temp, MAX_QPATH, "#%s", out);
 	trap_SetBrushModel( ent, temp );  // SV_SetBrushModel -- sets mins and maxs
 	G_BSPIndex(temp);
 
 	level.mNumBSPInstances++;
-	Com_sprintf(temp, MAX_QPATH, "%d-", level.mNumBSPInstances);
+	sprintf_s(temp, MAX_QPATH, "%d-", level.mNumBSPInstances);
 	VectorCopy(ent->s.origin, level.mOriginAdjust);
 	level.mRotationAdjust = ent->s.angles[1];
 	level.mTargetAdjust = temp;
@@ -332,15 +332,15 @@ void SP_terrain(gentity_t *ent)
 	{
 		// Grab the default terrain file from the RMG cvar
 		trap_Cvar_VariableStringBuffer("RMG_terrain", temp, MAX_QPATH);
-		Com_sprintf(final, MAX_QPATH, "%s", temp);
+		sprintf_s(final, MAX_QPATH, "%s", temp);
 		AddSpawnField("terrainDef", temp);
  
 		trap_Cvar_VariableStringBuffer("RMG_instances", temp, MAX_QPATH);
-		Com_sprintf(final, MAX_QPATH, "%s", temp);
+		sprintf_s(final, MAX_QPATH, "%s", temp);
 		AddSpawnField("instanceDef", temp);
 
 		trap_Cvar_VariableStringBuffer("RMG_miscents", temp, MAX_QPATH);
-		Com_sprintf(final, MAX_QPATH, "%s", temp);
+		sprintf_s(final, MAX_QPATH, "%s", temp);
 		AddSpawnField("miscentDef", temp);
 
 		trap_Cvar_VariableStringBuffer("RMG_seed", seed, MAX_QPATH);
@@ -441,14 +441,14 @@ void SP_terrain(gentity_t *ent)
 
 			// Red team change from RMG ?
 			trap_GetConfigstring ( CS_GAMETYPE_REDTEAM, temp, MAX_QPATH );
-			if ( Q_stricmp ( temp, level.gametypeTeam[TEAM_RED] ) )
+			if ( strcmp ( temp, level.gametypeTeam[TEAM_RED] ) )
 			{
 				level.gametypeTeam[TEAM_RED] = trap_VM_LocalStringAlloc ( temp );
 			}
 
 			// Blue team change from RMG ?
 			trap_GetConfigstring ( CS_GAMETYPE_BLUETEAM, temp, MAX_QPATH );
-			if ( Q_stricmp ( temp, level.gametypeTeam[TEAM_BLUE] ) )
+			if ( strcmp ( temp, level.gametypeTeam[TEAM_BLUE] ) )
 			{
 				level.gametypeTeam[TEAM_BLUE] = trap_VM_LocalStringAlloc ( temp );
 			}

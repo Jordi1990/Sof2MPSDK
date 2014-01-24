@@ -116,7 +116,7 @@ static void UpdateIPBans (void)
 			continue;
 
 		*(unsigned *)b = ipFilters[i].compare;
-		Com_sprintf( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist), 
+		sprintf_s( iplist + strlen(iplist), sizeof(iplist) - strlen(iplist), 
 			"%i.%i.%i.%i ", b[0], b[1], b[2], b[3]);
 	}
 
@@ -203,7 +203,7 @@ void G_ProcessIPBans(void)
 	char *s, *t;
 	char		str[MAX_TOKEN_CHARS];
 
-	Q_strncpyz( str, g_banIPs.string, sizeof(str) );
+	strncpy( str, g_banIPs.string, sizeof(str) );
 
 	for (t = s = g_banIPs.string; *t; /* */ ) {
 		s = strchr(s, ' ');
@@ -386,7 +386,7 @@ gclient_t	*ClientForString( const char *s ) {
 		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			continue;
 		}
-		if ( !Q_stricmp( cl->pers.netname, s ) ) {
+		if ( !strcmp( cl->pers.netname, s ) ) {
 			return cl;
 		}
 	}
@@ -448,31 +448,31 @@ bool ConsoleCommand( void )
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-	if ( Q_stricmp (cmd, "entitylist") == 0 ) 
+	if ( strcmp (cmd, "entitylist") == 0 ) 
 	{
 		Svcmd_EntityList_f();
 		return true;
 	}
 
-	if ( Q_stricmp (cmd, "forceteam") == 0 ) 
+	if ( strcmp (cmd, "forceteam") == 0 ) 
 	{
 		Svcmd_ForceTeam_f();
 		return true;
 	}
 
-	if ( Q_stricmp ( cmd, "cancelvote" ) == 0 )
+	if ( strcmp ( cmd, "cancelvote" ) == 0 )
 	{
 		Svcmd_CancelVote_f();
 		return true;
 	}
 
-	if (Q_stricmp (cmd, "gametype_restart" ) == 0 )
+	if (strcmp (cmd, "gametype_restart" ) == 0 )
 	{
 		G_ResetGametype ( );
 		return true;
 	}
 
-	if (Q_stricmp (cmd, "extendtime" ) == 0 )
+	if (strcmp (cmd, "extendtime" ) == 0 )
 	{
 		Svcmd_ExtendTime_f();
 		return true;
@@ -480,7 +480,7 @@ bool ConsoleCommand( void )
 
 	if (g_dedicated.integer) 
 	{
-		if (Q_stricmp (cmd, "say") == 0) 
+		if (strcmp (cmd, "say") == 0) 
 		{
 			trap_SendServerCommand( -1, va("chat -1 \"server: %s\n\"", ConcatArgs(1) ) );
 			return true;

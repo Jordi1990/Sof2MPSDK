@@ -622,8 +622,6 @@ bool	trap_G2API_RemoveBolt(void *ghlInfo, const int modelIndex, const int index)
 bool	trap_G2API_AttachG2Model(void *ghoul2From, int modelFrom, void *ghoul2To, int toBoltIndex, int toModel);
 void		trap_G2_SetGhoul2ModelIndexes(void *ghoul2, qhandle_t *modelList, qhandle_t *skinList);
 bool	trap_G2_HaveWeGhoul2Models(void *ghoul2);
-bool	trap_G2API_GetBoltMatrix(void *ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix,
-								const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, vec3_t scale);
 int			trap_G2API_InitGhoul2Model(void **ghoul2Ptr, const char *fileName, int modelIndex, qhandle_t customSkin,
 						  qhandle_t customShader, int modelFlags, int lodBias);
 
@@ -752,7 +750,7 @@ void		DeathmatchScoreboardMessage		( gentity_t *client );
 void		FindIntermissionPoint				( void );
 void		SetLeader							( int team, int client );
 void		G_RunThink							( gentity_t *ent );
-void QDECL	G_LogPrintf							( const char *fmt, ... );
+void 	G_LogPrintf							( const char *fmt, ... );
 void		SendScoreboardMessageToAllClients	( void );
 void		CheckGametype						( void );
 
@@ -812,21 +810,6 @@ void		G_ResetGametypeItem					( gitem_t* item );
 // ai_main.c
 #define MAX_FILEPATH			144
 int OrgVisible(vec3_t org1, vec3_t org2, int ignore);
-
-//bot settings
-typedef struct bot_settings_s
-{
-	char personalityfile[MAX_FILEPATH];
-	float skill;
-	char team[MAX_FILEPATH];
-} bot_settings_t;
-
-int BotAISetup( int restart );
-int BotAIShutdown( int restart );
-int BotAILoadMap( int restart );
-int BotAISetupClient(int client, struct bot_settings_s *settings, bool restart);
-int BotAIShutdownClient( int client, bool restart );
-int BotAIStartFrame( int time );
 
 #include "g_team.h" // teamplay specific stuff
 
@@ -1114,12 +1097,6 @@ void		*trap_VM_LocalAllocUnaligned ( int size );			// WARNING!!!! USE WITH CAUTI
 void		*trap_VM_LocalTempAlloc( int size );
 void		trap_VM_LocalTempFree( int size );					// free must be in opposite order of allocation!
 const char	*trap_VM_LocalStringAlloc ( const char *source );
-
-// Gametype traps
-void		trap_GT_Init		( const char* gametype, bool restart );
-void		trap_GT_RunFrame	( int time );
-void		trap_GT_Start		( int time );
-int			trap_GT_SendEvent	( int event, int time, int arg0, int arg1, int arg2, int arg3, int arg4 );
 
 void G_UpdateClientAntiLag	( gentity_t* ent );
 void G_UndoAntiLag			( void );

@@ -27,7 +27,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug SoF2|Win32'">
-    <OutDir>.\..\Debug\</OutDir>
+    <OutDir>D:\sof2\</OutDir>
     <IntDir>.\..\Debug\SoF2game\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <TargetName>sof2mp_gamex86</TargetName>
@@ -49,6 +49,8 @@
       <ObjectFileName>.\..\Debug\SoF2game\</ObjectFileName>
       <ProgramDataBaseFileName>.\..\Debug\SoF2game\</ProgramDataBaseFileName>
       <CompileAs>CompileAsCpp</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableLanguageExtensions>true</DisableLanguageExtensions>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>

@@ -14,7 +14,7 @@ bool G_SpawnString( const char *key, const char *defaultString, char **out )
 
 	for ( i = 0 ; i < level.numSpawnVars ; i++ ) 
 	{
-		if ( !Q_stricmp( key, level.spawnVars[i][0] ) ) 
+		if ( !strcmp( key, level.spawnVars[i][0] ) ) 
 		{
 			*out = level.spawnVars[i][1];
 			return true;
@@ -321,7 +321,7 @@ bool G_CallSpawn( gentity_t *ent )
 		
 		if ( wildcard )
 		{
-			result = Q_strncmp ( s->name, ent->classname, wildcard - s->name );
+			result = strncmp ( s->name, ent->classname, wildcard - s->name );
 		}
 		else
 		{
@@ -397,7 +397,7 @@ void G_ParseField( const char *key, const char *value, gentity_t *ent ) {
 	vec3_t	vec;
 
 	for ( f=fields ; f->name ; f++ ) {
-		if ( !Q_stricmp(f->name, key) ) {
+		if ( !strcmp(f->name, key) ) {
 			// found it
 			b = (byte *)ent;
 
@@ -450,7 +450,7 @@ void G_SpawnGEntityFromSpawnVars( bool inSubBSP )
 	{	
 		// filter out the unwanted entities
 		G_SpawnString("filter", "", &value);
-		if (value[0] && Q_stricmp(level.mFilter, value))
+		if (value[0] && strcmp(level.mFilter, value))
 		{	
 			// we are not matching up to the filter, so no spawney
 			return;
@@ -539,7 +539,7 @@ void AddSpawnField(char *field, char *value)
 
 	for(i=0;i<level.numSpawnVars;i++)
 	{
-		if (Q_stricmp(level.spawnVars[i][0], field) == 0)
+		if (strcmp(level.spawnVars[i][0], field) == 0)
 		{
 			level.spawnVars[ i ][1] = G_AddSpawnVarToken( value );
 			return;
@@ -561,7 +561,7 @@ static void HandleEntityAdjustment(void)
 	float		rotation;
 
 	G_SpawnString("origin", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
 		sscanf( value, "%f %f %f", &origin[0], &origin[1], &origin[2] );
 	}
@@ -576,23 +576,23 @@ static void HandleEntityAdjustment(void)
 	newOrigin[2] = origin[2];
 	VectorAdd(newOrigin, level.mOriginAdjust, newOrigin);
 	// damn VMs don't handle outputing a float that is compatible with sscanf in all cases
-	Com_sprintf(temp, MAX_QPATH, "%0.0f %0.0f %0.0f", newOrigin[0], newOrigin[1], newOrigin[2]);
+	sprintf_s(temp, MAX_QPATH, "%0.0f %0.0f %0.0f", newOrigin[0], newOrigin[1], newOrigin[2]);
 	AddSpawnField("origin", temp);
 
 	G_SpawnString("angles", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
 		sscanf( value, "%f %f %f", &angles[0], &angles[1], &angles[2] );
 
 		angles[1] = fmod(angles[1] + level.mRotationAdjust, 360.0);
 		// damn VMs don't handle outputing a float that is compatible with sscanf in all cases
-		Com_sprintf(temp, MAX_QPATH, "%0.0f %0.0f %0.0f", angles[0], angles[1], angles[2]);
+		sprintf_s(temp, MAX_QPATH, "%0.0f %0.0f %0.0f", angles[0], angles[1], angles[2]);
 		AddSpawnField("angles", temp);
 	}
 	else
 	{
 		G_SpawnString("angle", NOVALUE, &value);
-		if (Q_stricmp(value, NOVALUE) != 0)
+		if (strcmp(value, NOVALUE) != 0)
 		{
 			sscanf( value, "%f", &angles[1] );
 		}
@@ -601,14 +601,14 @@ static void HandleEntityAdjustment(void)
 			angles[1] = 0.0;
 		}
 		angles[1] = fmod(angles[1] + level.mRotationAdjust, 360.0);
-		Com_sprintf(temp, MAX_QPATH, "%0.0f", angles[1]);
+		sprintf_s(temp, MAX_QPATH, "%0.0f", angles[1]);
 		AddSpawnField("angle", temp);
 	}
 
 	// RJR experimental code for handling "direction" field of breakable brushes
 	// though direction is rarely ever used.
 	G_SpawnString("direction", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
 		sscanf( value, "%f %f %f", &angles[0], &angles[1], &angles[2] );
 	}
@@ -617,58 +617,58 @@ static void HandleEntityAdjustment(void)
 		angles[0] = angles[1] = angles[2] = 0.0;
 	}
 	angles[1] = fmod(angles[1] + level.mRotationAdjust, 360.0);
-	Com_sprintf(temp, MAX_QPATH, "%0.0f %0.0f %0.0f", angles[0], angles[1], angles[2]);
+	sprintf_s(temp, MAX_QPATH, "%0.0f %0.0f %0.0f", angles[0], angles[1], angles[2]);
 	AddSpawnField("direction", temp);
 
 
 	AddSpawnField("BSPInstanceID", level.mTargetAdjust);
 
 	G_SpawnString("targetname", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("targetname", temp);
 	}
 
 	G_SpawnString("target", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("target", temp);
 	}
 
 	G_SpawnString("killtarget", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("killtarget", temp);
 	}
 
 	G_SpawnString("brushparent", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("brushparent", temp);
 	}
 
 	G_SpawnString("brushchild", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("brushchild", temp);
 	}
 
 	G_SpawnString("enemy", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("enemy", temp);
 	}
 
 	G_SpawnString("ICARUSname", NOVALUE, &value);
-	if (Q_stricmp(value, NOVALUE) != 0)
+	if (strcmp(value, NOVALUE) != 0)
 	{
-		Com_sprintf(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
+		sprintf_s(temp, MAX_QPATH, "%s%s", level.mTargetAdjust, value);
 		AddSpawnField("ICARUSname", temp);
 	}
 }
@@ -929,7 +929,7 @@ void SP_worldspawn( void )
 	int			lengthRed, lengthBlue, lengthGreen;
 
 	G_SpawnString( "classname", "", &text );
-	if ( Q_stricmp( text, "worldspawn" ) ) 
+	if ( strcmp( text, "worldspawn" ) ) 
 	{
 		Com_Error( ERR_FATAL, "SP_worldspawn: The first entity isn't 'worldspawn'" );
 	}
@@ -1007,17 +1007,17 @@ void SP_worldspawn( void )
 	
 	for(i=1;i<LS_NUM_STYLES;i++)
 	{
-		Com_sprintf(temp, sizeof(temp), "ls_%dr", i);
+		sprintf_s(temp, sizeof(temp), "ls_%dr", i);
 		G_SpawnString(temp, defaultStyles[i][0], &text);
 		lengthRed = strlen(text);
 		trap_SetConfigstring(CS_LIGHT_STYLES+((i+LS_STYLES_START)*3)+0, text);
 
-		Com_sprintf(temp, sizeof(temp), "ls_%dg", i);
+		sprintf_s(temp, sizeof(temp), "ls_%dg", i);
 		G_SpawnString(temp, defaultStyles[i][1], &text);
 		lengthGreen = strlen(text);
 		trap_SetConfigstring(CS_LIGHT_STYLES+((i+LS_STYLES_START)*3)+1, text);
 
-		Com_sprintf(temp, sizeof(temp), "ls_%db", i);
+		sprintf_s(temp, sizeof(temp), "ls_%db", i);
 		G_SpawnString(temp, defaultStyles[i][2], &text);
 		lengthBlue = strlen(text);
 		trap_SetConfigstring(CS_LIGHT_STYLES+((i+LS_STYLES_START)*3)+2, text);

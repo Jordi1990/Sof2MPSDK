@@ -12,8 +12,6 @@
 //#include "../../ui/menudef.h"
 #include "inv.h"
 
-#define	GAME_VERSION		"sof2mp-1.00"
-
 #define	DEFAULT_GRAVITY		800
 #define	ARMOR_PROTECTION	0.55
 
@@ -114,8 +112,6 @@ enum
 #if (CS_MAX) > MAX_CONFIGSTRINGS
 #error overflow: (CS_MAX) > MAX_CONFIGSTRINGS
 #endif
-
-typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
 
 /*
 ===================================================================================
@@ -606,21 +602,6 @@ typedef enum
 	GAME_OVER_SCORELIMIT,
 
 } game_over_t;
-
-typedef enum {
-	GTS_RED_CAPTURE,
-	GTS_BLUE_CAPTURE,
-	GTS_RED_RETURN,
-	GTS_BLUE_RETURN,
-	GTS_RED_TAKEN,
-	GTS_BLUE_TAKEN,
-	GTS_REDTEAM_SCORED,
-	GTS_BLUETEAM_SCORED,
-	GTS_REDTEAM_TOOK_LEAD,
-	GTS_BLUETEAM_TOOK_LEAD,
-	GTS_TEAMS_ARE_TIED
-} global_team_sound_t;
-
 
 // Time between location updates
 #define TEAM_LOCATION_UPDATE_TIME		1000

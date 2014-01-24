@@ -917,7 +917,7 @@ gitem_t	*BG_FindItem( const char *pickupName )
 	
 	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) 
 	{
-		if ( !Q_stricmp( it->pickup_name, pickupName ) )
+		if ( !strcmp( it->pickup_name, pickupName ) )
 		{
 			return it;
 		}
@@ -936,7 +936,7 @@ gitem_t	*BG_FindClassnameItem ( const char *classname )
 	
 	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) 
 	{
-		if ( !Q_stricmp( it->classname, classname ) )
+		if ( !strcmp( it->classname, classname ) )
 		{
 			return it;
 		}

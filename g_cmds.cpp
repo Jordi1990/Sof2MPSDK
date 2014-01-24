@@ -41,7 +41,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
 	
-		Com_sprintf (entry, sizeof(entry),
+		sprintf_s (entry, sizeof(entry),
 			" %i %i %i %i %i %i %i %i %i", 
 			level.sortedClients[i],
 			cl->sess.score, 
@@ -284,12 +284,12 @@ void Cmd_Give_f (gentity_t *ent)
 
 	trap_Argv( 1, arg, sizeof( arg ) );
 
-	if ( !Q_stricmp ( arg, "me" ) )
+	if ( !strcmp ( arg, "me" ) )
 	{
 		start = ent->s.number;
 		end = start + 1;
 	}
-	else if ( !Q_stricmp ( arg, "all" ) )
+	else if ( !strcmp ( arg, "all" ) )
 	{
 		start = 0;
 		end   = MAX_CLIENTS;
@@ -320,26 +320,26 @@ void Cmd_Give_f (gentity_t *ent)
 
 	name = ConcatArgs( 2 );
 
-	if (Q_stricmp(name, "all") == 0)
+	if (strcmp(name, "all") == 0)
 		give_all = true;
 	else
 		give_all = false;
 
-	if (give_all || Q_stricmp( name, "health") == 0)
+	if (give_all || strcmp( name, "health") == 0)
 	{
 		ent->health = MAX_HEALTH;
 		if (!give_all)
 			continue;
 	}
 
-	if (give_all || Q_stricmp(name, "weapons") == 0)
+	if (give_all || strcmp(name, "weapons") == 0)
 	{
 		ent->client->ps.stats[STAT_WEAPONS] = (1 << WP_NUM_WEAPONS) - 1 - ( 1 << WP_NONE );
 		if (!give_all)
 			continue;
 	}
 
-	if (give_all || Q_stricmp(name, "ammo") == 0)
+	if (give_all || strcmp(name, "ammo") == 0)
 	{
 		for ( i = WP_NONE + 1 ; i < WP_NUM_WEAPONS ; i++ ) 
 		{
@@ -354,7 +354,7 @@ void Cmd_Give_f (gentity_t *ent)
 			continue;
 	}
 
-	if (give_all || Q_stricmp(name, "armor") == 0)
+	if (give_all || strcmp(name, "armor") == 0)
 	{
 		ent->client->ps.stats[STAT_ARMOR] = MAX_ARMOR;
 
@@ -580,7 +580,7 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 		char userinfo[MAX_INFO_STRING];
 		trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
 
-		if ( Q_stricmp ( identity, Info_ValueForKey ( userinfo, "identity" ) ) )
+		if ( strcmp ( identity, Info_ValueForKey ( userinfo, "identity" ) ) )
 		{
 			Info_SetValueForKey ( userinfo, "identity", identity );
 			Info_SetValueForKey ( userinfo, "team_identity", identity );
@@ -592,19 +592,19 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 		}
 	}
 
-	if ( !Q_stricmp( s, "follow1" ) ) 
+	if ( !strcmp( s, "follow1" ) ) 
 	{
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_FOLLOW;
 		specClient = -1;
 	} 
-	else if ( !Q_stricmp( s, "follow2" ) ) 
+	else if ( !strcmp( s, "follow2" ) ) 
 	{
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_FOLLOW;
 		specClient = -2;
 	} 
-	else if ( !Q_stricmp( s, "spectator" ) || !Q_stricmp( s, "s" ) ) 
+	else if ( !strcmp( s, "spectator" ) || !strcmp( s, "s" ) ) 
 	{
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_FREE;
@@ -613,11 +613,11 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 	{
 		// if running a team game, assign player to one of the teams
 		specState = SPECTATOR_NOT;
-		if ( !Q_stricmp( s, "red" ) || !Q_stricmp( s, "r" ) ) 
+		if ( !strcmp( s, "red" ) || !strcmp( s, "r" ) ) 
 		{
 			team = TEAM_RED;
 		} 
-		else if ( !Q_stricmp( s, "blue" ) || !Q_stricmp( s, "b" ) ) 
+		else if ( !strcmp( s, "blue" ) || !strcmp( s, "b" ) ) 
 		{
 			team = TEAM_BLUE;
 		} 
@@ -1233,7 +1233,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 		default:
 		case SAY_ALL:
 
-			Com_sprintf (name, nameSize, "%s%s%s: ", namecolor, ent->client->pers.netname, S_COLOR_WHITE );
+			sprintf_s (name, nameSize, "%s%s%s: ", namecolor, ent->client->pers.netname, S_COLOR_WHITE );
 
 			break;
 
@@ -1241,7 +1241,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 
 			if ( locationOk && Team_GetLocationMsg(ent, location, sizeof(location)))
 			{
-				Com_sprintf ( name, nameSize, "%s(%s%s) %s(%s): ", 
+				sprintf_s ( name, nameSize, "%s(%s%s) %s(%s): ", 
 							  namecolor, 
 							  ent->client->pers.netname, 
 							  namecolor,
@@ -1249,7 +1249,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 			}
 			else
 			{
-				Com_sprintf ( name, nameSize, "%s(%s%s)%s: ", 
+				sprintf_s ( name, nameSize, "%s(%s%s)%s: ", 
 							  namecolor, 
 							  ent->client->pers.netname, 
 							  namecolor,
@@ -1263,7 +1263,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 				 target->client->sess.team == ent->client->sess.team  &&
 				 Team_GetLocationMsg(ent, location, sizeof(location))    )
 			{
-				Com_sprintf ( name, nameSize, "%s[%s%s] %s(%s): ", 
+				sprintf_s ( name, nameSize, "%s[%s%s] %s(%s): ", 
 							  namecolor,
 							  ent->client->pers.netname, 
 							  namecolor,
@@ -1271,7 +1271,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 			}
 			else
 			{
-				Com_sprintf ( name, nameSize, "%s[%s%s]%s: ", 
+				sprintf_s ( name, nameSize, "%s[%s%s]%s: ", 
 							  namecolor,
 							  ent->client->pers.netname, 
 							  namecolor,
@@ -1311,7 +1311,7 @@ void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
 	G_GetChatPrefix ( ent, target, mode, name, sizeof(name) );
 
 	// Save off the chat text
-	Q_strncpyz( text, chatText, sizeof(text) );
+	strncpy( text, chatText, sizeof(text) );
 
 	if ( target ) 
 	{
@@ -1645,17 +1645,17 @@ void Cmd_CallVote_f( gentity_t *ent )
 		return;
 	}
 
-	if ( !Q_stricmp( arg1, "map_restart" ) ) {
-	} else if ( !Q_stricmp( arg1, "mapcycle" ) ) {
-	} else if ( !Q_stricmp( arg1, "map" ) ) {
-	} else if ( !Q_stricmp( arg1, "rmgmap" ) ) {
-	} else if ( !Q_stricmp( arg1, "g_gametype" ) ) {
-	} else if ( !Q_stricmp( arg1, "kick" ) ) {
-	} else if ( !Q_stricmp( arg1, "clientkick" ) ) {
-	} else if ( !Q_stricmp( arg1, "g_doWarmup" ) ) {
-	} else if ( !Q_stricmp( arg1, "timelimit" ) ) {
-	} else if ( !Q_stricmp( arg1, "timeextension" ) ) {
-	} else if ( !Q_stricmp( arg1, "scorelimit" ) ) {
+	if ( !strcmp( arg1, "map_restart" ) ) {
+	} else if ( !strcmp( arg1, "mapcycle" ) ) {
+	} else if ( !strcmp( arg1, "map" ) ) {
+	} else if ( !strcmp( arg1, "rmgmap" ) ) {
+	} else if ( !strcmp( arg1, "g_gametype" ) ) {
+	} else if ( !strcmp( arg1, "kick" ) ) {
+	} else if ( !strcmp( arg1, "clientkick" ) ) {
+	} else if ( !strcmp( arg1, "g_doWarmup" ) ) {
+	} else if ( !strcmp( arg1, "timelimit" ) ) {
+	} else if ( !strcmp( arg1, "timeextension" ) ) {
+	} else if ( !strcmp( arg1, "scorelimit" ) ) {
 	} else 
 	{
 		trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string.\n\"" );
@@ -1678,7 +1678,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 	}
 
 	// special case for g_gametype, check for bad values
-	if ( !Q_stricmp( arg1, "g_gametype" ) ) 
+	if ( !strcmp( arg1, "g_gametype" ) ) 
 	{
 		// Verify the gametype
 		i = BG_FindGametype ( arg2 );
@@ -1688,15 +1688,15 @@ void Cmd_CallVote_f( gentity_t *ent )
 			return;
 		}	
 
-		Com_sprintf( level.voteString, sizeof( level.voteString ), "%s %s", arg1, arg2 );
-		Com_sprintf( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s %s", arg1, bg_gametypeData[i].name );
+		sprintf_s( level.voteString, sizeof( level.voteString ), "%s %s", arg1, arg2 );
+		sprintf_s( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s %s", arg1, bg_gametypeData[i].name );
 	} 
-	else if ( !Q_stricmp( arg1, "map" ) ) 
+	else if ( !strcmp( arg1, "map" ) ) 
 	{
-		Com_sprintf( level.voteString, sizeof( level.voteString ), "%s %s", arg1, arg2 );
-		Com_sprintf( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
+		sprintf_s( level.voteString, sizeof( level.voteString ), "%s %s", arg1, arg2 );
+		sprintf_s( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
 	} 
-	else if ( !Q_stricmp( arg1, "rmgmap" ) ) 
+	else if ( !strcmp( arg1, "rmgmap" ) ) 
 	{
 		char	arg3[MAX_STRING_TOKENS];
 		char	arg4[MAX_STRING_TOKENS];
@@ -1704,21 +1704,21 @@ void Cmd_CallVote_f( gentity_t *ent )
 		trap_Argv( 3, arg3, sizeof( arg3 ) );
 		trap_Argv( 4, arg4, sizeof( arg4 ) );
 
-		Com_sprintf( level.voteString, sizeof( level.voteString ), "rmgmap 1 %s 2 %s 3 %s 4 \"%s\" 0", arg2, arg3, arg4, ConcatArgs ( 5 ) );
-		Com_sprintf( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
+		sprintf_s( level.voteString, sizeof( level.voteString ), "rmgmap 1 %s 2 %s 3 %s 4 \"%s\" 0", arg2, arg3, arg4, ConcatArgs ( 5 ) );
+		sprintf_s( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
 	}
-	else if ( !Q_stricmp( arg1, "mapcycle" ) ) 
+	else if ( !strcmp( arg1, "mapcycle" ) ) 
 	{
-		if (!*g_mapcycle.string || !Q_stricmp ( g_mapcycle.string, "none" ) ) 
+		if (!*g_mapcycle.string || !strcmp ( g_mapcycle.string, "none" ) ) 
 		{
 			trap_SendServerCommand( ent-g_entities, "print \"there is no map cycle ccurently set up.\n\"" );
 			return;
 		}
 
-		Com_sprintf( level.voteString, sizeof( level.voteString ), "mapcycle");
-		Com_sprintf( level.voteDisplayString, sizeof( level.voteDisplayString ), "nextmap" );
+		sprintf_s( level.voteString, sizeof( level.voteString ), "mapcycle");
+		sprintf_s( level.voteDisplayString, sizeof( level.voteDisplayString ), "nextmap" );
 	} 
-	else if ( !Q_stricmp ( arg1, "clientkick" ) )
+	else if ( !strcmp ( arg1, "clientkick" ) )
 	{
 		int n = atoi ( arg2 );
 
@@ -1734,10 +1734,10 @@ void Cmd_CallVote_f( gentity_t *ent )
 			return;
 		}
 			
-		Com_sprintf ( level.voteString, sizeof(level.voteString ), "%s %s", arg1, arg2 );
-		Com_sprintf ( level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[n].client->pers.netname );
+		sprintf_s ( level.voteString, sizeof(level.voteString ), "%s %s", arg1, arg2 );
+		sprintf_s ( level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[n].client->pers.netname );
 	}
-	else if ( !Q_stricmp ( arg1, "kick" ) )
+	else if ( !strcmp ( arg1, "kick" ) )
 	{
 		int clientid = G_ClientNumberFromName ( arg2 );
 
@@ -1747,10 +1747,10 @@ void Cmd_CallVote_f( gentity_t *ent )
 			return;
 		}
 
-		Com_sprintf ( level.voteString, sizeof(level.voteString ), "clientkick %d", clientid );
-		Com_sprintf ( level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[clientid].client->pers.netname );
+		sprintf_s ( level.voteString, sizeof(level.voteString ), "clientkick %d", clientid );
+		sprintf_s ( level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[clientid].client->pers.netname );
 	}
-	else if ( !Q_stricmp ( arg1, "timeextension" ) )
+	else if ( !strcmp ( arg1, "timeextension" ) )
 	{
 		if ( !g_timelimit.integer )
 		{
@@ -1763,13 +1763,13 @@ void Cmd_CallVote_f( gentity_t *ent )
 			trap_SendServerCommand( ent-g_entities, va("print \"This server does not allow time extensions.\n\"") );
 			return;
 		}
-		Com_sprintf ( level.voteString, sizeof(level.voteString ), "extendtime %d", g_timeextension.integer );
-		Com_sprintf ( level.voteDisplayString, sizeof(level.voteDisplayString), "extend timelimit by %d minutes", g_timeextension.integer );
+		sprintf_s ( level.voteString, sizeof(level.voteString ), "extendtime %d", g_timeextension.integer );
+		sprintf_s ( level.voteDisplayString, sizeof(level.voteDisplayString), "extend timelimit by %d minutes", g_timeextension.integer );
 	}
 	else 
 	{
-		Com_sprintf( level.voteString, sizeof( level.voteString ), "%s \"%s\"", arg1, arg2 );
-		Com_sprintf( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
+		sprintf_s( level.voteString, sizeof( level.voteString ), "%s \"%s\"", arg1, arg2 );
+		sprintf_s( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
 	}
 
 	trap_SendServerCommand( -1, va("print \"%s called a vote.\n\"", ent->client->pers.netname ) );
@@ -1894,33 +1894,33 @@ void ClientCommand( int clientNum ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-	if (Q_stricmp (cmd, "say") == 0) {
+	if (strcmp (cmd, "say") == 0) {
 		Cmd_Say_f (ent, SAY_ALL, false);
 		return;
 	}
-	if (Q_stricmp (cmd, "say_team") == 0) {
+	if (strcmp (cmd, "say_team") == 0) {
 		Cmd_Say_f (ent, SAY_TEAM, false);
 		return;
 	}
 	
-	if (Q_stricmp (cmd, "tell") == 0) 
+	if (strcmp (cmd, "tell") == 0) 
 	{
 		Cmd_Tell_f ( ent );
 		return;
 	}
 
-	if (Q_stricmp (cmd, "vsay_team") == 0) 
+	if (strcmp (cmd, "vsay_team") == 0) 
 	{
 		Cmd_Voice_f (ent, SAY_TEAM, false, false);
 		return;
 	}
 
-	if (Q_stricmp (cmd, "score") == 0) {
+	if (strcmp (cmd, "score") == 0) {
 		Cmd_Score_f (ent);
 		return;
 	}
 
-	if (Q_stricmp (cmd, "team") == 0)
+	if (strcmp (cmd, "team") == 0)
 	{
 		Cmd_Team_f (ent);
 		return;
@@ -1933,37 +1933,37 @@ void ClientCommand( int clientNum ) {
 		return;
 	}
 
-	if ( Q_stricmp ( cmd, "drop" ) == 0 )
+	if ( strcmp ( cmd, "drop" ) == 0 )
 		Cmd_Drop_f ( ent );
-	else if (Q_stricmp (cmd, "give") == 0)
+	else if (strcmp (cmd, "give") == 0)
 		Cmd_Give_f (ent);
-	else if (Q_stricmp (cmd, "god") == 0)
+	else if (strcmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
-	else if (Q_stricmp (cmd, "notarget") == 0)
+	else if (strcmp (cmd, "notarget") == 0)
 		Cmd_Notarget_f (ent);
-	else if (Q_stricmp (cmd, "noclip") == 0)
+	else if (strcmp (cmd, "noclip") == 0)
 		Cmd_Noclip_f (ent);
-	else if (Q_stricmp (cmd, "kill") == 0)
+	else if (strcmp (cmd, "kill") == 0)
 		Cmd_Kill_f (ent);
-	else if (Q_stricmp (cmd, "levelshot") == 0)
+	else if (strcmp (cmd, "levelshot") == 0)
 		Cmd_LevelShot_f (ent);
-	else if (Q_stricmp (cmd, "follow") == 0)
+	else if (strcmp (cmd, "follow") == 0)
 		Cmd_Follow_f (ent);
-	else if (Q_stricmp (cmd, "follownext") == 0)
+	else if (strcmp (cmd, "follownext") == 0)
 		Cmd_FollowCycle_f (ent, 1);
-	else if (Q_stricmp (cmd, "followprev") == 0)
+	else if (strcmp (cmd, "followprev") == 0)
 		Cmd_FollowCycle_f (ent, -1);
-	else if (Q_stricmp (cmd, "where") == 0)
+	else if (strcmp (cmd, "where") == 0)
 		Cmd_Where_f (ent);
-	else if (Q_stricmp (cmd, "callvote") == 0)
+	else if (strcmp (cmd, "callvote") == 0)
 		Cmd_CallVote_f (ent);
-	else if (Q_stricmp (cmd, "vote") == 0)
+	else if (strcmp (cmd, "vote") == 0)
 		Cmd_Vote_f (ent);
-	else if (Q_stricmp (cmd, "setviewpos") == 0)
+	else if (strcmp (cmd, "setviewpos") == 0)
 		Cmd_SetViewpos_f( ent );
 
 #ifdef _SOF2_BOTS
-	else if (Q_stricmp (cmd, "addbot") == 0)
+	else if (strcmp (cmd, "addbot") == 0)
 		trap_SendServerCommand( clientNum, va("print \"ADDBOT command can only be used via RCON\n\"" ) );
 #endif
 

@@ -382,7 +382,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 					(DirToByte( trace->plane.normal ) << MATERIAL_BITS) | (trace->surfaceFlags & MATERIAL_MASK));
 
 		// If missile should stick into impact point (e.g. a thrown knife).
-		if(!Q_stricmp(ent->classname,"Knife"))
+		if(!strcmp(ent->classname,"Knife"))
 		{
 			// Create a pickup where we impacted.
 			vec3_t		pickupPos;
@@ -529,7 +529,7 @@ void G_RunMissile( gentity_t *ent )
 			trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, passent, ent->clipmask );
 
 			// If its glass then redo the trace after breaking the glass
-			if ( tr.fraction != 1 && !Q_stricmp ( g_entities[tr.entityNum].classname, "func_glass" ) )
+			if ( tr.fraction != 1 && !strcmp ( g_entities[tr.entityNum].classname, "func_glass" ) )
 			{
 				g_entities[tr.entityNum].use ( &g_entities[tr.entityNum], ent, ent );
 				continue;

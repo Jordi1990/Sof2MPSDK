@@ -190,9 +190,9 @@ void SP_target_speaker( gentity_t *ent )
 	}
 
 	if (!strstr( s, ".wav" )) {
-		Com_sprintf (buffer, sizeof(buffer), "%s.wav", s );
+		sprintf_s (buffer, sizeof(buffer), "%s.wav", s );
 	} else {
-		Q_strncpyz( buffer, s, sizeof(buffer) );
+		strncpy( buffer, s, sizeof(buffer) );
 	}
 	ent->noise_index = G_SoundIndex(buffer);
 
@@ -432,7 +432,7 @@ static void target_location_linkup(gentity_t *ent)
 		  i < level.num_entities;
 		  i++, ent++) 
 	{
-		if (ent->classname && !Q_stricmp(ent->classname, "target_location")) 
+		if (ent->classname && !strcmp(ent->classname, "target_location")) 
 		{
 			// lets overload some variables!
 			ent->health = n; // use for location marking

@@ -112,7 +112,7 @@ void G_TraceBullet ( weapon_t weapon, trace_t* tr, G2Trace_t G2Trace, vec3_t sta
 		trap_Trace ( tr, start, NULL, NULL, end, passent, mask );
 
 		// If the bullet hit glass then break it completely for now
-		if ( tr->fraction != 1 && !Q_stricmp ( g_entities[ tr->entityNum ].classname, "func_glass" ) )
+		if ( tr->fraction != 1 && !strcmp ( g_entities[ tr->entityNum ].classname, "func_glass" ) )
 		{
 			// break the glass
 			g_entities[ tr->entityNum ].use ( &g_entities[ tr->entityNum ], &g_entities[ tr->entityNum ], &g_entities[ tr->entityNum ] );

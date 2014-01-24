@@ -6,10 +6,10 @@
 // this file is only included when building a dll
 // g_syscalls.asm is included instead when building a qvm
 
-static int (QDECL *syscall)( int arg, ... ) = (int (QDECL *)( int, ...))-1;
+static int ( *syscall)( int arg, ... ) = (int ( *)( int, ...))-1;
 
 
-void dllEntry( int (QDECL *syscallptr)( int arg,... ) ) {
+void dllEntry( int ( *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
 }
 
@@ -215,10 +215,6 @@ int trap_DebugPolygonCreate(int color, int numPoints, vec3_t *points) {
 
 void trap_DebugPolygonDelete(int id) {
 	syscall( G_DEBUG_POLYGON_DELETE, id );
-}
-
-int trap_RealTime( qtime_t *qtime ) {
-	return syscall( G_REAL_TIME, qtime );
 }
 
 void trap_SnapVector( float *v ) {
@@ -786,10 +782,6 @@ int trap_PC_FreeSource( int handle ) {
 	return syscall( BOTLIB_PC_FREE_SOURCE, handle );
 }
 
-int trap_PC_ReadToken( int handle, pc_token_t *pc_token ) {
-	return syscall( BOTLIB_PC_READ_TOKEN, handle, pc_token );
-}
-
 int trap_PC_SourceFileAndLine( int handle, char *filename, int *line ) {
 	return syscall( BOTLIB_PC_SOURCE_FILE_AND_LINE, handle, filename, line );
 }
@@ -823,12 +815,6 @@ void trap_G2_SetGhoul2ModelIndexes(void *ghoul2, qhandle_t *modelList, qhandle_t
 bool trap_G2_HaveWeGhoul2Models(	void *ghoul2)
 {
 	return (bool)(syscall(G_G2_HAVEWEGHOULMODELS, ghoul2));
-}
-
-bool trap_G2API_GetBoltMatrix(void *ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix,
-								const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, vec3_t scale)
-{
-	return (bool)(syscall(G_G2_GETBOLT, ghoul2, modelIndex, boltIndex, matrix, angles, position, frameNum, modelList, scale));
 }
 
 int trap_G2API_InitGhoul2Model(void **ghoul2Ptr, const char *fileName, int modelIndex, qhandle_t customSkin,

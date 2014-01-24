@@ -1863,7 +1863,7 @@ void PM_CheckWeaponNotes ( void )
 		{
 			if(step > pm->ps->weaponCallbackStep)
 			{			
-				if( !Q_stricmp("fire",note->mNote) || !Q_stricmp("altfire",note->mNote) )
+				if( !strcmp("fire",note->mNote) || !strcmp("altfire",note->mNote) )
 				{
 					if(pm->ps->weaponstate==WEAPON_FIRING)
 					{

@@ -75,7 +75,7 @@ const char *TeamColorString(team_t team)
 }
 
 // NULL for everyone
-void QDECL PrintMsg( gentity_t *ent, const char *fmt, ... ) 
+void  PrintMsg( gentity_t *ent, const char *fmt, ... ) 
 {
 	char		msg[1024];
 	va_list		argptr;
@@ -202,7 +202,7 @@ bool Team_GetLocationMsg ( gentity_t *ent, char *loc, int loclen )
 		return false;
 	}
 
-	Com_sprintf(loc, loclen, "%s", best->message);
+	sprintf_s(loc, loclen, "%s", best->message);
 
 	return true;
 }

@@ -683,7 +683,7 @@ void G_Use ( gentity_t* ent )
 		}
 
 		// Misstion triggers can be used
-		if ( !Q_stricmp ( hit->classname, "gametype_trigger" ) )
+		if ( !strcmp ( hit->classname, "gametype_trigger" ) )
 		{
 			hit->use ( hit, ent, ent );
 		}

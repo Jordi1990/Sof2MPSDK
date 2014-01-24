@@ -29,11 +29,11 @@ void SP_gametype_player ( gentity_t *ent )
 	// If a team filter is set then override any team settings for the spawns
 	if ( level.mTeamFilter[0] )
 	{
-		if ( Q_stricmp ( level.mTeamFilter, "red") == 0 )
+		if ( strcmp ( level.mTeamFilter, "red") == 0 )
 		{
 			team = TEAM_RED;
 		}
-		else if ( Q_stricmp ( level.mTeamFilter, "blue") == 0 )
+		else if ( strcmp ( level.mTeamFilter, "blue") == 0 )
 		{
 			team = TEAM_BLUE;
 		}
@@ -145,7 +145,7 @@ gentity_t* G_SpawnGametypeItem ( const char* pickup_name, bool dropped )
 	while ( NULL != (ent = G_Find ( ent, FOFS(classname), "gametype_item" ) ) )
 	{
 		// Match?
-		if ( !Q_stricmp ( ent->item->pickup_name, pickup_name ) )
+		if ( !strcmp ( ent->item->pickup_name, pickup_name ) )
 		{
 			break;
 		}
@@ -422,9 +422,6 @@ void G_ResetGametype ( void )
 	// Reset the clients local effects
 	tent = G_TempEntity( vec3_origin, EV_GAMETYPE_RESTART );
 	tent->r.svFlags |= SVF_BROADCAST;
-
-	// Start the gametype
-	trap_GT_Start ( level.gametypeStartTime );
 }
 
 /*
@@ -470,7 +467,7 @@ bool G_ParseGametypeItems ( TGPGroup* itemsGroup )
 		while ( NULL != (ent = G_Find ( ent, FOFS(targetname), item->pickup_name ) ) )
 		{
 			// If not a gametype item then skip it
-			if ( Q_stricmp ( ent->classname, "gametype_item" ) )
+			if ( strcmp ( ent->classname, "gametype_item" ) )
 			{
 				continue;
 			}
@@ -521,11 +518,11 @@ bool G_ParseGametypeFile ( void )
 
 	// Look for the respawn type
 	trap_GPG_FindPairValue ( gametypeGroup, "respawn", "normal", value );
-	if ( !Q_stricmp ( value, "none" ) )
+	if ( !strcmp ( value, "none" ) )
 	{
 		level.gametypeData->respawnType = RT_NONE;
 	}
-	else if ( !Q_stricmp ( value, "interval" ) )
+	else if ( !strcmp ( value, "interval" ) )
 	{
 		level.gametypeData->respawnType = RT_INTERVAL;
 	}
