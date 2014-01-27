@@ -328,12 +328,11 @@ G_RegisterCvars
 */
 void G_RegisterCvars( void ) 
 {
-	int			i;
-	cvarTable_t	*cv;
 	bool	remapped = false;
 
-	for ( i = 0, cv = gameCvarTable ; i < gameCvarTableSize ; i++, cv++ ) 
+	for (int i = 0; i < gameCvarTableSize ; i++) 
 	{
+		cvarTable_t *cv = &gameCvarTable[i];
 		trap_Cvar_Register( cv->vmCvar, cv->cvarName, cv->defaultString, cv->cvarFlags, cv->mMinValue, cv->mMaxValue );
 		
 		if ( cv->vmCvar )
@@ -479,8 +478,6 @@ G_InitGame
 */
 void G_InitGame( int levelTime, int randomSeed, int restart ) 
 {
-	int	i;
-
 	Com_Printf ("------- Game Initialization -------\n");
 	Com_Printf ("gamename: %s\n", GAMEVERSION);
 	Com_Printf ("gamedate: %s\n", __DATE__);
@@ -493,8 +490,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 	level.startTime = levelTime;
 
 	G_RegisterCvars();
-
-	G_ProcessIPBans();
 
 	// Load the list of arenas
 	G_LoadArenas ( );
@@ -550,7 +545,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 	level.clients = g_clients;
 
 	// set client fields on player ents
-	for ( i=0 ; i<level.maxclients ; i++ ) 
+	for ( int i=0 ; i<level.maxclients ; i++ ) 
 	{
 		g_entities[i].client = level.clients + i;
 	}

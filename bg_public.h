@@ -603,12 +603,6 @@ typedef enum
 
 } game_over_t;
 
-// Time between location updates
-#define TEAM_LOCATION_UPDATE_TIME		1000
-
-// How many players on the overlay
-#define TEAM_MAXOVERLAY		32
-
 //---------------------------------------------------------
 
 typedef enum 
@@ -750,14 +744,8 @@ typedef enum
 	WACT_ALTCHARGE
 } WACT;
 
-
-#define ARENAS_PER_TIER		4
 #define MAX_ARENAS			1024
 #define	MAX_ARENAS_TEXT		8192
-
-#define MAX_BOTS			1024
-#define MAX_BOTS_TEXT		8192
-
 
 #define HL_NONE			0x00000000	// 0
 
@@ -791,37 +779,6 @@ typedef enum
 
 #define GORE_NONE		0x80000000
 
-/*
-typedef enum
-{
-	HL_NONE,
-
-	HL_FOOT_RT,
-	HL_FOOT_LT,
-	HL_LEG_UPPER_RT,
-	HL_LEG_UPPER_LT,
-	HL_LEG_LOWER_RT,
-	HL_LEG_LOWER_LT,
-	HL_HAND_RT,
-
-	HL_HAND_LT,
-	HL_ARM_RT,
-	HL_ARM_LT,
-	HL_HEAD,
-	HL_WAIST,
-
-	HL_BACK_RT,
-	HL_BACK_LT,
-	HL_BACK,
-	HL_CHEST_RT,
-	HL_CHEST_LT,
-
-	HL_CHEST,
-	HL_NECK,
-
-	HL_DEBUG
-} hitLocation_t;
-*/
 
 /*******************************************************************************
  *
@@ -830,7 +787,6 @@ typedef enum
  *******************************************************************************/
 
 #define MAX_GAMETYPES			128
-#define MAX_GAMETYPE_PHOTOS		4
 
 typedef enum
 {

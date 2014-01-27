@@ -291,14 +291,9 @@ gspawn_t* G_SelectSpectatorSpawnPoint( void )
 	return &spawn;
 }
 
-/*
-===============
-G_InitBodyQueue
-===============
-*/
+// Reserves a few spots for bodys in the entities structure
 void G_InitBodyQueue (void) 
 {
-	gentity_t	*ent;
 	int			max;
 
 	if ( level.gametypeData->respawnType == RT_NONE )
@@ -312,15 +307,11 @@ void G_InitBodyQueue (void)
 		max = BODY_QUEUE_SIZE;
 	}
 
-	level.bodyQueIndex = 0;
-	for ( level.bodyQueSize = 0; 
-		  level.bodyQueSize < max && level.bodyQueSize < level.maxclients; 
-		  level.bodyQueSize++) 
+	for (level.bodyQueSize = 0; level.bodyQueSize < max && level.bodyQueSize < level.maxclients; ++level.bodyQueSize) 
 	{
-		ent = G_Spawn();
-		ent->classname = "bodyque";
-		ent->neverFree = true;
-		level.bodyQue[level.bodyQueSize] = ent;
+		level.bodyQue[level.bodyQueSize] = G_Spawn();
+		level.bodyQue[level.bodyQueSize]->classname = "bodyque";
+		level.bodyQue[level.bodyQueSize]->neverFree = true;
 	}
 }
 
@@ -1162,20 +1153,10 @@ restarts.
 char *ClientConnect( int clientNum, bool firstTime, bool isBot ) 
 {
 	char		*value;
-	gclient_t	*client;
 	char		userinfo[MAX_INFO_STRING];
-	gentity_t	*ent;
-
-	ent = &g_entities[ clientNum ];
+	gentity_t	*ent = &g_entities[ clientNum ];
 
 	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
-
-	// check to see if they are on the banned IP list
-	value = Info_ValueForKey (userinfo, "ip");
-	if ( G_FilterPacket( value ) ) 
-	{
-		return "Banned.";
-	}
 
 	// we don't check password for bots and local client
 	// NOTE: local client <-> "ip" "localhost"
@@ -1193,7 +1174,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 
 	// they can connect
 	ent->client = level.clients + clientNum;
-	client = ent->client;
+	gclient_t *client = ent->client;
 
 	memset( client, 0, sizeof(*client) );
 
@@ -1394,7 +1375,6 @@ void ClientSpawn(gentity_t *ent)
 	vec3_t				spawn_origin;
 	vec3_t				spawn_angles;
 	gclient_t			*client;
-	int					i;
 	clientPersistant_t	saved;
 	clientSession_t		savedSess;
 	int					persistant[MAX_PERSISTANT];
@@ -1448,7 +1428,7 @@ void ClientSpawn(gentity_t *ent)
 	client->ps.ping = savedPing;
 	client->lastkilled_client = -1;
 
-	for ( i = 0 ; i < MAX_PERSISTANT ; i++ ) 
+	for (int i = 0 ; i < MAX_PERSISTANT ; i++ ) 
 	{
 		client->ps.persistant[i] = persistant[i];
 	}
@@ -1661,8 +1641,6 @@ server system housekeeping.
 void ClientDisconnect( int clientNum ) 
 {
 	gentity_t	*ent;
-	gentity_t	*tent;
-	int			i;
 
 	ent = g_entities + clientNum;
 	if ( !ent->client ) 
@@ -1671,7 +1649,7 @@ void ClientDisconnect( int clientNum )
 	}
 
 	// stop any following clients
-	for ( i = 0 ; i < level.maxclients ; i++ ) 
+	for (int i = 0 ; i < level.maxclients ; i++ ) 
 	{
 		if ( G_IsClientSpectating ( &level.clients[i] ) &&
 			 level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW &&
@@ -1686,7 +1664,7 @@ void ClientDisconnect( int clientNum )
 		 !G_IsClientSpectating ( ent->client )  &&
 		 !G_IsClientDead ( ent->client ) )
 	{
-		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
+		gentity_t	*tent = G_TempEntity(ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT);
 		tent->s.clientNum = ent->s.clientNum;
 
 		// Dont drop weapons
@@ -1720,9 +1698,7 @@ Updates the animation information for the client
 */
 void G_UpdateClientAnimations ( gentity_t* ent )
 {
-	gclient_t*	client;
-
-	client = ent->client;
+	gclient_t*	client = ent->client;
 	
 	// Check for anim change in the legs
 	if ( client->legs.anim != ent->s.legsAnim )
@@ -1781,9 +1757,7 @@ Locates a client thats near the given origin
 */
 gentity_t* G_FindNearbyClient ( vec3_t origin, team_t team, float radius, gentity_t* ignore )
 {
-	int i;
-
-	for ( i = 0; i < level.numConnectedClients; i ++ )
+	for (int i = 0; i < level.numConnectedClients; i ++ )
 	{
 		gentity_t* other = &g_entities[ level.sortedClients[i] ];
 		vec3_t	   diff;

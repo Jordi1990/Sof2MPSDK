@@ -9,9 +9,6 @@
 
 #define	JUMP_VELOCITY	270
 
-#define	TIMER_LAND		130
-#define	TIMER_GESTURE	(34*66+50)
-
 #define	OVERCLIP		1.001f
 
 // all of the locals will be zeroed before each

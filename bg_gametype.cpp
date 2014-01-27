@@ -20,7 +20,6 @@ static bool BG_ParseGametypePhotos ( int gametypeIndex, TGPGroup group )
 {
 	TGPGroup photo;
 	int		 index;
-	char	 temp[1024];
 
 	// Convienience check
 	if ( !group )
@@ -33,6 +32,7 @@ static bool BG_ParseGametypePhotos ( int gametypeIndex, TGPGroup group )
 
 	while ( photo )
 	{
+		char temp[1024];
 		trap_GPG_GetName ( photo, temp );
 		bg_gametypeData[gametypeIndex].photos[index].name = trap_VM_LocalStringAlloc ( temp );
 
@@ -168,7 +168,6 @@ bool BG_BuildGametypeList ( void )
 	char*		s;
 	int			filelen;
 	int			filecount;
-	int			i;
 
 	bg_gametypeCount = 0;
 
@@ -177,7 +176,7 @@ bool BG_BuildGametypeList ( void )
 	filecount = trap_FS_GetFileList("scripts", ".gametype", filelist, 4096 );
 	fileptr   = filelist;
 	
-	for ( i = 0; i < filecount; i++, fileptr += filelen+1) 
+	for (int i = 0; i < filecount; i++, fileptr += filelen+1) 
 	{
 		// Grab the length so we can skip this file later
 		filelen = strlen(fileptr);
@@ -211,11 +210,9 @@ then -1 will be returned (and this is bad)
 */
 int BG_FindGametype ( const char* name )
 {
-	int i;
-
 	// Loop through the known gametypes and compare their names to 
 	// the name given
-	for ( i = 0; i < bg_gametypeCount; i ++ )
+	for (int i = 0; i < bg_gametypeCount; i ++ )
 	{
 		// Do the names match?
 		if ( !strcmp ( bg_gametypeData[i].name, name )  )
@@ -250,10 +247,8 @@ find the gametype item with the given item id.
 ==============
 */
 gitem_t *BG_FindGametypeItemByID ( int itemid )
-{
-	int i;
-	
-	for ( i = 0; i < MAX_GAMETYPE_ITEMS; i ++ )
+{	
+	for (int i = 0; i < MAX_GAMETYPE_ITEMS; i ++ )
 	{
 		if ( bg_itemlist[i + MODELINDEX_GAMETYPE_ITEM].quantity == itemid )
 		{

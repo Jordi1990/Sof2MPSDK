@@ -214,10 +214,8 @@ G_UndoAntiLag
 */
 void G_UndoAntiLag ( void )
 {
-	int i;
-
 	// Undo all history
-	for ( i = 0; i < level.numConnectedClients; i ++ )
+	for (int i = 0; i < level.numConnectedClients; i ++ )
 	{
 		gentity_t* other = &g_entities[level.sortedClients[i]];
 		
@@ -257,7 +255,6 @@ G_ApplyAntiLag
 */
 void G_ApplyAntiLag ( gentity_t* ref, bool enlargeHitBox )
 {
-	int i;
 	int reftime;
 
 	// Figure out the reference time based on the reference clients server time
@@ -268,7 +265,7 @@ void G_ApplyAntiLag ( gentity_t* ref, bool enlargeHitBox )
 	}
 
 	// Move all the clients back into the reference clients time frame.
-	for ( i = 0; i < level.numConnectedClients; i ++ )
+	for (int i = 0; i < level.numConnectedClients; i ++ )
 	{
 		gentity_t* other = &g_entities[level.sortedClients[i]];
 

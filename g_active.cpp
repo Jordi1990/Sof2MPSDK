@@ -164,12 +164,11 @@ ClientImpacts
 ==============
 */
 void ClientImpacts( gentity_t *ent, pmove_t *pm ) {
-	int		i, j;
 	trace_t	trace;
-	gentity_t	*other;
 
 	memset( &trace, 0, sizeof( trace ) );
-	for (i=0 ; i<pm->numtouch ; i++) {
+	for (int i=0 ; i<pm->numtouch ; i++) {
+		int j;
 		for (j=0 ; j<i ; j++) {
 			if (pm->touchents[j] == pm->touchents[i] ) {
 				break;
@@ -178,7 +177,7 @@ void ClientImpacts( gentity_t *ent, pmove_t *pm ) {
 		if (j != i) {
 			continue;	// duplicated
 		}
-		other = &g_entities[ pm->touchents[i] ];
+		gentity_t *other = &g_entities[pm->touchents[i]];
 
 		if ( ( ent->r.svFlags & SVF_BOT ) && ( ent->touch ) ) {
 			ent->touch( ent, other, &trace );
@@ -255,11 +254,8 @@ Spectators will only interact with teleporters.
 */
 void G_TouchTriggers( gentity_t *ent ) 
 {
-	int				i;
 	int				num;
 	int				touch[MAX_GENTITIES];
-	gentity_t		*hit;
-	trace_t			trace;
 	vec3_t			mins;
 	vec3_t			maxs;
 	static vec3_t	range = { 20, 20, 40 };
@@ -288,9 +284,9 @@ void G_TouchTriggers( gentity_t *ent )
 	ent->client->ps.pm_flags &= ~(PMF_CAN_USE);
 	ent->s.modelindex  = 0;
 
-	for ( i=0 ; i<num ; i++ ) 
+	for ( int i=0 ; i<num ; i++ ) 
 	{
-		hit = &g_entities[touch[i]];
+		gentity_t		*hit = &g_entities[touch[i]];
 
 		// pmove would have to have detected siamese twins first
 		if ( hit->client && hit != ent && !hit->client->siameseTwin && (ent->client->ps.pm_flags & PMF_SIAMESETWINS) )
@@ -344,7 +340,7 @@ void G_TouchTriggers( gentity_t *ent )
 				continue;
 			}
 		}
-
+		trace_t	trace;
 		memset( &trace, 0, sizeof(trace) );
 
 		if ( hit->touch ) 
@@ -373,13 +369,9 @@ Spectators will only interact with teleporters.
 */
 void G_MoverTouchPushTriggers( gentity_t *ent, vec3_t oldOrg ) 
 {
-	int			i, num;
-	float		step, stepSize, dist;
-	int			touch[MAX_GENTITIES];
-	gentity_t	*hit;
-	trace_t		trace;
-	vec3_t		mins, maxs, dir, size, checkSpot;
-	const vec3_t	range = { 40, 40, 52 };
+	int			num;
+	float		stepSize, dist;
+	vec3_t		dir, size;
 
 	// non-moving movers don't hit triggers!
 	if ( !VectorLengthSquared( ent->s.pos.trDelta ) ) 
@@ -396,8 +388,12 @@ void G_MoverTouchPushTriggers( gentity_t *ent, vec3_t oldOrg )
 
 	VectorSubtract( ent->r.currentOrigin, oldOrg, dir );
 	dist = VectorNormalize( dir );
-	for ( step = 0; step <= dist; step += stepSize )
+	for (int step = 0; step <= dist; step += stepSize )
 	{
+		int			touch[MAX_GENTITIES];
+		vec3_t checkSpot, mins, maxs;
+		const vec3_t	range = { 40, 40, 52 };
+
 		VectorMA( ent->r.currentOrigin, step, dir, checkSpot );
 		VectorSubtract( checkSpot, range, mins );
 		VectorAdd( checkSpot, range, maxs );
@@ -408,9 +404,10 @@ void G_MoverTouchPushTriggers( gentity_t *ent, vec3_t oldOrg )
 		VectorAdd( checkSpot, ent->r.mins, mins );
 		VectorAdd( checkSpot, ent->r.maxs, maxs );
 
-		for ( i=0 ; i<num ; i++ ) 
+		for ( int i=0 ; i<num ; i++ ) 
 		{
-			hit = &g_entities[touch[i]];
+			gentity_t	*hit = &g_entities[touch[i]];
+			trace_t		trace;
 
 			if ( hit->s.eType != ET_PUSH_TRIGGER )
 			{
@@ -485,16 +482,13 @@ SpectatorThink
 */
 void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) 
 {
-	pmove_t		pm;
-	gclient_t	*client;
-
-	client = ent->client;
+	gclient_t	*client = ent->client;
 
 	if ( client->sess.spectatorState != SPECTATOR_FOLLOW ) 
 	{
 		client->ps.pm_type = PM_SPECTATOR;
 		client->ps.speed = 400;	// faster than normal
-
+		pmove_t		pm;
 		// set up for pmove
 		memset (&pm, 0, sizeof(pm));
 		pm.ps = &client->ps;
@@ -580,9 +574,7 @@ Actions that happen once a second
 */
 void ClientTimerActions( gentity_t *ent, int msec ) 
 {
-	gclient_t	*client;
-
-	client = ent->client;
+	gclient_t	*client = ent->client;
 
 	// Check so see if the player has moved and if so dont let them change their outfitting
 	if ( !client->noOutfittingChange && ((level.time - client->respawnTime) > 3000))
@@ -700,7 +692,6 @@ but any server game effects are handled here
 */
 void ClientEvents( gentity_t *ent, int oldEventSequence ) 
 {
-	int			i;
 	int			event;
 	gclient_t	*client;
 	vec3_t		dir;
@@ -712,7 +703,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 		oldEventSequence = client->ps.eventSequence - MAX_PS_EVENTS;
 	}
 
-	for ( i = oldEventSequence ; i < client->ps.eventSequence ; i++ ) 
+	for ( int i = oldEventSequence ; i < client->ps.eventSequence ; i++ ) 
 	{
 		event = client->ps.events[ i & (MAX_PS_EVENTS-1) ];
 
@@ -774,11 +765,10 @@ StuckInOtherClient
 */
 static int StuckInOtherClient(gentity_t *ent) 
 {
-	int i;
 	gentity_t	*ent2;
 
 	ent2 = &g_entities[0];
-	for ( i = 0; i < MAX_CLIENTS; i++, ent2++ ) 
+	for (int i = 0; i < MAX_CLIENTS; i++, ent2++ ) 
 	{
 		if ( ent2 == ent ) 
 		{
@@ -1012,10 +1002,6 @@ void ClientThink_real( gentity_t *ent )
 
 	pm.animations = NULL;
 
-#if _Debug
-	pm.isClient=0;
-#endif
-
 	VectorCopy( client->ps.origin, client->oldOrigin );
 
 	Pmove (&pm);
@@ -1221,9 +1207,7 @@ A new command has arrived from the client
 */
 void ClientThink( int clientNum ) 
 {
-	gentity_t *ent;
-
-	ent = g_entities + clientNum;
+	gentity_t *ent = g_entities + clientNum;
 	trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
 
 	// mark the time we got info, so we can display the
@@ -1260,8 +1244,6 @@ SpectatorClientEndFrame
 */
 void SpectatorClientEndFrame( gentity_t *ent ) 
 {
-	gclient_t	*cl;
-
 	// if we are doing a chase cam or a remote view, grab the latest info
 	if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) 
 	{
@@ -1281,7 +1263,7 @@ void SpectatorClientEndFrame( gentity_t *ent )
 		
 		if ( clientNum >= 0 ) 
 		{
-			cl = &level.clients[ clientNum ];
+			gclient_t *cl = &level.clients[clientNum];
 		
 			if ( cl->pers.connected == CON_CONNECTED && !G_IsClientSpectating ( cl ) ) 
 			{
@@ -1335,24 +1317,13 @@ while a slow client may have multiple ClientEndFrame between ClientThink.
 */
 void ClientEndFrame( gentity_t *ent ) 
 {
-	clientPersistant_t	*pers;
-
 	if ( G_IsClientSpectating ( ent->client ) ) 
 	{
 		SpectatorClientEndFrame( ent );
 		return;
 	}
 
-	pers = &ent->client->pers;
-
-	// save network bandwidth
-#if 0
-	if ( !g_synchronousClients->integer && ent->client->ps.pm_type == PM_NORMAL ) 
-	{
-		// FIXME: this must change eventually for non-sync demo recording
-		VectorClear( ent->client->ps.viewangles );
-	}
-#endif
+	clientPersistant_t *pers = &ent->client->pers;
 
 	//
 	// If the end of unit layout is displayed, don't give

@@ -5,20 +5,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 
-#ifdef QAGAME
 #include "g_local.h"
-#endif
-
-#ifdef UI_EXPORTS
-#include "../ui/ui_local.h"
-#endif
-
-#ifndef UI_EXPORTS
-#ifndef QAGAME
-#include "../cgame/cg_local.h"
-#endif
-#endif
-
 /*QUAKED item_***** ( 0 0 0 ) (-16 -16 -16) (16 16 16) suspended
 DO NOT USE THIS CLASS, IT JUST HOLDS GENERAL INFORMATION.
 The suspended flag will allow items to hang in the air, otherwise they are dropped to the next surface.
@@ -892,9 +879,7 @@ BG_FindWeaponItem
 */
 gitem_t	*BG_FindWeaponItem ( weapon_t weapon ) 
 {
-	gitem_t	*it;
-	
-	for ( it = bg_itemlist + 1 ; it->classname ; it++) 
+	for ( gitem_t *it = bg_itemlist + 1 ; it->classname ; it++) 
 	{
 		if ( it->giType == IT_WEAPON && it->giTag == weapon ) 
 		{
@@ -913,9 +898,7 @@ BG_FindItem
 */
 gitem_t	*BG_FindItem( const char *pickupName ) 
 {
-	gitem_t	*it;
-	
-	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) 
+	for (gitem_t *it = bg_itemlist + 1; it->classname; it++)
 	{
 		if ( !strcmp( it->pickup_name, pickupName ) )
 		{
@@ -932,9 +915,7 @@ BG_FindClassnameItem
 */
 gitem_t	*BG_FindClassnameItem ( const char *classname ) 
 {
-	gitem_t	*it;
-	
-	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) 
+	for (gitem_t* it = bg_itemlist + 1; it->classname; it++)
 	{
 		if ( !strcmp( it->classname, classname ) )
 		{
@@ -1198,11 +1179,6 @@ bool BG_CanItemBeGrabbed( int gametype, const entityState_t *ent, const playerSt
 		}
 
         default:
-#ifndef Q3_VM
-#ifndef NDEBUG 
-		      Com_Printf("BG_CanItemBeGrabbed: unknown enum %d\n", item->giType );
-#endif
-#endif
 			 break;
 	}
 
@@ -1391,20 +1367,6 @@ Handles the sequence numbers
 void	trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 
 void BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps ) {
-
-#ifdef _DEBUG
-	{
-		char buf[256];
-		trap_Cvar_VariableStringBuffer("showevents", buf, sizeof(buf));
-		if ( atof(buf) != 0 ) {
-#ifdef QAGAME
-			Com_Printf(" game event svt %5d -> %5d: num = %20s parm %d\n", ps->pmove_framecount/*ps->commandTime*/, ps->eventSequence, eventnames[newEvent], eventParm);
-#else
-			Com_Printf("Cgame event svt %5d -> %5d: num = %20s parm %d\n", ps->pmove_framecount/*ps->commandTime*/, ps->eventSequence, eventnames[newEvent], eventParm);
-#endif
-		}
-	}
-#endif
 	ps->events[ps->eventSequence & (MAX_PS_EVENTS-1)] = newEvent;
 	ps->eventParms[ps->eventSequence & (MAX_PS_EVENTS-1)] = eventParm;
 	ps->eventSequence++;

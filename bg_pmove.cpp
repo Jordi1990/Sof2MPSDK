@@ -66,8 +66,6 @@ PM_AddTouchEnt
 */
 void PM_AddTouchEnt ( int entityNum ) 
 {
-	int		i;
-
 	// Cant add the world as a touch entity
 	if ( entityNum == ENTITYNUM_WORLD ) 
 	{
@@ -81,7 +79,7 @@ void PM_AddTouchEnt ( int entityNum )
 	}
 
 	// see if it is already added
-	for ( i = 0 ; i < pm->numtouch ; i++ ) 
+	for (int i = 0 ; i < pm->numtouch ; i++ ) 
 	{
 		if ( pm->touchents[ i ] == entityNum ) 
 		{
@@ -105,8 +103,6 @@ Slide off of the impacting surface
 void PM_ClipVelocity( vec3_t in, vec3_t normal, vec3_t out, float overbounce ) 
 {
 	float	backoff;
-	float	change;
-	int		i;
 	
 	backoff = DotProduct (in, normal);
 	
@@ -119,9 +115,9 @@ void PM_ClipVelocity( vec3_t in, vec3_t normal, vec3_t out, float overbounce )
 		backoff /= overbounce;
 	}
 
-	for ( i=0 ; i<3 ; i++ ) 
+	for (int i=0 ; i<3 ; i++ ) 
 	{
-		change = normal[i]*backoff;
+		float change = normal[i]*backoff;
 		out[i] = in[i] - change;
 	}
 }
@@ -222,7 +218,6 @@ Handles user intended acceleration
 */
 static void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel ) 
 {
-#if 1
 	// q2 style
 	int			i;
 	float		addspeed, accelspeed, currentspeed;
@@ -240,24 +235,6 @@ static void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel )
 	for (i=0 ; i<3 ; i++) {
 		pm->ps->velocity[i] += accelspeed*wishdir[i];	
 	}
-#else
-	// proper way (avoids strafe jump maxspeed bug), but feels bad
-	vec3_t		wishVelocity;
-	vec3_t		pushDir;
-	float		pushLen;
-	float		canPush;
-
-	VectorScale( wishdir, wishspeed, wishVelocity );
-	VectorSubtract( wishVelocity, pm->ps->velocity, pushDir );
-	pushLen = VectorNormalize( pushDir );
-
-	canPush = accel*pml.frametime*wishspeed;
-	if (canPush > pushLen) {
-		canPush = pushLen;
-	}
-
-	VectorMA( pm->ps->velocity, canPush, pushDir, pm->ps->velocity );
-#endif
 }
 
 /*
@@ -512,7 +489,6 @@ PM_WaterMove
 */
 static void PM_WaterMove( void ) 
 {
-	int		i;
 	vec3_t	wishvel;
 	float	wishspeed;
 	vec3_t	wishdir;
@@ -525,18 +501,6 @@ static void PM_WaterMove( void )
 		return;
 	}
 
-#if 0
-	// jump = head for surface
-	if ( pm->cmd.upmove >= 10 ) {
-		if (pm->ps->velocity[2] > -300) {
-			if ( pm->watertype == CONTENTS_WATER ) {
-				pm->ps->velocity[2] = 100;
-			} else {
-				pm->ps->velocity[2] = 50;
-			}
-		}
-	}
-#endif
 	PM_Friction ();
 
 	scale = PM_CmdScale( &pm->cmd );
@@ -551,7 +515,7 @@ static void PM_WaterMove( void )
 	} 
 	else 
 	{
-		for (i=0 ; i<3 ; i++)
+		for (int i=0 ; i<3 ; i++)
 		{
 			wishvel[i] = scale * pml.forward[i]*pm->cmd.forwardmove + scale * pml.right[i]*pm->cmd.rightmove;
 		}
@@ -591,7 +555,6 @@ PM_FlyMove
 */
 static void PM_FlyMove( void ) 
 {
-	int		i;
 	vec3_t	wishvel;
 	float	wishspeed;
 	vec3_t	wishdir;
@@ -612,7 +575,7 @@ static void PM_FlyMove( void )
 	} 
 	else 
 	{
-		for (i=0 ; i<3 ; i++) 
+		for (int i=0 ; i<3 ; i++) 
 		{
 			wishvel[i] = scale * pml.forward[i]*pm->cmd.forwardmove + scale * pml.right[i]*pm->cmd.rightmove;
 		}
@@ -637,7 +600,6 @@ PM_AirMove
 */
 static void PM_AirMove( void ) 
 {
-	int			i;
 	vec3_t		wishvel;
 	float		fmove, smove;
 	vec3_t		wishdir;
@@ -662,7 +624,7 @@ static void PM_AirMove( void )
 	VectorNormalize (pml.forward);
 	VectorNormalize (pml.right);
 
-	for ( i = 0 ; i < 2 ; i++ ) {
+	for ( int i = 0 ; i < 2 ; i++ ) {
 		wishvel[i] = pml.forward[i]*fmove + pml.right[i]*smove;
 	}
 	wishvel[2] = 0;
@@ -691,7 +653,6 @@ PM_WalkMove
 ===================
 */
 static void PM_WalkMove( void ) {
-	int			i;
 	vec3_t		wishvel;
 	float		fmove, smove;
 	vec3_t		wishdir;
@@ -747,7 +708,7 @@ static void PM_WalkMove( void ) {
 	VectorNormalize (pml.forward);
 	VectorNormalize (pml.right);
 
-	for ( i = 0 ; i < 3 ; i++ ) {
+	for (int i = 0 ; i < 3 ; i++ ) {
 		wishvel[i] = pml.forward[i]*fmove + pml.right[i]*smove;
 	}
 	// when going up or down slopes the wish velocity should Not be zero
@@ -853,8 +814,6 @@ static void PM_LadderMove ( void )
 	} 
 	else 
 	{
-		int i;
-		
 		VectorNormalize ( pm_ladders[pm->ps->ladder].fwd );
 		VectorNormalize ( pml.forward );
 
@@ -884,7 +843,7 @@ static void PM_LadderMove ( void )
 			}
 		}
 
-		for ( i=0 ; i<3 ; i++ ) 
+		for ( int i=0 ; i<3 ; i++ ) 
 		{
 			wishvel[i] = scale * pml.forward[i]*pm->cmd.forwardmove + scale * pml.right[i]*pm->cmd.rightmove * pm_ladderScale;
 		}
@@ -936,7 +895,6 @@ PM_NoclipMove
 */
 static void PM_NoclipMove( void ) {
 	float	speed, drop, friction, control, newspeed;
-	int			i;
 	vec3_t		wishvel;
 	float		fmove, smove;
 	vec3_t		wishdir;
@@ -977,7 +935,7 @@ static void PM_NoclipMove( void ) {
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.rightmove;
 	
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 		wishvel[i] = pml.forward[i]*fmove + pml.right[i]*smove;
 	wishvel[2] += pm->cmd.upmove;
 
@@ -1151,7 +1109,6 @@ PM_CorrectAllSolid
 */
 static int PM_CorrectAllSolid( trace_t *trace ) 
 {
-	int			i, j, k;
 	vec3_t		point;
 
 	if ( pm->debugLevel ) 
@@ -1160,9 +1117,9 @@ static int PM_CorrectAllSolid( trace_t *trace )
 	}
 
 	// jitter around
-	for (i = -1; i <= 1; i++) {
-		for (j = -1; j <= 1; j++) {
-			for (k = -1; k <= 1; k++) {
+	for (int i = -1; i <= 1; i++) {
+		for (int j = -1; j <= 1; j++) {
+			for (int k = -1; k <= 1; k++) {
 				VectorCopy(pm->ps->origin, point);
 				point[0] += (float) i;
 				point[1] += (float) j;
@@ -1324,10 +1281,6 @@ static void PM_GroundTrace( void )
 	if ( pm->ps->groundEntityNum == ENTITYNUM_NONE) 
 	{
 		// just hit the ground
-//		if ((pml.groundTrace.contents & CONTENTS_TERRAIN) && pml.previous_velocity[2] > -200)
-//		{
-//		}
-//		else
 		{
 			if ( pm->debugLevel ) 
 			{
@@ -1795,10 +1748,6 @@ TNoteTrack *BG_GetWeaponNote( playerState_t* ps, int weapon, int anim, int animC
 {
 	TAnimWeapon		*aW;
 	TAnimInfoWeapon *aIW;
-	TNoteTrack		*note;
-	int				n=0;
-
-	note = NULL;
 	aW=BG_GetInviewAnimFromIndex( weapon, anim&~ANIM_TOGGLEBIT);
 	if (!aW)
 	{
@@ -1810,9 +1759,9 @@ TNoteTrack *BG_GetWeaponNote( playerState_t* ps, int weapon, int anim, int animC
 	{
 		return 0;
 	}
-
+	TNoteTrack *note;
 	// Find the callback for the given step
-	for ( note = aIW->mNoteTracks[ps->weaponAnimIdChoice], n=0; note && n < callbackStep; note = note->mNext, n++ )
+	for ( note = aIW->mNoteTracks[ps->weaponAnimIdChoice], int n=0; note && n < callbackStep; note = note->mNext, n++ )
 	{
 		// Do nothing, loop does it all
 	}
@@ -1937,7 +1886,6 @@ TAnimWeapon* PM_GetAnimFromName ( char *animName, playerState_t *ps, int *animIn
 {
 	TAnimWeapon		*aW=0;
 	TAnimInfoWeapon *aIW=0;
-	char			tempname[MAX_QPATH];
 
 	switch(ps->weapon)
 	{
@@ -1959,6 +1907,7 @@ TAnimWeapon* PM_GetAnimFromName ( char *animName, playerState_t *ps, int *animIn
 				}
 				else if(!strcmp(aW->mName,"fire"))
 				{
+					char			tempname[MAX_QPATH];
 					// Get 'firetrans' anim. We don't call PM_SetWeaponAnimChoice()
 					// because the firetrans anims are matched to the fire anims.
 					aIW=BG_GetInviewModelAnim(ps->weapon,"weaponmodel","fire");

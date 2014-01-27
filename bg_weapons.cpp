@@ -81,8 +81,6 @@ static bool BG_ParseAmmoStats(ammo_t ammoNum, void *group)
 bool BG_InitAmmoStats(void)
 {
 	void		*GP2, *topGroup, *topSubs;
-	char		name[256];
-	int			i;
 
 	ammoData[AMMO_NONE].goreScale = 0.0f;
 	ammoData[AMMO_NONE].name = "none";
@@ -97,11 +95,12 @@ bool BG_InitAmmoStats(void)
 	topSubs = trap_GPG_GetSubGroups(topGroup);
 	while(topSubs)
 	{
+		char name[256];
 		trap_GPG_GetName(topSubs, name);
 		if (strcmp(name, "ammo") == 0)
 		{
 			trap_GPG_FindPairValue(topSubs, "name", "", name);
-			for(i=0;i<AMMO_MAX;i++)
+			for(int i=0;i<AMMO_MAX;i++)
 			{
 				if (strcmp(ammoNames[i], name) == 0)
 				{
@@ -109,13 +108,6 @@ bool BG_InitAmmoStats(void)
 					break;
 				}
 			}
-
-#ifdef _DEBUG
-			if (i == AMMO_MAX)
-			{
-				Com_Printf("BG_InitAmmoStats: Unknown ammo: %s\n", name);
-			}
-#endif
 		}
 		topSubs = trap_GPG_GetNext(topSubs);
 	}
@@ -129,7 +121,6 @@ static bool BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void *att
 {
 	void*	sub;
 	char	tmpStr[256];
-	int		i;
 
 	// No group is success.  This is to allow NULL to be passed 
 	if ( NULL == attacksub )
@@ -150,7 +141,7 @@ static bool BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void *att
 
 	trap_GPG_FindPairValue(attacksub, "mp_ammoType||ammoType", "none", tmpStr);
 	attack->ammoIndex = AMMO_NONE;
-	for (i = 0; i < AMMO_MAX; i++)
+	for (int i = 0; i < AMMO_MAX; i++)
 	{
 		if (0 == strcmp(tmpStr, ammoNames[i]))
 		{
@@ -158,13 +149,6 @@ static bool BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void *att
 			break;
 		}
 	}
-
-#ifdef _DEBUG
-	if (AMMO_MAX == i)
-	{
-		Com_Printf("BG_ParseWeaponStats: Unknown ammo: %s\n", tmpStr);
-	}
-#endif
 
 	// Parse the weapon animations
 	trap_GPG_FindPairValue( attacksub, "mp_animFire", "TORSO_ATTACK_PISTOL", tmpStr );
@@ -235,9 +219,7 @@ static bool BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void *att
 	sub = trap_GPG_FindSubGroup(attacksub, "fireModes");
 	if (sub)
 	{		
-		int i;
-
-		for ( i = 0; i < 5; i ++ )
+		for ( int i = 0; i < 5; i ++ )
 		{
 			trap_GPG_FindPairValue ( sub, va("mp_mode%i||mode%i", i, i ), "", tmpStr );
 			if ( !tmpStr[0] )
@@ -353,8 +335,6 @@ static bool BG_ParseWeaponStats(weapon_t weaponNum, void *group)
 bool BG_InitWeaponStats(void)
 {
 	void		*GP2, *topGroup, *topSubs;
-	char		name[256];
-	int			i;
 
 	GP2 = trap_GP_ParseFile("ext_data/sof2.wpn", true, false);
 	if (!GP2)
@@ -366,11 +346,12 @@ bool BG_InitWeaponStats(void)
 	topSubs = trap_GPG_GetSubGroups(topGroup);
 	while(topSubs)
 	{
+		char name[256];
 		trap_GPG_GetName(topSubs, name);
 		if (strcmp(name, "weapon") == 0)
 		{
 			trap_GPG_FindPairValue(topSubs, "name", "", name);
-			for(i=0;i<WP_NUM_WEAPONS;i++)
+			for(int i=0;i<WP_NUM_WEAPONS;i++)
 			{
 				if (strcmp(bg_weaponNames[i], name) == 0)
 				{
@@ -378,13 +359,6 @@ bool BG_InitWeaponStats(void)
 					break;
 				}
 			}
-
-#ifdef _DEBUG
-			if (i == WP_NUM_WEAPONS)
-			{
-				Com_Printf("BG_InitWeaponStats: Unknown weapon: %s\n", name);
-			}
-#endif
 		}
 		topSubs = trap_GPG_GetNext(topSubs);
 	}
@@ -535,20 +509,16 @@ static TNoteTrack *BG_FindNoteTracks(void *group)
 
 static void BG_FindWeaponFrames(TAnimInfoWeapon *animInfo, int choice)
 {
-	void	*group;
-	int		i;
-
 	if (!numWeaponFiles || !animInfo->mAnim[choice])
 	{
 		animInfo->mNumFrames[choice] = -1;
 		return;
 	}
 
-	for(i=0;i<numWeaponFiles;i++)
+	for(int i=0;i<numWeaponFiles;i++)
 	{
 		char  temp[256];
-
-		group = trap_GPG_GetSubGroups ( frameGroup[i] );
+		void *group = trap_GPG_GetSubGroups ( frameGroup[i] );
 		while ( group )
 		{
 			char* name;
@@ -585,9 +555,7 @@ static void BG_FindWeaponFrames(TAnimInfoWeapon *animInfo, int choice)
 
 static void BG_CloseWeaponFrames(int upTo)
 {
-	int		i;
-
-	for(i=upTo; i < numWeaponFiles; i++)
+	for(int i=upTo; i < numWeaponFiles; i++)
 	{
 		if (weaponFrames[i])
 		{
@@ -602,12 +570,8 @@ static void BG_CloseWeaponFrames(int upTo)
 static bool BG_ParseAnimGroup(weapon_t weapon, void *animGroup)
 {
 	void			*sub;
-	char			name[256];
 	TAnimWeapon		*anim;
 	TAnimInfoWeapon	*info;
-	char			value[256];
-	int				i;
-	char			temp[256];
 
 	anim = (TAnimWeapon *)trap_VM_LocalAlloc(sizeof(*anim));
 	memset(anim, 0, sizeof(*anim));
@@ -621,6 +585,8 @@ static bool BG_ParseAnimGroup(weapon_t weapon, void *animGroup)
 	sub = trap_GPG_GetSubGroups(animGroup);
 	while(sub)
 	{
+		char name[256];
+		char temp[256];
 		trap_GPG_GetName(sub, name);
 		if (strcmp(name, "info") == 0)
 		{
@@ -652,8 +618,10 @@ static bool BG_ParseAnimGroup(weapon_t weapon, void *animGroup)
 			trap_GPG_FindPairValue(sub, "lodbias", "0", temp);
 			info->mLODBias = atoi(temp);
 
-			for(i=0;i<=MAX_WEAPON_ANIM_CHOICES;i++)
+			for(int i=0;i<=MAX_WEAPON_ANIM_CHOICES;i++)
 			{
+				char value[256];
+				char temp[256];
 				if (i == 0)
 				{
 					strcpy(temp, "anim||animNoLerp");
@@ -748,7 +716,6 @@ static TBoltonWeapon *BG_ParseBolton(void *boltonGroup)
 static bool BG_ParseWeaponGroup(TWeaponModel *weapon, void *weaponGroup)
 {
 	void			*sub, *hand;
-	char			name[256];
 	TOptionalWeapon	*option;
 	char			temp[256];
 
@@ -761,6 +728,7 @@ static bool BG_ParseWeaponGroup(TWeaponModel *weapon, void *weaponGroup)
 	sub = trap_GPG_GetSubGroups(weaponGroup);
 	while(sub)
 	{
+		char			name[256];
 		trap_GPG_GetName(sub, name);
 		if (strcmp(name, "buffer") == 0)
 		{
@@ -808,16 +776,6 @@ static bool BG_ParseWeaponGroup(TWeaponModel *weapon, void *weaponGroup)
 			BG_BuildSideSurfaceList(sub, "surface", option->mSurfaces);
 			option->mNext=weapon->mOptionalList;
 			weapon->mOptionalList=option;
-/*
-			if(weapon->mOptionalList)
-			{
-				option->mNext=weapon->mOptionalList;
-				weapon->mOptionalList=option;
-			}
-			else
-			{
-				weapon->mOptionalList=option;
-			}		*/
 		}
 		
 		sub = trap_GPG_GetNext(sub);
@@ -831,8 +789,6 @@ static bool BG_ParseWeapon(weapon_t weapon, void *group)
 	void			*sub, *soundName, *surfaceCallbackName;
 	void			*soundValue, *surfaceCallbackValue;
 	char			onOffVal[256];
-	char			name[256];
-	int				i, j;
 	TAnimWeapon		*anims;
 	TAnimInfoWeapon	*infos;
 	char			temp[256];
@@ -845,6 +801,7 @@ static bool BG_ParseWeapon(weapon_t weapon, void *group)
 	sub = trap_GPG_GetSubGroups(group);
 	while(sub)
 	{
+		char			name[256];
 		trap_GPG_GetName(sub, name);
 
 		if (strcmp(name, "viewoffset") == 0)
@@ -859,11 +816,11 @@ static bool BG_ParseWeapon(weapon_t weapon, void *group)
 		else if (strcmp(name, "sounds") == 0)
 		{
 			soundName = trap_GPG_GetSubGroups(sub);
-			for(i=0;soundName && (i < MAX_WEAPON_SOUNDS);i++)
+			for(int i=0;soundName && (i < MAX_WEAPON_SOUNDS);i++)
 			{
 				trap_GPG_GetName(soundName, weaponParseInfo[weapon].mSoundNames[i]);
 				soundValue = trap_GPG_GetPairs(soundName);
-				for(j=0;soundValue && (j<MAX_WEAPON_SOUND_SLOTS);j++)
+				for(int j=0;soundValue && (j<MAX_WEAPON_SOUND_SLOTS);j++)
 				{
 					trap_GPV_GetTopValue(soundValue, weaponParseInfo[weapon].mSounds[i][j]);
 					soundValue = trap_GPV_GetNext(soundValue);
@@ -875,11 +832,11 @@ static bool BG_ParseWeapon(weapon_t weapon, void *group)
 		else if (strcmp(name, "surfaces") == 0)
 		{
 			surfaceCallbackName = trap_GPG_GetSubGroups(sub);
-			for(i=0;surfaceCallbackName && (i < MAX_SURFACE_CALLBACKS);i++)
+			for(int i=0;surfaceCallbackName && (i < MAX_SURFACE_CALLBACKS);i++)
 			{
 				trap_GPG_GetName(surfaceCallbackName, weaponParseInfo[weapon].mSurfaceCallbacks[i].mName);
 				surfaceCallbackValue = trap_GPG_GetPairs(surfaceCallbackName);
-				for(j=0;surfaceCallbackValue && (j<MAX_CALLBACK_SURFACES);j++)
+				for(int j=0;surfaceCallbackValue && (j<MAX_CALLBACK_SURFACES);j++)
 				{
 					trap_GPG_GetName(surfaceCallbackValue, weaponParseInfo[weapon].mSurfaceCallbacks[i].mOnOffSurfaces[j].mName);
 					trap_GPV_GetTopValue(surfaceCallbackValue, onOffVal);
@@ -909,7 +866,7 @@ static bool BG_ParseWeapon(weapon_t weapon, void *group)
 		infos = anims->mInfos;
 		while(infos)
 		{
-			for(i=0;i<infos->mNumChoices;i++)
+			for(int i=0;i<infos->mNumChoices;i++)
 			{
 				BG_FindWeaponFrames(infos, i);
 			}
@@ -926,10 +883,7 @@ static bool BG_ParseWeapon(weapon_t weapon, void *group)
 
 bool BG_ParseInviewFile(void)
 {
-	void		*GP2, *topGroup, *topSubs, *group;
-	char		name[256], temp[256];
-	int			i;
-
+	void		*GP2, *topGroup, *topSubs;
 	GP2 = trap_GP_ParseFile("inview/sof2.inview", true, false);
 	if (!GP2)
 	{
@@ -943,12 +897,14 @@ bool BG_ParseInviewFile(void)
 	topSubs = trap_GPG_GetSubGroups(topGroup);
 	while(topSubs)
 	{
+		char name[256];
 		trap_GPG_GetName(topSubs, name);
 		if (strcmp(name, "hands") == 0)
 		{
-			group = trap_GPG_FindSubGroup(topSubs, "left");
+			void *group = trap_GPG_FindSubGroup(topSubs, "left");
 			if (group)
 			{
+				char temp[256];
 				trap_GPG_FindPairValue(group, "model", "", weaponLeftHand);
 				trap_GPG_FindPairValue(group, "frames", "", temp);
 				if (BG_OpenWeaponFrames(temp))
@@ -959,6 +915,7 @@ bool BG_ParseInviewFile(void)
 			group = trap_GPG_FindSubGroup(topSubs, "right");
 			if (group)
 			{
+				char temp[256];
 				trap_GPG_FindPairValue(group, "model", "", weaponRightHand);
 				trap_GPG_FindPairValue(group, "frames", "", temp);
 				if (BG_OpenWeaponFrames(temp))
@@ -967,13 +924,10 @@ bool BG_ParseInviewFile(void)
 				}
 			}
 		}
-		else if (strcmp(name, "hud") == 0)
-		{
-		}
 		else if (strcmp(name, "weapon") == 0)
 		{
 			trap_GPG_FindPairValue(topSubs, "name", "", name);
-			for(i=0;i<WP_NUM_WEAPONS;i++)
+			for(int i=0;i<WP_NUM_WEAPONS;i++)
 			{
 				if (strcmp(bg_weaponNames[i], name) == 0)
 				{
@@ -981,13 +935,6 @@ bool BG_ParseInviewFile(void)
 					break;
 				}
 			}
-
-#ifdef _DEBUG
-			if (i == WP_NUM_WEAPONS)
-			{
-				Com_Printf("BG_InitWeapons: Unknown weapon: %s\n", name);
-			}
-#endif
 		}
 
 		topSubs = trap_GPG_GetNext(topSubs);
@@ -1104,14 +1051,12 @@ Finds the firemode for the given weapon using the given default
 */
 int BG_FindFireMode ( weapon_t weapon, attackType_t attack, int firemode )
 {
-	int i;
-
 	if ( !weapon )
 	{
 		return WP_FIREMODE_NONE;
 	}
 
-	for ( i=0; i <= WP_FIREMODE_SINGLE; i++ )
+	for ( int i=0; i <= WP_FIREMODE_SINGLE; i++ )
 	{
 		if( firemode >= WP_FIREMODE_MAX )
 		{

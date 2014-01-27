@@ -20,7 +20,6 @@ G_ParseInfos
 ===============
 */
 int G_ParseInfos( const char *buf, int max, char *infos[] ) {
-	const char	*token;
 	int			count;
 	char		key[MAX_TOKEN_CHARS];
 	char		info[MAX_INFO_STRING];
@@ -28,7 +27,7 @@ int G_ParseInfos( const char *buf, int max, char *infos[] ) {
 	count = 0;
 
 	while ( 1 ) {
-		token = COM_Parse( &buf );
+		const char *token = COM_Parse(&buf);
 		if ( !token[0] ) {
 			break;
 		}
@@ -109,31 +108,24 @@ G_LoadArenas
 */
 void G_LoadArenas( void ) 
 {
-	int			numdirs;
-	char		filename[128];
 	char		dirlist[1024];
-	char*		dirptr;
-	int			i, n;
 	int			dirlen;
 
 	g_numArenas = 0;
 
 	// get all arenas from .arena files
-	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024 );
-	dirptr  = dirlist;
-	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) 
+	int numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024 );
+	char *dirptr  = dirlist;
+	for (int i = 0; i < numdirs; i++, dirptr += dirlen+1) 
 	{
+		char filename[128];
 		dirlen = strlen(dirptr);
 		strcpy(filename, "scripts/");
-		strcat(filename, dirptr);
+		strcat_s<128>(filename, dirptr);
 		G_LoadArenasFromFile(filename);
 	}
-
-#ifdef _DEBUG
-	Com_Printf ( "%i arenas parsed\n", g_numArenas );
-#endif
 	
-	for( n = 0; n < g_numArenas; n++ ) 
+	for(int n = 0; n < g_numArenas; n++ ) 
 	{
 		Info_SetValueForKey( g_arenaInfos[n], "num", va( "%i", n ) );
 	}
@@ -146,9 +138,7 @@ G_GetArenaInfoByNumber
 */
 const char *G_GetArenaInfoByMap( const char *map ) 
 {
-	int n;
-
-	for( n = 0; n < g_numArenas; n++ ) 
+	for(int n = 0; n < g_numArenas; n++ ) 
 	{
 		if( strcmp( Info_ValueForKey( g_arenaInfos[n], "map" ), map ) == 0 ) 
 		{
@@ -171,7 +161,6 @@ bool G_DoesMapSupportGametype ( const char* gametype )
 	char		mapname[MAX_QPATH];
 	const char* info;
 	const char*	type;
-	char*		token;
 
 	// Figure out the current map name first
 	if ( RMG.integer )
@@ -197,7 +186,7 @@ bool G_DoesMapSupportGametype ( const char* gametype )
 
 	while ( 1 )
 	{
-		token = COM_Parse ( &type );
+		char* token = COM_Parse(&type);
 		if ( !token || !*token )
 		{
 			break;
