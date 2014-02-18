@@ -84,6 +84,14 @@ vmCvar_t	g_voiceFloodPenalty;			// Amount of time a void flooder must wait befor
 vmCvar_t	RMG;
 vmCvar_t	g_debugRMG;
 
+//New cvars
+vmCvar_t	server_color1;					// Server color 1-6.
+vmCvar_t	server_color2;					// Used for displaying colors.
+vmCvar_t	server_color3;					// In either commands or prefixes.
+vmCvar_t	server_color4;
+vmCvar_t	server_color5;
+vmCvar_t	server_color6;
+
 static cvarTable_t gameCvarTable[] = 
 {
 	// don't override the cheat state set by the system
@@ -181,6 +189,14 @@ static cvarTable_t gameCvarTable[] =
 	{ &g_teamkillPenalty,		"g_teamkillPenalty",		"-1",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,	false },
 	{ &g_teamkillDamageMax,		"g_teamkillDamageMax",		"300",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
 	{ &g_teamkillDamageForgive,	"g_teamkillDamageForgive",	"50",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
+
+	// New cvars
+	{ &server_color1, "server_color1", "^G", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ &server_color2, "server_color2", "^g", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ &server_color3, "server_color3", "^K", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ &server_color4, "server_color4", "^k", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ &server_color5, "server_color5", "^+", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ &server_color6, "server_color6", "^7", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
 };
 
 // bk001129 - made static to avoid aliasing

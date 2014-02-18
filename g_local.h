@@ -10,8 +10,6 @@
 
 // Classes
 #include "userinfo.h"
-#include "gametype.h"
-#include "gametype_inf.h"
 //==================================================================
 
 // the "gameversion" client command will print this plus compile date
@@ -875,6 +873,14 @@ extern	vmCvar_t	g_teamkillDamageForgive;
 extern	vmCvar_t	g_voiceFloodCount;
 extern	vmCvar_t	g_voiceFloodPenalty;
 
+// New cvars
+extern	vmCvar_t	server_color1;
+extern	vmCvar_t	server_color2;
+extern	vmCvar_t	server_color3;
+extern	vmCvar_t	server_color4;
+extern	vmCvar_t	server_color5;
+extern	vmCvar_t	server_color6;
+
 void	trap_Print( const char *text );
 void	trap_Error( const char *text );
 int		trap_Milliseconds( void );
@@ -1004,6 +1010,9 @@ const char	*trap_VM_LocalStringAlloc ( const char *source );
 void G_UpdateClientAntiLag	( gentity_t* ent );
 void G_UndoAntiLag			( void );
 void G_ApplyAntiLag			( gentity_t* ref, bool enlargeHitBox );
+
+#include "gametype.h"
+#include "gametype_inf.h"
 
 extern Gametype *gtCore;
 #endif

@@ -315,7 +315,7 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace)
 	// If its a gametype item the gametype handles it
 	if ( ent->item->giType == IT_GAMETYPE )
 	{
-		if (!gtCore->onItemTouch(ent->item))
+		if (!gtCore->onItemTouch(ent->item, other->client))
 			return;
 		// Let the gametype decide if it can be picked up
 		//if ( !trap_GT_SendEvent ( GTEV_ITEM_TOUCHED, level.time, ent->item->quantity, other->s.number, other->client->sess.team, 0, 0 ) )

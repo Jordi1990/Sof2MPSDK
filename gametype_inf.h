@@ -5,7 +5,7 @@
 class Gametype_inf : public Gametype {
 public:
 	void onItemStuck(gitem_t *item);
-	bool onItemTouch(gitem_t *item);
+	bool onItemTouch(gitem_t *item, gclient_s *other);
 	Gametype_inf();
 };
 #endif

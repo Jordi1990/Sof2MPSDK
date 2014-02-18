@@ -90,7 +90,6 @@
     <ClCompile Include="bg_pmove.cpp" />
     <ClCompile Include="bg_slidemove.cpp" />
     <ClCompile Include="bg_weapons.cpp" />
-    <ClCompile Include="gametype.cpp" />
     <ClCompile Include="gametype_inf.cpp" />
     <ClCompile Include="g_active.cpp" />
     <ClCompile Include="g_antilag.cpp" />

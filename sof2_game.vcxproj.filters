@@ -111,9 +111,6 @@
     <ClCompile Include="q_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gametype.cpp">
-      <Filter>Source Files\gametypes</Filter>
-    </ClCompile>
     <ClCompile Include="gametype_inf.cpp">
       <Filter>Source Files\gametypes</Filter>
     </ClCompile>

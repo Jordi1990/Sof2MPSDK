@@ -6,6 +6,9 @@
 class Gametype {
 public:
 	virtual void onItemStuck(gitem_t *item) = 0;
-	virtual bool onItemTouch(gitem_t *item) = 0;
+	virtual bool onItemTouch(gitem_t *item, gclient_s *other) = 0;
+	int caseTakenSound;
+	int caseCaptureSound;
+	int caseReturnSound;
 };
 #endif
