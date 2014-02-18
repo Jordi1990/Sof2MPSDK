@@ -187,6 +187,25 @@ void Cmd_Drop_f ( gentity_t* ent )
 	}
 }
 
+void Cmd_DropItem_f(gentity_t* ent)
+{
+	// spectators cant drop anything since they dont have anything
+	if (ent->client->sess.team == TEAM_SPECTATOR)
+		return;
+
+	// Ghosts and followers cant drop stuff
+	if (ent->client->ps.pm_flags & (PMF_GHOST | PMF_FOLLOW))
+		return;
+
+	// Nothing to drop
+	if (!ent->client->ps.stats[STAT_GAMETYPE_ITEMS]){
+		trap_SendServerCommand(ent->s.number, va("print\"^3[Info] ^7You don't have any gametype item to drop\n\""));
+		return;
+	}
+
+	G_DropGametypeItems(ent, 3000);
+}
+
 /*
 ==================
 Cmd_Give_f
@@ -1841,8 +1860,10 @@ void ClientCommand( int clientNum ) {
 		return;
 	}
 
-	if ( strcmp ( cmd, "drop" ) == 0 )
-		Cmd_Drop_f ( ent );
+	if (strcmp(cmd, "drop") == 0)
+		Cmd_Drop_f(ent);
+	else if (strcmp(cmd, "dropitem") == 0)
+		Cmd_DropItem_f(ent);
 	else if (strcmp (cmd, "give") == 0)
 		Cmd_Give_f (ent);
 	else if (strcmp (cmd, "god") == 0)
@@ -1869,11 +1890,6 @@ void ClientCommand( int clientNum ) {
 		Cmd_Vote_f (ent);
 	else if (strcmp (cmd, "setviewpos") == 0)
 		Cmd_SetViewpos_f( ent );
-
-#ifdef _SOF2_BOTS
-	else if (strcmp (cmd, "addbot") == 0)
-		trap_SendServerCommand( clientNum, va("print \"ADDBOT command can only be used via RCON\n\"" ) );
-#endif
 
 	else
 		trap_SendServerCommand( clientNum, va("print \"unknown cmd %s\n\"", cmd ) );

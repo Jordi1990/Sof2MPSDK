@@ -1061,24 +1061,3 @@ const char *trap_VM_LocalStringAlloc ( const char *source )
 {
 	return (const char *)syscall ( G_VM_LOCALSTRINGALLOC, source );
 }
-
-void trap_GT_Init ( const char* gametype, bool restart )
-{
-	syscall ( G_GT_INIT, gametype, restart );
-}
-
-void trap_GT_RunFrame ( int time )
-{
-	syscall ( G_GT_RUNFRAME, time );
-}
-
-void trap_GT_Start ( int time )
-{
-	syscall ( G_GT_START, time );
-}
-
-int trap_GT_SendEvent ( int event, int time, int arg0, int arg1, int arg2, int arg3, int arg4 )
-{
-	return syscall ( G_GT_SENDEVENT, event, time, arg0, arg1, arg2, arg3, arg4 );
-}
-

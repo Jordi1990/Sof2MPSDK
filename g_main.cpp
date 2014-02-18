@@ -194,7 +194,7 @@ void CheckExitRules				( void );
 void G_InitGhoul				( void );
 void G_ShutdownGhoul			( void );
 
-Gametype gtCore;
+Gametype *gtCore;
 /*
 ================
 vmMain
@@ -591,7 +591,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
 	Com_Printf ("-----------------------------------\n");
 
-	gtCore = Gametype_inf();
+	if (g_gametype.string == "inf")
+		gtCore = new Gametype_inf();
+	else
+		Com_Error(ERR_FATAL, "Unsupported gametype: %s\n", g_gametype.string);
 
 	if( trap_Cvar_VariableIntegerValue( "com_buildScript" ) ) 
 	{

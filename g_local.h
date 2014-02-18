@@ -1,7 +1,8 @@
 // Copyright (C) 2001-2002 Raven Software.
 //
 // g_local.h -- local definitions for game module
-
+#ifndef G_LOCAL_H
+#define G_LOCAL_H
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
@@ -804,6 +805,7 @@ bool	G_ExecuteGametypeScript				( gentity_t* activator, const char* name );
 void		G_ResetGametype						( void );
 bool	G_CanGametypeTriggerBeUsed			( gentity_t* self, gentity_t* activator );
 void		G_ResetGametypeItem					( gitem_t* item );
+void		G_DropGametypeItems(gentity_t* self, int delayPickup);
 
 #include "g_team.h" // teamplay specific stuff
 
@@ -1003,5 +1005,5 @@ void G_UpdateClientAntiLag	( gentity_t* ent );
 void G_UndoAntiLag			( void );
 void G_ApplyAntiLag			( gentity_t* ref, bool enlargeHitBox );
 
-extern Gametype gtCore;
-
+extern Gametype *gtCore;
+#endif

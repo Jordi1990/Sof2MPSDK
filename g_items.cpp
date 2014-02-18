@@ -315,6 +315,8 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace)
 	// If its a gametype item the gametype handles it
 	if ( ent->item->giType == IT_GAMETYPE )
 	{
+		if (!gtCore->onItemTouch(ent->item))
+			return;
 		// Let the gametype decide if it can be picked up
 		//if ( !trap_GT_SendEvent ( GTEV_ITEM_TOUCHED, level.time, ent->item->quantity, other->s.number, other->client->sess.team, 0, 0 ) )
 		//{
@@ -988,6 +990,7 @@ void G_RunItem( gentity_t *ent )
 		// Gametype items are reported to the gametype when they are stuck like this
 		if ( ent->item && ent->item->giType == IT_GAMETYPE )
 		{
+			gtCore->onItemStuck(ent->item);
 			// Let the gametype handle the problem, if it doenst handle it and return 1 then 
 			// just reset the gametype item
 			//if ( !trap_GT_SendEvent ( GTEV_ITEM_STUCK, level.time, ent->item->quantity, 0, 0, 0, 0 ) )

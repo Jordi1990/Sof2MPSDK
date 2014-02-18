@@ -1,3 +1,5 @@
+#ifndef G_PUBLIC_H
+#define G_PUBLIC_H
 // Copyright (C) 2001-2002 Raven Software.
 //
 // g_public.h -- game module information visible to server
@@ -124,105 +126,105 @@ typedef enum {
 	G_DROP_CLIENT,		// ( int clientNum, const char *reason );
 	// kick a client off the server with a message
 
-	G_SEND_SERVER_COMMAND,	// ( int clientNum, const char *fmt, ... );
-	// reliably sends a command string to be interpreted by the given
-	// client.  If clientNum is -1, it will be sent to all clients
+G_SEND_SERVER_COMMAND,	// ( int clientNum, const char *fmt, ... );
+// reliably sends a command string to be interpreted by the given
+// client.  If clientNum is -1, it will be sent to all clients
 
-	G_SET_CONFIGSTRING,	// ( int num, const char *string );
-	// config strings hold all the index strings, and various other information
-	// that is reliably communicated to all clients
-	// All of the current configstrings are sent to clients when
-	// they connect, and changes are sent to all connected clients.
-	// All confgstrings are cleared at each level start.
+G_SET_CONFIGSTRING,	// ( int num, const char *string );
+// config strings hold all the index strings, and various other information
+// that is reliably communicated to all clients
+// All of the current configstrings are sent to clients when
+// they connect, and changes are sent to all connected clients.
+// All confgstrings are cleared at each level start.
 
-	G_GET_CONFIGSTRING,	// ( int num, char *buffer, int bufferSize );
+G_GET_CONFIGSTRING,	// ( int num, char *buffer, int bufferSize );
 
-	G_GET_USERINFO,		// ( int num, char *buffer, int bufferSize );
-	// userinfo strings are maintained by the server system, so they
-	// are persistant across level loads, while all other game visible
-	// data is completely reset
+G_GET_USERINFO,		// ( int num, char *buffer, int bufferSize );
+// userinfo strings are maintained by the server system, so they
+// are persistant across level loads, while all other game visible
+// data is completely reset
 
-	G_SET_USERINFO,		// ( int num, const char *buffer );
+G_SET_USERINFO,		// ( int num, const char *buffer );
 
-	G_GET_SERVERINFO,	// ( char *buffer, int bufferSize );
-	// the serverinfo info string has all the cvars visible to server browsers
+G_GET_SERVERINFO,	// ( char *buffer, int bufferSize );
+// the serverinfo info string has all the cvars visible to server browsers
 
-	G_SET_BRUSH_MODEL,	// ( gentity_t *ent, const char *name );
-	// sets mins and maxs based on the brushmodel name
+G_SET_BRUSH_MODEL,	// ( gentity_t *ent, const char *name );
+// sets mins and maxs based on the brushmodel name
 
-	G_SET_ACTIVE_SUBBSP,	// int index
+G_SET_ACTIVE_SUBBSP,	// int index
 
-	G_TRACE,	// ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
-	// collision detection against all linked entities
+G_TRACE,	// ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
+// collision detection against all linked entities
 
-	G_POINT_CONTENTS,	// ( const vec3_t point, int passEntityNum );
-	// point contents against all linked entities
+G_POINT_CONTENTS,	// ( const vec3_t point, int passEntityNum );
+// point contents against all linked entities
 
-	G_IN_PVS,			// ( const vec3_t p1, const vec3_t p2 );
+G_IN_PVS,			// ( const vec3_t p1, const vec3_t p2 );
 
-	G_IN_PVS_IGNORE_PORTALS,	// ( const vec3_t p1, const vec3_t p2 );
+G_IN_PVS_IGNORE_PORTALS,	// ( const vec3_t p1, const vec3_t p2 );
 
-	G_ADJUST_AREA_PORTAL_STATE,	// ( gentity_t *ent, bool open );
+G_ADJUST_AREA_PORTAL_STATE,	// ( gentity_t *ent, bool open );
 
-	G_AREAS_CONNECTED,	// ( int area1, int area2 );
+G_AREAS_CONNECTED,	// ( int area1, int area2 );
 
-	G_LINKENTITY,		// ( gentity_t *ent );
-	// an entity will never be sent to a client or used for collision
-	// if it is not passed to linkentity.  If the size, position, or
-	// solidity changes, it must be relinked.
+G_LINKENTITY,		// ( gentity_t *ent );
+// an entity will never be sent to a client or used for collision
+// if it is not passed to linkentity.  If the size, position, or
+// solidity changes, it must be relinked.
 
-	G_UNLINKENTITY,		// ( gentity_t *ent );		
-	// call before removing an interactive entity
+G_UNLINKENTITY,		// ( gentity_t *ent );		
+// call before removing an interactive entity
 
-	G_ENTITIES_IN_BOX,	// ( const vec3_t mins, const vec3_t maxs, gentity_t **list, int maxcount );
-	// EntitiesInBox will return brush models based on their bounding box,
-	// so exact determination must still be done with EntityContact
+G_ENTITIES_IN_BOX,	// ( const vec3_t mins, const vec3_t maxs, gentity_t **list, int maxcount );
+// EntitiesInBox will return brush models based on their bounding box,
+// so exact determination must still be done with EntityContact
 
-	G_ENTITY_CONTACT,	// ( const vec3_t mins, const vec3_t maxs, const gentity_t *ent );
-	// perform an exact check against inline brush models of non-square shape
+G_ENTITY_CONTACT,	// ( const vec3_t mins, const vec3_t maxs, const gentity_t *ent );
+// perform an exact check against inline brush models of non-square shape
 
-	// access for bots to get and free a server client (FIXME?)
-	G_BOT_ALLOCATE_CLIENT,	// ( void );
+// access for bots to get and free a server client (FIXME?)
+G_BOT_ALLOCATE_CLIENT,	// ( void );
 
-	G_BOT_FREE_CLIENT,	// ( int clientNum );
+G_BOT_FREE_CLIENT,	// ( int clientNum );
 
-	G_GET_USERCMD,	// ( int clientNum, usercmd_t *cmd )
+G_GET_USERCMD,	// ( int clientNum, usercmd_t *cmd )
 
-	G_GET_ENTITY_TOKEN,	// bool ( char *buffer, int bufferSize )
-	// Retrieves the next string token from the entity spawn text, returning
-	// false when all tokens have been parsed.
-	// This should only be done at GAME_INIT time.
+G_GET_ENTITY_TOKEN,	// bool ( char *buffer, int bufferSize )
+// Retrieves the next string token from the entity spawn text, returning
+// false when all tokens have been parsed.
+// This should only be done at GAME_INIT time.
 
-	G_FS_GETFILELIST,
-	G_BOT_GET_MEMORY,
-	G_BOT_FREE_MEMORY,
-	G_DEBUG_POLYGON_CREATE,
-	G_DEBUG_POLYGON_DELETE,
-	G_REAL_TIME,
-	G_SNAPVECTOR,
+G_FS_GETFILELIST,
+G_BOT_GET_MEMORY,
+G_BOT_FREE_MEMORY,
+G_DEBUG_POLYGON_CREATE,
+G_DEBUG_POLYGON_DELETE,
+G_REAL_TIME,
+G_SNAPVECTOR,
 
-	G_TRACECAPSULE,	// ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
-	G_ENTITY_CONTACTCAPSULE,	// ( const vec3_t mins, const vec3_t maxs, const gentity_t *ent );
+G_TRACECAPSULE,	// ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
+G_ENTITY_CONTACTCAPSULE,	// ( const vec3_t mins, const vec3_t maxs, const gentity_t *ent );
 
-	G_MEMSET = 100,
-	G_MEMCPY,
-	G_STRNCPY,
-	G_SIN,
-	G_COS,
-	G_ATAN2,
-	G_SQRT,
-	G_ANGLEVECTORS,
-	G_PERPENDICULARVECTOR,
-	G_FLOOR,
-	G_CEIL,
+G_MEMSET = 100,
+G_MEMCPY,
+G_STRNCPY,
+G_SIN,
+G_COS,
+G_ATAN2,
+G_SQRT,
+G_ANGLEVECTORS,
+G_PERPENDICULARVECTOR,
+G_FLOOR,
+G_CEIL,
 
-	G_TESTPRINTINT,
-	G_TESTPRINTFLOAT,
+G_TESTPRINTINT,
+G_TESTPRINTFLOAT,
 
-	G_ACOS,
-	G_ASIN,
+G_ACOS,
+G_ASIN,
 
-	G_MATRIXMULTIPLY,
+G_MATRIXMULTIPLY,
 
 	BOTLIB_SETUP = 200,				// ( void );
 	BOTLIB_SHUTDOWN,				// ( void );
@@ -447,11 +449,6 @@ typedef enum {
 	G_G2_SETSKIN,
 	G_G2_GETANIMFILENAMEINDEX,
 
-	G_GT_INIT,
-	G_GT_RUNFRAME,
-	G_GT_START,
-	G_GT_SENDEVENT,
-
 } gameImport_t;
 
 
@@ -500,3 +497,4 @@ typedef enum {
 
 } gameExport_t;
 
+#endif
