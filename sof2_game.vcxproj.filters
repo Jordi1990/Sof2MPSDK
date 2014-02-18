@@ -13,6 +13,15 @@
       <UniqueIdentifier>{dd4ef1c5-10c8-4e8d-b655-e53d58a33580}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Header Files\classes">
+      <UniqueIdentifier>{221039f2-0526-4ed6-85d1-2c9ae67fdd1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gametypes">
+      <UniqueIdentifier>{5275897b-e676-4f3c-98b0-39309d88bed1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\userinfo">
+      <UniqueIdentifier>{8dc8ac04-e1ce-4e55-b6c9-98919f236b19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bg_gametype.cpp">
@@ -102,6 +111,15 @@
     <ClCompile Include="q_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gametype.cpp">
+      <Filter>Source Files\gametypes</Filter>
+    </ClCompile>
+    <ClCompile Include="gametype_inf.cpp">
+      <Filter>Source Files\gametypes</Filter>
+    </ClCompile>
+    <ClCompile Include="userinfo.cpp">
+      <Filter>Source Files\userinfo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h">
@@ -133,6 +151,15 @@
     </ClInclude>
     <ClInclude Include="G2.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gametype.h">
+      <Filter>Header Files\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="gametype_inf.h">
+      <Filter>Header Files\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="userinfo.h">
+      <Filter>Header Files\classes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

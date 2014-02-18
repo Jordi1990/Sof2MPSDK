@@ -1,15 +1,15 @@
 // Copyright (C) 2001-2002 Raven Software.
 //
 #include "g_local.h"
-#include "bg_public.h"
+//#include "bg_public.h"
 
 // this file is only included when building a dll
 // g_syscalls.asm is included instead when building a qvm
 
-static int ( *syscall)( int arg, ... ) = (int ( *)( int, ...))-1;
+static intptr_t(*syscall)(intptr_t arg, ...) = (intptr_t(*)(intptr_t, ...)) - 1;
 
 
-void dllEntry( int ( *syscallptr)( int arg,... ) ) {
+Q_EXPORT void dllEntry( intptr_t ( *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
 }
 
@@ -19,12 +19,12 @@ int PASSFLOAT( float x ) {
 	return *(int *)&floatTemp;
 }
 
-void	trap_Printf( const char *fmt ) {
-	syscall( G_PRINT, fmt );
+void	trap_Print( const char *text ) {
+	syscall( G_PRINT, text );
 }
 
-void	trap_Error( const char *fmt ) {
-	syscall( G_ERROR, fmt );
+void	trap_Error( const char *text ) {
+	syscall( G_ERROR, text );
 }
 
 int		trap_Milliseconds( void ) {

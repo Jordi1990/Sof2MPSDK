@@ -1,7 +1,7 @@
 // Copyright (C) 2001-2002 Raven Software
 //
 #include "g_local.h"
-
+#include <boost/algorithm/string/replace.hpp>
 // g_client.c -- client functions that don't happen every frame
 
 static vec3_t	playerMins = {-15, -15, -46};
@@ -523,46 +523,12 @@ void respawn( gentity_t *ent )
 
 /*
 ================
-G_GhostCount
-
-Returns number of ghosts on a team, if -1 is given for a team all ghosts in the game
-are returned instead
-================
-*/
-int G_GhostCount ( team_t team )
-{
-	int i;
-	int count;
-
-	for ( i = 0, count = 0; i < level.numConnectedClients; i ++ )	
-	{
-		if (g_entities[level.sortedClients[i]].client->pers.connected != CON_CONNECTED )
-		{
-			continue;
-		}
-
-		if ( g_entities[level.sortedClients[i]].client->sess.ghost )
-		{
-			if ( team != -1 && team != g_entities[level.sortedClients[i]].client->sess.ghost )
-			{
-				continue;
-			}
-
-			count ++;
-		}
-	}
-
-	return count;
-}		
-
-/*
-================
 G_IsClientDead
 
 Returns true if the client is dead and false if not
 ================
 */
-bool G_IsClientDead ( gclient_t* client )
+bool G_IsClientDead ( const gclient_t* client )
 {
 	if ( client->ps.stats[STAT_HEALTH] <= 0 )
 	{
@@ -914,6 +880,18 @@ void G_UpdateOutfitting ( int clientNum )
 	client->ps.stats[STAT_OUTFIT_GRENADE] = bg_itemlist[bg_outfittingGroups[OUTFITTING_GROUP_GRENADE][client->pers.outfitting.items[OUTFITTING_GROUP_GRENADE]]].giTag;
 }
 
+string parseName(const string &name1)
+{
+	string name = string(name1);
+	boost::replace_all(name, "^^", "");// replace double color tags
+	boost::replace_all(name, "  ", "");// remove double spaces
+	if (name.back() == ' ' || name.back() == '\t')
+		name.pop_back(); // delete last whitespace
+	// define a max length
+	if (name.length() > 128)
+		throw "parseName max length exceeded";
+	return name;
+}
 
 /*
 ===========
@@ -926,110 +904,51 @@ The game can override any of the settings and call trap_SetUserinfo
 if desired.
 ============
 */
-void ClientUserinfoChanged( int clientNum ) 
+void ClientUserinfoChanged( int clientNum, userinfo *userInfo ) 
 {
 	gentity_t	*ent;
 	int			team;
-	int			health;
-	char		*s;
 	gclient_t	*client;
-	char		oldname[MAX_STRING_CHARS];
-	char		userinfo[MAX_INFO_STRING];
+	string oldname;
 	TIdentity	*oldidentity;
 
 	ent = g_entities + clientNum;
 	client = ent->client;
-
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
-
-	// check for malformed or illegal info strings
-	if ( !Info_Validate(userinfo) ) 
-	{
-		strcpy (userinfo, "\\name\\badinfo");
+	if (!userInfo){ // fetch again
+		userInfo = new userinfo(clientNum);
 	}
 
-	// check for local client
-	s = Info_ValueForKey( userinfo, "ip" );
-	if ( !strcmp( s, "localhost" ) ) 
-	{
-		client->pers.localClient = true;
-	}
+	ent->client->pers.predictItemPickup = userInfo->cg_predictItems;
+	ent->client->pers.autoReload = userInfo->cg_autoReload;
+	ent->client->pers.antiLag = userInfo->cg_antiLag;
 
-	// check the item prediction
-	s = Info_ValueForKey( userinfo, "cg_predictItems" );
-	if ( !atoi( s ) ) 
-	{
-		client->pers.predictItemPickup = false;
-	} 
-	else 
-	{
-		client->pers.predictItemPickup = true;
-	}
-
-	// Is anti-lag turned on?
-	s = Info_ValueForKey ( userinfo, "cg_antiLag" );
-	client->pers.antiLag = atoi( s )?true:false;
-
-	// Is auto-reload turned on?
-	s = Info_ValueForKey ( userinfo, "cg_autoReload" );
-	client->pers.autoReload = atoi( s )?true:false;
-	if ( client->pers.autoReload )
-	{
-		client->ps.pm_flags |= PMF_AUTORELOAD;
-	}
-	else
-	{
-		client->ps.pm_flags &= ~PMF_AUTORELOAD;
-	}
+	oldname = client->pers.netname;
 
 	// set name
-	strncpy ( oldname, client->pers.netname, sizeof( oldname ) );
-	s = Info_ValueForKey (userinfo, "name");
-	G_ClientCleanName( s, client->pers.netname, sizeof(client->pers.netname), level.gametypeData->teams?false:true );
+	try{
+		client->pers.netname = parseName(userInfo->name);
+	}
+	catch (const char *){
+		client->pers.netname = "Unnamed Player";
+	}
 
 	if ( client->sess.team == TEAM_SPECTATOR ) 
 	{
 		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) 
 		{
-			strncpy( client->pers.netname, "scoreboard", sizeof(client->pers.netname) );
+			client->pers.netname = "scoreboard";
 		}
 	}
 
-	// set max health
-	health = atoi( Info_ValueForKey( userinfo, "handicap" ) );
-
-	// bots set their team a few frames later
-	if ( level.gametypeData->teams && (g_entities[clientNum].r.svFlags & SVF_BOT)) 
-	{
-		s = Info_ValueForKey( userinfo, "team" );
-		if ( !strcmp( s, "red" ) || !strcmp( s, "r" ) ) 
-		{
-			team = TEAM_RED;
-		} 
-		else if ( !strcmp( s, "blue" ) || !strcmp( s, "b" ) ) 
-		{
-			team = TEAM_BLUE;
-		} 
-		else 
-		{
-			// pick the team with the least number of players
-			team = PickTeam( clientNum );
-		}
-	}
-	else 
-	{
-		team = client->sess.team;
-	}
+	team = client->sess.team;
 
 	// Enforce the identities
 	oldidentity = client->pers.identity;
 
 	if( level.gametypeData->teams ) 
 	{
-		s = Info_ValueForKey ( userinfo, "team_identity" );
-
 		// Lookup the identity by name and if it cant be found then pick a random one
-		client->pers.identity = BG_FindIdentity ( s );
+		client->pers.identity = BG_FindIdentity ( userInfo->team_identity.c_str() );
 
 		if ( team != TEAM_SPECTATOR )
 		{
@@ -1050,10 +969,8 @@ void ClientUserinfoChanged( int clientNum )
 	} 
 	else 
 	{
-		s = Info_ValueForKey ( userinfo, "identity" );
-
 		// Lookup the identity by name and if it cant be found then pick a random one
-		client->pers.identity = BG_FindIdentity ( s );
+		client->pers.identity = BG_FindIdentity ( userInfo->identity.c_str() );
 	}
 
 	// If the identity wasnt in the list then just give them the first identity.  We could
@@ -1069,34 +986,28 @@ void ClientUserinfoChanged( int clientNum )
 	{
 		if ( client->pers.identity && oldidentity && client->pers.identity != oldidentity && team != TEAM_SPECTATOR )
 		{
-			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " has changed identities\n\"", client->pers.netname ) );
+			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " has changed identities\n\"", client->pers.netname.c_str() ) );
 		}
 
 		// If the client is changing their name then handle some delayed name changes
-		if ( strcmp( oldname, client->pers.netname ) ) 
+		if ( client->pers.netname.compare(oldname) ) 
 		{
 			// Dont let them change their name too much
 			if ( level.time - client->pers.netnameTime < 5000 )
 			{
 				trap_SendServerCommand ( client - &level.clients[0], "print \"You must wait 5 seconds before changing your name again.\n\"" );
-				strcpy ( client->pers.netname, oldname );
-			}
-			// voting clients cannot change their names
-			else if ( (level.voteTime || level.voteExecuteTime) && strstr ( level.voteDisplayString, oldname ) )
-			{
-				trap_SendServerCommand ( client - &level.clients[0], "print \"You are not allowed to change your name while there is an active vote against you.\n\"" );
-				strcpy ( client->pers.netname, oldname );
+				client->pers.netname = oldname;
 			}
 			// If they are a ghost or spectating in an inf game their name is deferred
 			else if ( level.gametypeData->respawnType == RT_NONE && (client->sess.ghost || G_IsClientDead ( client ) ) )
 			{
 				trap_SendServerCommand ( client - &level.clients[0], "print \"Name changes while dead will be deferred until you spawn again.\n\"" );
-				strcpy ( client->pers.deferredname, client->pers.netname );
-				strcpy ( client->pers.netname, oldname );
+				strcpy ( client->pers.deferredname, client->pers.netname.c_str() );
+				client->pers.netname = oldname;
 			}
 			else
 			{
-				trap_SendServerCommand( -1, va("print \"%s renamed to %s\n\"", oldname, client->pers.netname) );
+				trap_SendServerCommand( -1, va("print \"%s renamed to %s\n\"", oldname.c_str(), client->pers.netname.c_str()) );
 				client->pers.netnameTime = level.time;
 			}
 		}
@@ -1106,23 +1017,17 @@ void ClientUserinfoChanged( int clientNum )
 	if ( level.pickupsDisabled )
 	{
 		// Parse out the new outfitting
-		BG_DecompressOutfitting ( Info_ValueForKey ( userinfo, "outfitting" ), &client->pers.outfitting );
+		BG_DecompressOutfitting ( userInfo->outfitting.c_str(), &client->pers.outfitting );
 		G_UpdateOutfitting ( clientNum );
 	}
 
 	// send over a subset of the userinfo keys so other clients can
 	// print scoreboards, display models, and play custom sounds
-	if ( ent->r.svFlags & SVF_BOT ) 
-	{
-		s = va("n\\%s\\t\\%i\\identity\\%s\\skill\\%s",
-			client->pers.netname, team, client->pers.identity->mName, 
-			Info_ValueForKey( userinfo, "skill" ) );
-	} 
-	else 
-	{
-		s = va("n\\%s\\t\\%i\\identity\\%s",
-			   client->pers.netname, team, client->pers.identity->mName );
-	}
+	char s[1024];
+	if (ent->r.svFlags & SVF_BOT)
+		sprintf_s(s, sizeof(s), "n\\%s\\t\\%i\\identity\\%s\\skill\\5", ent->client->pers.netname.c_str(), ent->client->sess.team, ent->client->pers.identity->mName);
+	else
+		sprintf_s(s, sizeof(s), "n\\%s\\t\\%i\\identity\\%s", ent->client->pers.netname.c_str(), ent->client->sess.team, ent->client->pers.identity->mName);
 
 	trap_SetConfigstring( CS_PLAYERS+clientNum, s );
 
@@ -1152,23 +1057,21 @@ restarts.
 */
 char *ClientConnect( int clientNum, bool firstTime, bool isBot ) 
 {
-	char		*value;
-	char		userinfo[MAX_INFO_STRING];
+	char		userinfoBuf[MAX_INFO_STRING];
 	gentity_t	*ent = &g_entities[ clientNum ];
 
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+	trap_GetUserinfo(clientNum, userinfoBuf, MAX_INFO_STRING);
 
-	// we don't check password for bots and local client
-	// NOTE: local client <-> "ip" "localhost"
-	//   this means this client is not running in our current process
-	if ( !( isBot ) && (strcmp(value, "localhost") != 0)) 
+	userinfo userInfo(clientNum); // exception will be catched one call up so connect returns the reason why it failed
+	bool isLocal = userInfo.ip.compare("localhost") != 0;
+
+	if (!isBot && !isLocal)
 	{
 		// check for a password
-		value = Info_ValueForKey (userinfo, "password");
-		if ( g_password.string[0] && strcmp( g_password.string, "none" ) &&
-			strcmp( g_password.string, value) != 0) 
+		if (g_password.string[0] && strcmp(g_password.string, "none") != 0 &&
+			strcmp(g_password.string, userInfo.password.c_str()) != 0)
 		{
-			return va("Invalid password: %s", value );
+			return "Invalid password";
 		}
 	}
 
@@ -1177,27 +1080,26 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	gclient_t *client = ent->client;
 
 	memset( client, 0, sizeof(*client) );
-
 	client->pers.connected = CON_CONNECTING;
-
 	client->sess.team = TEAM_SPECTATOR;
+	client->pers.localClient = isLocal;
 
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) 
 	{
-		G_InitSessionData( client, userinfo );
+		//G_InitSessionData( client, userinfo );
 	}
 	
-	G_ReadSessionData( client );
+	//G_ReadSessionData( client );
 
 	// get and distribute relevent paramters
 	G_LogPrintf( "ClientConnect: %i\n", clientNum );
-	ClientUserinfoChanged( clientNum );
+	ClientUserinfoChanged( clientNum, &userInfo);
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	if ( firstTime ) 
 	{
-		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " is connecting...\n\"", client->pers.netname) );
+		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " is connecting...\n\"", client->pers.netname.c_str()) );
 	}
 
 	// Broadcast team change if not going to spectator
@@ -1276,7 +1178,7 @@ void ClientBegin( int clientNum )
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
 		tent->s.clientNum = ent->s.clientNum;
 
-		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
+		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname.c_str()) );
 	}
 	
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
@@ -1382,7 +1284,6 @@ void ClientSpawn(gentity_t *ent)
 	int					flags;
 	int					savedPing;
 	int					eventSequence;
-	char				userinfo[MAX_INFO_STRING];
 	int					start_ammo_type;
 	int					ammoIndex;
 	int					idle;
@@ -1415,7 +1316,7 @@ void ClientSpawn(gentity_t *ent)
 	saved = client->pers;
 	savedSess = client->sess;
 	savedPing = client->ps.ping;
-	for ( i = 0 ; i < MAX_PERSISTANT ; i++ ) 
+	for ( int i = 0 ; i < MAX_PERSISTANT ; i++ ) 
 	{
 		persistant[i] = client->ps.persistant[i];
 	}
@@ -1440,8 +1341,8 @@ void ClientSpawn(gentity_t *ent)
 	client->ps.persistant[PERS_ATTACKER] = ENTITYNUM_WORLD;
 
 	client->airOutTime = level.time + 12000;
-
-	trap_GetUserinfo( index, userinfo, sizeof(userinfo) );
+	
+	userinfo userInfo(client->ps.clientNum);
 
 	// clear entity values
 	client->ps.eFlags = flags;
@@ -1607,11 +1508,11 @@ void ClientSpawn(gentity_t *ent)
 	// Handle a deferred name change
 	if ( client->pers.deferredname[0] )
 	{
-		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", client->pers.netname, client->pers.deferredname) );
-		strcpy ( client->pers.netname, client->pers.deferredname );
+		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", client->pers.netname.c_str(), client->pers.deferredname) );
+		client->pers.netname = client->pers.deferredname;
 		client->pers.deferredname[0] = '\0';
 		client->pers.netnameTime = level.time;
-		ClientUserinfoChanged ( client->ps.clientNum );
+		ClientUserinfoChanged ( client->ps.clientNum, &userInfo );
 	}
 
 	// Update the time when other people can join the game

@@ -5,6 +5,20 @@
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
+#if (defined _MSC_VER)
+#pragma warning(disable : 4244)     // double to float loss of data
+#pragma warning(disable : 4224)		// string name parameter defined as type
+#pragma warning(disable : 4800)		// forcing value to bool
+#pragma warning(disable : 4996)		// use safe functions insteaad
+#define Q_EXPORT __declspec(dllexport)
+#elif (defined __SUNPRO_C)
+#define Q_EXPORT __global
+#elif ((__GNUC__ >= 3) && (!__EMX__) && (!sun))
+#define Q_EXPORT __attribute__((visibility("default")))
+#else
+#define Q_EXPORT
+#endif
+
 #define SOF2_VERSION_ID	"1.00"
 #define	GAME_VERSION		"sof2mp-1.00"
 

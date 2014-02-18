@@ -194,6 +194,7 @@ void CheckExitRules				( void );
 void G_InitGhoul				( void );
 void G_ShutdownGhoul			( void );
 
+Gametype gtCore;
 /*
 ================
 vmMain
@@ -202,7 +203,7 @@ This is the only way control passes into the module.
 This must be the very first function compiled into the .q3vm file
 ================
 */
-int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) 
+Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) 
 {
 	switch ( command ) 
 	{
@@ -224,7 +225,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			ClientThink( arg0 );
 			return 0;
 		case GAME_CLIENT_USERINFO_CHANGED:
-			ClientUserinfoChanged( arg0 );
+			ClientUserinfoChanged( arg0, NULL);
 			return 0;
 		case GAME_CLIENT_DISCONNECT:
 			ClientDisconnect( arg0 );
@@ -590,6 +591,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
 	Com_Printf ("-----------------------------------\n");
 
+	gtCore = Gametype_inf();
+
 	if( trap_Cvar_VariableIntegerValue( "com_buildScript" ) ) 
 	{
 		G_SoundIndex( "sound/player/gurp1.wav" );
@@ -658,7 +661,7 @@ void  Com_Printf( const char *msg, ... )
 	vsprintf (text, msg, argptr);
 	va_end (argptr);
 
-	trap_Printf( text );
+	trap_Print( text );
 }
 
 #endif

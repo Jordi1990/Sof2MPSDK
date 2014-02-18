@@ -241,7 +241,7 @@ void player_die(
 		killer = attacker->s.number;
 		if ( attacker->client ) 
 		{
-			killerName = attacker->client->pers.netname;
+			killerName = (char *)attacker->client->pers.netname.c_str();
 		} 
 		else 
 		{

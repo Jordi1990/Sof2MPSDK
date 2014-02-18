@@ -158,80 +158,6 @@ void SanitizeString( char *in, char *out ) {
 
 /*
 ==================
-G_ClientNumberFromName
-
-Finds the client number of the client with the given name
-==================
-*/
-int G_ClientNumberFromName ( const char* name )
-{
-	char		s2[MAX_STRING_CHARS];
-	char		n2[MAX_STRING_CHARS];
-	int			i;
-	gclient_t*	cl;
-
-	// check for a name match
-	SanitizeString( (char*)name, s2 );
-	for ( i=0, cl=level.clients ; i < level.numConnectedClients ; i++, cl++ ) 
-	{
-		SanitizeString( cl->pers.netname, n2 );
-		if ( !strcmp( n2, s2 ) ) 
-		{
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-/*
-==================
-ClientNumberFromString
-
-Returns a player number for either a number or name string
-Returns -1 if invalid
-==================
-*/
-int ClientNumberFromString( gentity_t *to, char *s ) {
-	gclient_t	*cl;
-	int			idnum;
-	char		s2[MAX_STRING_CHARS];
-	char		n2[MAX_STRING_CHARS];
-
-	// numeric values are just slot numbers
-	if (s[0] >= '0' && s[0] <= '9') {
-		idnum = atoi( s );
-		if ( idnum < 0 || idnum >= level.maxclients ) {
-			trap_SendServerCommand( to-g_entities, va("print \"Bad client slot: %i\n\"", idnum));
-			return -1;
-		}
-
-		cl = &level.clients[idnum];
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			trap_SendServerCommand( to-g_entities, va("print \"Client %i is not active\n\"", idnum));
-			return -1;
-		}
-		return idnum;
-	}
-
-	// check for a name match
-	SanitizeString( s, s2 );
-	for ( idnum=0,cl=level.clients ; idnum < level.maxclients ; idnum++,cl++ ) {
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		SanitizeString( cl->pers.netname, n2 );
-		if ( !strcmp( n2, s2 ) ) {
-			return idnum;
-		}
-	}
-
-	trap_SendServerCommand( to-g_entities, va("print \"User %s is not on the server\n\"", s));
-	return -1;
-}
-
-/*
-==================
 Cmd_Drop_f
 
 Drops the currenty selected weapon
@@ -529,22 +455,22 @@ void BroadcastTeamChange( gclient_t *client, int oldTeam )
 	switch ( client->sess.team )
 	{
 		case TEAM_RED:
-			trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " joined the red team.\n\"", client->pers.netname) );
+			trap_SendServerCommand(-1, va("cp \"%s" S_COLOR_WHITE " joined the red team.\n\"", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_BLUE:
-			trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " joined the blue team.\n\"", client->pers.netname));
+			trap_SendServerCommand(-1, va("cp \"%s" S_COLOR_WHITE " joined the blue team.\n\"", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_SPECTATOR:
 			if ( oldTeam != TEAM_SPECTATOR )
 			{
-				trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " joined the spectators.\n\"", client->pers.netname));
+				trap_SendServerCommand(-1, va("cp \"%s" S_COLOR_WHITE " joined the spectators.\n\"", client->pers.netname.c_str()));
 			}
 			break;
 
 		case TEAM_FREE:
-			trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " joined the battle.\n\"", client->pers.netname));
+			trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " joined the battle.\n\"", client->pers.netname.c_str()));
 			break;
 	}
 }
@@ -572,19 +498,14 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 	clientNum = client - level.clients;
 	specClient = 0;
 	specState = SPECTATOR_NOT;
-
+	userinfo userInfo(clientNum);
 	// If an identity was specified then inject it into
 	// the clients userinfo
 	if ( identity )
 	{
-		char userinfo[MAX_INFO_STRING];
-		trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
-
-		if ( strcmp ( identity, Info_ValueForKey ( userinfo, "identity" ) ) )
+		if ( strcmp ( identity, userInfo.identity.c_str()))
 		{
-			Info_SetValueForKey ( userinfo, "identity", identity );
-			Info_SetValueForKey ( userinfo, "team_identity", identity );
-			trap_SetUserinfo ( clientNum, userinfo );
+			userInfo.setIdentity(clientNum, identity);
 		}
 		else
 		{
@@ -677,7 +598,7 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 		{
 			// get and distribute relevent paramters
 			client->pers.identity = NULL;
-			ClientUserinfoChanged( clientNum );
+			ClientUserinfoChanged( clientNum, &userInfo );
 		}
 		
 		return;
@@ -757,7 +678,7 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 
 			// get and distribute relevent paramters
 			client->pers.identity = NULL;
-			ClientUserinfoChanged( clientNum );
+			ClientUserinfoChanged( clientNum, &userInfo );
 
 			CalculateRanks();
 
@@ -767,7 +688,7 @@ void SetTeam( gentity_t *ent, char *s, const char* identity )
 
 	// get and distribute relevent paramters
 	client->pers.identity = NULL;
-	ClientUserinfoChanged( clientNum );
+	ClientUserinfoChanged( clientNum, &userInfo );
 
 	CalculateRanks();
 
@@ -979,7 +900,7 @@ void Cmd_Follow_f( gentity_t *ent )
 	}
 
 	trap_Argv( 1, arg, sizeof( arg ) );
-	i = ClientNumberFromString( ent, arg );
+	i = atoi(arg);
 	if ( i == -1 ) 
 	{
 		return;
@@ -1233,7 +1154,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 		default:
 		case SAY_ALL:
 
-			sprintf_s (name, nameSize, "%s%s%s: ", namecolor, ent->client->pers.netname, S_COLOR_WHITE );
+			sprintf_s (name, nameSize, "%s%s%s: ", namecolor, ent->client->pers.netname.c_str(), S_COLOR_WHITE );
 
 			break;
 
@@ -1243,7 +1164,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 			{
 				sprintf_s ( name, nameSize, "%s(%s%s) %s(%s): ", 
 							  namecolor, 
-							  ent->client->pers.netname, 
+							  ent->client->pers.netname.c_str(),
 							  namecolor,
 							  S_COLOR_WHITE, location );
 			}
@@ -1251,7 +1172,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 			{
 				sprintf_s ( name, nameSize, "%s(%s%s)%s: ", 
 							  namecolor, 
-							  ent->client->pers.netname, 
+							  ent->client->pers.netname.c_str(),
 							  namecolor,
 							  S_COLOR_WHITE );
 			}
@@ -1265,7 +1186,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 			{
 				sprintf_s ( name, nameSize, "%s[%s%s] %s(%s): ", 
 							  namecolor,
-							  ent->client->pers.netname, 
+							  ent->client->pers.netname.c_str(),
 							  namecolor,
 							  S_COLOR_WHITE, location );
 			}
@@ -1273,7 +1194,7 @@ void G_GetChatPrefix ( gentity_t* ent, gentity_t* target, int mode, char* name, 
 			{
 				sprintf_s ( name, nameSize, "%s[%s%s]%s: ", 
 							  namecolor,
-							  ent->client->pers.netname, 
+							  ent->client->pers.netname.c_str(),
 							  namecolor,
 							  S_COLOR_WHITE );
 			}
@@ -1299,11 +1220,11 @@ void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
 	switch ( mode )
 	{
 		case SAY_ALL:
-			G_LogPrintf( "say: %s: %s\n", ent->client->pers.netname, chatText );
+			G_LogPrintf("say: %s: %s\n", ent->client->pers.netname.c_str(), chatText);
 			break;
 
 		case SAY_TEAM:
-			G_LogPrintf( "sayteam: %s: %s\n", ent->client->pers.netname, chatText );
+			G_LogPrintf("sayteam: %s: %s\n", ent->client->pers.netname.c_str(), chatText);
 			break;
 	}
 
@@ -1386,7 +1307,7 @@ static void Cmd_Tell_f( gentity_t *ent ) {
 
 	p = ConcatArgs( 2 );
 
-	G_LogPrintf( "tell: %s to %s: %s\n", ent->client->pers.netname, target->client->pers.netname, p );
+	G_LogPrintf("tell: %s to %s: %s\n", ent->client->pers.netname.c_str(), target->client->pers.netname.c_str(), p);
 	G_Say( ent, target, SAY_TELL, p );
 	// don't tell to the player self if it was already directed to this player
 	// also don't send the chat back to a bot
@@ -1735,20 +1656,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 		}
 			
 		sprintf_s ( level.voteString, sizeof(level.voteString ), "%s %s", arg1, arg2 );
-		sprintf_s ( level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[n].client->pers.netname );
-	}
-	else if ( !strcmp ( arg1, "kick" ) )
-	{
-		int clientid = G_ClientNumberFromName ( arg2 );
-
-		if ( clientid == -1 )
-		{
-			trap_SendServerCommand( ent-g_entities, va("print \"there is no client named '%s' currently on the server.\n\"", arg2 ) );
-			return;
-		}
-
-		sprintf_s ( level.voteString, sizeof(level.voteString ), "clientkick %d", clientid );
-		sprintf_s ( level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[clientid].client->pers.netname );
+		sprintf_s(level.voteDisplayString, sizeof(level.voteDisplayString), "kick %s", g_entities[n].client->pers.netname.c_str());
 	}
 	else if ( !strcmp ( arg1, "timeextension" ) )
 	{
@@ -1772,7 +1680,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 		sprintf_s( level.voteDisplayString, sizeof( level.voteDisplayString ), "%s", level.voteString );
 	}
 
-	trap_SendServerCommand( -1, va("print \"%s called a vote.\n\"", ent->client->pers.netname ) );
+	trap_SendServerCommand(-1, va("print \"%s called a vote.\n\"", ent->client->pers.netname.c_str()));
 
 	// start the voting, the caller autoamtically votes yes
 	level.voteTime = level.time;

@@ -120,7 +120,7 @@ gclient_t	*ClientForString( const char *s ) {
 		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			continue;
 		}
-		if ( !strcmp( cl->pers.netname, s ) ) {
+		if ( !cl->pers.netname.compare(s ) ) {
 			return cl;
 		}
 	}

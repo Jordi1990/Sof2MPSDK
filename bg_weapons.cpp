@@ -1146,8 +1146,8 @@ int BG_GetMaxAmmo ( const playerState_t* ps, int ammoIndex )
 		return 0;
 	}
 
-	int ammo;
-	for ( int weapon = WP_KNIFE, ammo = 0; weapon < WP_NUM_WEAPONS; weapon ++ )
+	int ammo = 0;
+	for ( int weapon = WP_KNIFE; weapon < WP_NUM_WEAPONS; weapon ++ )
 	{
 		if ( !(ps->stats[STAT_WEAPONS] & (1<<weapon)) )
 		{

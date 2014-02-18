@@ -853,7 +853,7 @@ returns the first identity which matches the given team name
 TIdentity* BG_FindTeamIdentity ( const char* teamName, int index )
 {
 	TIdentity* idents[MAX_TEAM_IDENTS];
-	int		   count;
+	int		   count = 0;
 
 	// Convienience
 	if ( !teamName )
@@ -862,7 +862,7 @@ TIdentity* BG_FindTeamIdentity ( const char* teamName, int index )
 	}
 
 	// Linear search through all of the parsed identities
-	for (int i = 0, count = 0; i < bg_identityCount && count < MAX_TEAM_IDENTS; i ++ )
+	for (int i = 0; i < bg_identityCount && count < MAX_TEAM_IDENTS; i ++ )
 	{
 		if (strcmp(teamName, bg_identities[i].mTeam) == 0)
 		{
@@ -1112,7 +1112,7 @@ void BG_PlayerAngles (
 {
 	float		dest;
 	static	int	movementOffsets[8] = { 0, 22, 45, -22, 0, 22, -45, -22 };
-	float		speed;
+	double		speed;
 	int			dir;
 	vec3_t		velocity;
 
@@ -1582,7 +1582,7 @@ bool BG_ParseOutfittingTemplate ( const char* fileName, goutfitting_t* outfittin
 		{
 			gitem_t*	item;
 			int			i;
-
+			char temp[MAX_OUTFITTING_NAME];
 			trap_GPV_GetName ( list, temp );
 
 			// Lookup the weapon number

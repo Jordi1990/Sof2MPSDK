@@ -1760,8 +1760,9 @@ TNoteTrack *BG_GetWeaponNote( playerState_t* ps, int weapon, int anim, int animC
 		return 0;
 	}
 	TNoteTrack *note;
+	int n;
 	// Find the callback for the given step
-	for ( note = aIW->mNoteTracks[ps->weaponAnimIdChoice], int n=0; note && n < callbackStep; note = note->mNext, n++ )
+	for ( note = aIW->mNoteTracks[ps->weaponAnimIdChoice], n=0; note && n < callbackStep; note = note->mNext, n++ )
 	{
 		// Do nothing, loop does it all
 	}
