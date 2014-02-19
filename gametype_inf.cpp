@@ -65,3 +65,15 @@ bool Gametype_inf::onItemTouch(gitem_t *item, gclient_s *other){
 	else
 		return false;
 }
+
+void Gametype_inf::update(){
+	Gametype::defaultUpdate();
+}
+
+void Gametype_inf::onTeamEliminated(team_t team){
+	
+}
+
+void Gametype_inf::onGametimeExpired(){
+
+}

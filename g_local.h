@@ -749,7 +749,6 @@ void		SetLeader							( int team, int client );
 void		G_RunThink							( gentity_t *ent );
 void 	G_LogPrintf							( const char *fmt, ... );
 void		SendScoreboardMessageToAllClients	( void );
-void		CheckGametype						( void );
 
 //
 // g_client.c
@@ -1010,7 +1009,7 @@ const char	*trap_VM_LocalStringAlloc ( const char *source );
 void G_UpdateClientAntiLag	( gentity_t* ent );
 void G_UndoAntiLag			( void );
 void G_ApplyAntiLag			( gentity_t* ref, bool enlargeHitBox );
-
+void G_RespawnClients(bool force, team_t team);
 #include "gametype.h"
 #include "gametype_inf.h"
 

@@ -1146,7 +1146,7 @@ void ClientBegin( int clientNum )
 	// Run a gametype check just in case the game hasnt started yet
 	if ( !level.gametypeStartTime )
 	{
-		CheckGametype ( );
+		gtCore->update();
 	}
 
 	G_InitGentity( ent );

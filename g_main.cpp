@@ -607,7 +607,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
 	Com_Printf ("-----------------------------------\n");
 
-	if (g_gametype.string == "inf")
+	if (strstr(g_gametype.string, "inf"))
 		gtCore = new Gametype_inf();
 	else
 		Com_Error(ERR_FATAL, "Unsupported gametype: %s\n", g_gametype.string);
@@ -1752,7 +1752,7 @@ void G_RunFrame( int levelTime )
 	CheckExitRules();
 
 	// Update gametype stuff
-	CheckGametype ();		
+	gtCore->update();
 
 	// cancel vote if timed out
 	CheckVote();
