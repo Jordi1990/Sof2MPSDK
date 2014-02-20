@@ -522,7 +522,7 @@ gentity_t *G_DropItem( gentity_t *ent, gitem_t *item, float angle )
 
 	if ( item->giType == IT_GAMETYPE )
 	{
-		//trap_GT_SendEvent ( GTEV_ITEM_DROPPED, level.time, item->quantity, ent->s.number, 0, 0, 0 );
+		gtCore->onItemDropped(ent);
 	}
 
 	return dropped;

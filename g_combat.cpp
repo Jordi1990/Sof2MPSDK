@@ -96,7 +96,7 @@ void TossClientItems( gentity_t *self )
 
 		if ( self->enemy && self->enemy->client && !OnSameTeam ( self->enemy, self ) )
 		{
-			//trap_GT_SendEvent ( GTEV_ITEM_DEFEND, level.time, item->quantity, self->enemy->s.clientNum, self->enemy->client->sess.team, 0, 0  );
+			gtCore->onItemDefend(self);
 		}
 	}
 
@@ -361,12 +361,15 @@ void player_die(
 
 			// Let the gametype handle the problem, if it doenst handle it and return 1 then 
 			// just reset the gametype item
-			//if ( !trap_GT_SendEvent ( GTEV_ITEM_STUCK, level.time, item->quantity, 0, 0, 0, 0 ) )
-			//{
-			//	G_ResetGametypeItem ( item );
-			//}
+			gtCore->onItemStuck(item);
 		}
 	}
+
+	// Henk 01/04/10 -> Hp/armor message if you are killed
+	if (attacker->client && self->client && attacker->s.number != self->s.number){ // if the attacker and target are both clients
+		trap_SendServerCommand(self->s.number, va("print \"^3[Info] ^7%s ^7had ^3%i ^7health and ^3%i ^7armor left.\n\"", attacker->client->pers.netname.c_str(), attacker->health, attacker->client->ps.stats[STAT_ARMOR]));
+	}
+	// End
 
 	Cmd_Score_f( self );
 

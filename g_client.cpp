@@ -1,7 +1,6 @@
 // Copyright (C) 2001-2002 Raven Software
 //
 #include "g_local.h"
-#include <boost/algorithm/string/replace.hpp>
 // g_client.c -- client functions that don't happen every frame
 
 static vec3_t	playerMins = {-15, -15, -46};
@@ -879,20 +878,6 @@ void G_UpdateOutfitting ( int clientNum )
 	// the backpack code
 	client->ps.stats[STAT_OUTFIT_GRENADE] = bg_itemlist[bg_outfittingGroups[OUTFITTING_GROUP_GRENADE][client->pers.outfitting.items[OUTFITTING_GROUP_GRENADE]]].giTag;
 }
-
-string parseName(const string &name1)
-{
-	string name = string(name1);
-	boost::replace_all(name, "^^", "");// replace double color tags
-	boost::replace_all(name, "  ", "");// remove double spaces
-	if (name.back() == ' ' || name.back() == '\t')
-		name.pop_back(); // delete last whitespace
-	// define a max length
-	if (name.length() > 128)
-		throw "parseName max length exceeded";
-	return name;
-}
-
 /*
 ===========
 ClientUserInfoChanged
@@ -924,13 +909,8 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 
 	oldname = client->pers.netname;
 
-	// set name
-	try{
-		client->pers.netname = parseName(userInfo->name);
-	}
-	catch (const char *){
-		client->pers.netname = "Unnamed Player";
-	}
+	//set name
+	client->pers.netname = userInfo->name;
 
 	if ( client->sess.team == TEAM_SPECTATOR ) 
 	{
@@ -1007,7 +987,7 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 			}
 			else
 			{
-				trap_SendServerCommand( -1, va("print \"%s renamed to %s\n\"", oldname.c_str(), client->pers.netname.c_str()) );
+				trap_SendServerCommand( -1, va("print \"%s ^7renamed to %s\n\"", oldname.c_str(), client->pers.netname.c_str()) );
 				client->pers.netnameTime = level.time;
 			}
 		}

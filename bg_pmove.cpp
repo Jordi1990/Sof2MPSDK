@@ -1107,7 +1107,7 @@ static void PM_CrashLand( int impactMaterial, vec3_t impactNormal )
 PM_CorrectAllSolid
 =============
 */
-static int PM_CorrectAllSolid( trace_t *trace ) 
+static bool PM_CorrectAllSolid( trace_t *trace ) 
 {
 	vec3_t		point;
 
@@ -3354,8 +3354,6 @@ are being updated isntead of a full move
 */
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd ) 
 {
-	short	temp;
-	int		i;
 	vec3_t	kickAngles;
 
 	if ( ps->pm_type == PM_INTERMISSION) 
@@ -3373,9 +3371,9 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
 	kickAngles[YAW]   = kickAngles[ROLL] = 0;
 
 	// circularly clamp the angles with deltas
-	for (i=0 ; i<3 ; i++) 
+	for (int i=0 ; i<3 ; i++) 
 	{
-		temp = cmd->angles[i] + ps->delta_angles[i] - ANGLE2SHORT(kickAngles[i]);
+		short temp = cmd->angles[i] + ps->delta_angles[i] - ANGLE2SHORT(kickAngles[i]);
 		if ( i == PITCH ) 
 		{
 			// don't let the player look up or down more than 90 degrees

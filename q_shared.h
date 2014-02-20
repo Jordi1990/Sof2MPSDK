@@ -3,6 +3,8 @@
 #ifndef __Q_SHARED_H
 #define __Q_SHARED_H
 
+#include "version.h"
+
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 #if (defined _MSC_VER)

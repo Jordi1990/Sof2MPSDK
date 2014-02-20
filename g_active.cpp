@@ -763,7 +763,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 StuckInOtherClient
 ==============
 */
-static int StuckInOtherClient(gentity_t *ent) 
+static bool StuckInOtherClient(gentity_t *ent) 
 {
 	gentity_t	*ent2;
 

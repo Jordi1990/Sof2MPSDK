@@ -1010,6 +1010,7 @@ void G_UpdateClientAntiLag	( gentity_t* ent );
 void G_UndoAntiLag			( void );
 void G_ApplyAntiLag			( gentity_t* ref, bool enlargeHitBox );
 void G_RespawnClients(bool force, team_t team);
+void gametype_trigger_touch(gentity_t *self, gentity_t *other, trace_t *trace);
 #include "gametype.h"
 #include "gametype_inf.h"
 

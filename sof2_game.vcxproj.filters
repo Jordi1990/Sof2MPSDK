@@ -158,6 +158,9 @@
     <ClInclude Include="userinfo.h">
       <Filter>Header Files\classes</Filter>
     </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="SoF2_game.def">

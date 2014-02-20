@@ -10,5 +10,8 @@ public:
 	void update();
 	void onTeamEliminated(team_t team);
 	void onGametimeExpired();
+	void onItemDropped(gentity_t *ent);
+	bool onTriggerTouch(gentity_t *trigger, gentity_t *other);
+	void onItemDefend(gentity_t *ent);
 };
 #endif

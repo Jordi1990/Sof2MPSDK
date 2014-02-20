@@ -1,4 +1,5 @@
 #include "g_local.h"
+#include <boost/algorithm/string/replace.hpp>
 
 void Tokenize(const string& str,
 	vector<string>& tokens,
@@ -12,7 +13,7 @@ userinfo::userinfo(int id){
 	vector<string> output;
 	Tokenize(buf, output, "\\");
 	for (unsigned int i = 0; i < output.size() - 1; i += 2){
-		this->parseValue(output[i], output[i + 1]);
+		this->parseValue(output[i], output[i + 1], id);
 	}
 }
 
@@ -21,7 +22,33 @@ void userinfo::setIdentity(int id, string identity){
 	//trap_SetUserinfo(id, "");
 }
 
-void userinfo::parseValue(const string &tag, const string &value){
+string parseName(const string &name1)
+{
+	string name = string(name1);
+	boost::replace_all(name, "^^", "");// replace double color tags
+	boost::replace_all(name, "  ", "");// remove double spaces
+	try{
+		if (name.back() == ' ' || name.back() == '\t')
+			name.pop_back(); // delete last whitespace
+	}
+	catch (...){
+		throw "Error while parsing name";
+	}
+	// after a ^3 there always has to be another character
+	for (unsigned int i = 0; i<name.length()-1; ++i){
+		if (name[i] == '^' && !(name[i+1] >= 33 && name[i+1] < 128))
+			throw "Invalid color specified";
+	}
+	// define a max length
+	if (name.length() > 64)
+		throw "Maximum name length exceeded";
+	else if (name.length() < 2)
+		throw "Please use a name with more than 1 character";
+	return name;
+}
+
+
+void userinfo::parseValue(const string &tag, const string &value, int clientId){
 	try{
 		if (tag == "ip")
 			this->ip = value;
@@ -31,8 +58,16 @@ void userinfo::parseValue(const string &tag, const string &value){
 			this->qport = boost::lexical_cast<int>(value);
 		else if (tag == "rate")
 			this->rate = boost::lexical_cast<int>(value);
-		else if (tag == "name")
-			this->name = value;
+		else if (tag == "name"){
+			// set name
+			try{
+				this->name = parseName(value);
+			}
+			catch (const char *err){
+				this->name = "Unnamed Player";
+				trap_SendServerCommand(clientId, va("print \"^3[Rename failed] ^7%s.\n\"", err));
+			}
+		}
 		else if (tag == "snaps")
 			this->snaps = boost::lexical_cast<int>(value);
 		else if (tag == "identity")

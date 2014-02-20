@@ -10,6 +10,9 @@ public:
 	virtual void update() = 0;
 	virtual void onTeamEliminated(team_t team) = 0;
 	virtual void onGametimeExpired() = 0;
+	virtual void onItemDropped(gentity_t *ent) = 0;
+	virtual bool onTriggerTouch(gentity_t *trigger, gentity_t *other) = 0;
+	virtual void onItemDefend(gentity_t *ent) = 0;
 
 	void defaultUpdate(){
 		// If the level is over then forget checking gametype stuff.

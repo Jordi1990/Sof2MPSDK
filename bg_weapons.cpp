@@ -447,7 +447,7 @@ static	bool BG_OpenWeaponFrames(const char *name)
 {
 	weaponFrames[numWeaponFiles] = trap_GP_ParseFile((char *)name, true, false);
 
-	if (!weaponFrames)
+	if (!weaponFrames[numWeaponFiles])
 	{
 		return false;
 	}

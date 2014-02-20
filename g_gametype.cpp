@@ -83,10 +83,8 @@ void gametype_trigger_touch ( gentity_t *self, gentity_t *other, trace_t *trace 
 		return;
 	}
 
-	//if ( trap_GT_SendEvent ( GTEV_TRIGGER_TOUCHED, level.time, self->health, other->s.number, other->client->sess.team, 0, 0 ) )
-	//{
-	//	G_UseTargets ( self, other );
-	//}
+	if (gtCore->onTriggerTouch(self, other))
+		G_UseTargets(self, other);
 }
 
 /*QUAKED gametype_trigger (0 0 .8) ? 
@@ -591,10 +589,8 @@ void G_DropGametypeItems(gentity_t* self, int delayPickup)
 		self->client->ps.stats[STAT_GAMETYPE_ITEMS] &= ~(1 << i);
 
 		if (self->enemy && self->enemy->client && !OnSameTeam(self->enemy, self))
-		{	//05.07.05 - 07:15pm
-			//trap_GT_SendEvent ( GTEV_ITEM_DEFEND, level.time, level.gametypeItems[item->giTag].id, self->enemy->s.clientNum, self->enemy->client->sess.team, 0, 0  );
-			//trap_GT_SendEvent(GTEV_ITEM_DEFEND, level.time, item->quantity, self->enemy->s.clientNum, self->enemy->client->sess.team, 0, 0);
-			//End  - 05.07.05 - 07:15pm
+		{
+			gtCore->onItemDefend(self);
 		}
 	}
 

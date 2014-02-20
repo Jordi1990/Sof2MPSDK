@@ -97,6 +97,11 @@ static cvarTable_t gameCvarTable[] =
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, 0.0, 0.0, 0, false },
 
+	{ NULL, "^3Mod Name", MOD_STRING, CVAR_SERVERINFO | CVAR_ROM, 0.0, 0.0, 0, qfalse },
+	{ NULL, "^3Mod Version", VERSION_STRING, CVAR_SERVERINFO | CVAR_ROM, 0.0, 0.0, 0, qfalse },
+	{ NULL, "^3Mod URL", "1fx.uk.to", CVAR_SERVERINFO | CVAR_ROM, 0.0, 0.0, 0, qfalse },
+	{ NULL, "modname", "RPM 2 k 3 v1.71 ^_- ^31fx.uk.to", CVAR_SERVERINFO | CVAR_ROM, 0.0, 0.0, 0, qfalse },
+
 	// noset vars
 	{ NULL, "gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_ROM, 0.0, 0.0, 0, false  },
 	{ NULL, "gamedate", __DATE__ , CVAR_ROM, 0.0, 0.0, 0, false  },
@@ -607,10 +612,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
 	Com_Printf ("-----------------------------------\n");
 
+	Com_Printf("Initializing gametype...\n");
+	int start = level.time;
 	if (strstr(g_gametype.string, "inf"))
 		gtCore = new Gametype_inf();
 	else
 		Com_Error(ERR_FATAL, "Unsupported gametype: %s\n", g_gametype.string);
+	Com_Printf("Gametype %s initialized in %dms\n", g_gametype.string, level.time - start);
 
 	if( trap_Cvar_VariableIntegerValue( "com_buildScript" ) ) 
 	{
@@ -1120,7 +1128,7 @@ void  G_LogPrintf( const char *fmt, ... ) {
 	tens = sec / 10;
 	sec -= tens * 10;
 
-	sprintf_s( string, sizeof(string), "%fi:%i%i ", min, tens, sec );
+	sprintf_s( string, sizeof(string), "%i:%i%i ", min, tens, sec );
 
 	va_start( argptr, fmt );
 	vsprintf( string +8 , fmt,argptr );
@@ -1192,7 +1200,7 @@ void LogExit( const char *string )
 
 		ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 
-		G_LogPrintf( "score: %i  ping: %i  client: %i %s\n", cl->sess.score, ping, level.sortedClients[i],	cl->pers.netname );
+		G_LogPrintf( "score: %i  ping: %i  client: %i %s\n", cl->sess.score, ping, level.sortedClients[i],	cl->pers.netname.c_str() );
 	}
 }
 
