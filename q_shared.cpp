@@ -229,50 +229,6 @@ char *COM_ParseExt( const char **data_p, bool allowLineBreaks )
 	return com_token;
 }
 
-int Q_PrintStrlen( const char *string ) {
-	int			len;
-	const char	*p;
-
-	if( !string ) {
-		return 0;
-	}
-
-	len = 0;
-	p = string;
-	while( *p ) {
-		if( Q_IsColorString( p ) ) {
-			p += 2;
-			continue;
-		}
-		p++;
-		len++;
-	}
-
-	return len;
-}
-
-
-char *Q_CleanStr( char *string ) {
-	char*	d;
-	char*	s;
-	int		c;
-
-	s = string;
-	d = string;
-	while ((c = *s) != 0 ) {
-		if ( Q_IsColorString( s ) ) {
-			s++;
-		}		
-		else if ( c >= 0x20 && c <= 0x7E ) {
-			*d++ = c;
-		}
-		s++;
-	}
-	*d = '\0';
-
-	return string;
-}
-
 /*
 ============
 va
@@ -282,9 +238,9 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
-char	*  va( char *format, ... ) {
+char *va( char *format, ... ) {
 	va_list		argptr;
-	static char		string[2][32000];	// in case va is called by nested functions
+	static char		string[2][4096];	// in case va is called by nested functions
 	static int		index = 0;
 	char	*buf;
 
@@ -411,82 +367,6 @@ void Info_RemoveKey( char *s, const char *key ) {
 			return;
 	}
 
-}
-
-/*
-===================
-Info_RemoveKey_Big
-===================
-*/
-void Info_RemoveKey_Big( char *s, const char *key ) {
-	char	*start;
-	char	pkey[BIG_INFO_KEY];
-	char	value[BIG_INFO_VALUE];
-	char	*o;
-
-	if ( strlen( s ) >= BIG_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_RemoveKey_Big: oversize infostring" );
-	}
-
-	if (strchr (key, '\\')) {
-		return;
-	}
-
-	while (1)
-	{
-		start = s;
-		if (*s == '\\')
-			s++;
-		o = pkey;
-		while (*s != '\\')
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-		s++;
-
-		o = value;
-		while (*s != '\\' && *s)
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-
-		if (!strcmp (key, pkey) )
-		{
-			strcpy (start, s);	// remove this part
-			return;
-		}
-
-		if (!*s)
-			return;
-	}
-
-}
-
-
-
-
-/*
-==================
-Info_Validate
-
-Some characters are illegal in info strings because they
-can mess up the server's parsing
-==================
-*/
-bool Info_Validate( const char *s ) {
-	if ( strchr( s, '\"' ) ) {
-		return false;
-	}
-	if ( strchr( s, ';' ) ) {
-		return false;
-	}
-	return true;
 }
 
 /*

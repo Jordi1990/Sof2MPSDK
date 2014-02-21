@@ -9,7 +9,6 @@
 #define __BG_PUBLIC_H__
 
 #include "bg_weapons.h"
-//#include "../../ui/menudef.h"
 #include "inv.h"
 
 #define	DEFAULT_GRAVITY		800
@@ -648,7 +647,6 @@ extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
 
 gitem_t*	BG_FindItem				( const char *pickupName );
-gitem_t*	BG_FindClassnameItem	( const char *classname );
 gitem_t*	BG_FindWeaponItem		( weapon_t weapon );
 gitem_t*	BG_FindGametypeItem		( int index );
 gitem_t*	BG_FindGametypeItemByID ( int itemid );
@@ -724,7 +722,6 @@ float		BG_CalculateLeanOffset ( int leanTime );
 bool	BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 
 TAnimWeapon *BG_GetWeaponAnim(int weaponAction,playerState_t *ps,int *animIndex);
-TNoteTrack *BG_GetWeaponNote( playerState_t* ps, int weapon, int anim, int animChoice, int callbackStep );
 
 typedef enum
 {
@@ -786,7 +783,7 @@ typedef enum
  *
  *******************************************************************************/
 
-#define MAX_GAMETYPES			128
+#define MAX_GAMETYPES			10
 
 typedef enum
 {
@@ -943,16 +940,12 @@ extern stringID_table_t		bg_animTable [MAX_ANIMATIONS+1];
 TIdentity*			BG_FindIdentity						( const char *identityName );
 TIdentity*			BG_FindTeamIdentity					( const char *identityName, int index );
 TCharacterTemplate*	BG_FindCharacterTemplate			( const char *name );
-const char*			BG_GetModelSound					( const char *identityName, const char *SoundGroup, int index );
 bool			BG_ParseNPCFiles					( void );
 int					BG_ParseSkin						( const char* filename, char* pairs, int pairsSize ); 
 
 bool			BG_IsWeaponAvailableForOutfitting	( weapon_t weapon, int level );
 void				BG_SetAvailableOutfitting			( const char* available );
 void				BG_DecompressOutfitting				( const char* compressed, goutfitting_t* outfitting );
-void				BG_CompressOutfitting				( goutfitting_t* outfitting, char* compressed, int size );
-int					BG_ParseOutfittingTemplates			( bool force );
-int					BG_FindOutfitting					( goutfitting_t* outfitting);
 														
 /*******************************************************************************
  *
@@ -966,21 +959,15 @@ typedef	void	*TGPGroup;
 typedef	void	*TGPValue;
 
 // CGenericParser2 (void *) routines
-TGenericParser2		trap_GP_Parse					( char **dataPtr, bool cleanFirst, bool writeable );
 TGenericParser2		trap_GP_ParseFile				( char *fileName, bool cleanFirst, bool writeable );
-void				trap_GP_Clean					( TGenericParser2 GP2 );
 void				trap_GP_Delete					( TGenericParser2 *GP2 );
 TGPGroup			trap_GP_GetBaseParseGroup		( TGenericParser2 GP2 );
 
 // CGPGroup (void *) routines
 bool			trap_GPG_GetName				( TGPGroup GPG, char *Value);
 TGPGroup			trap_GPG_GetNext				( TGPGroup GPG);
-TGPGroup			trap_GPG_GetInOrderNext			( TGPGroup GPG);
-TGPGroup			trap_GPG_GetInOrderPrevious		( TGPGroup GPG);
 TGPValue			trap_GPG_GetPairs				( TGPGroup GPG);
-TGPGroup			trap_GPG_GetInOrderPairs		( TGPGroup GPG);
 TGPGroup			trap_GPG_GetSubGroups			( TGPGroup GPG);
-TGPGroup			trap_GPG_GetInOrderSubGroups	( TGPGroup GPG);
 TGPGroup			trap_GPG_FindSubGroup			( TGPGroup GPG, const char *name);
 TGPValue			trap_GPG_FindPair				( TGPGroup GPG, const char *key);
 bool			trap_GPG_FindPairValue			( TGPGroup GPG, const char *key, const char *defaultVal, char *Value);
@@ -988,8 +975,6 @@ bool			trap_GPG_FindPairValue			( TGPGroup GPG, const char *key, const char *def
 // CGPValue (void *) routines
 bool			trap_GPV_GetName				( TGPValue GPV, char *Value);
 TGPValue			trap_GPV_GetNext				( TGPValue GPV);
-TGPValue			trap_GPV_GetInOrderNext			( TGPValue GPV );
-TGPValue			trap_GPV_GetInOrderPrevious		( TGPValue GPV );
 bool			trap_GPV_IsList					( TGPValue GPV );
 bool			trap_GPV_GetTopValue			( TGPValue GPV, char *Value );
 TGPValue			trap_GPV_GetList				( TGPValue GPV );

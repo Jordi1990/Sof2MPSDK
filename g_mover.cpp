@@ -3,16 +3,6 @@
 
 #include "g_local.h"
 
-
-
-/*
-===============================================================================
-
-PUSHMOVE
-
-===============================================================================
-*/
-
 void MatchTeam( gentity_t *teamLeader, int moverState, int time );
 
 typedef struct {
@@ -21,6 +11,7 @@ typedef struct {
 	vec3_t	angles;
 	float	deltayaw;
 } pushed_t;
+
 pushed_t	pushed[MAX_GENTITIES], *pushed_p;
 
 
@@ -67,9 +58,8 @@ G_TransposeMatrix
 ================
 */
 void G_TransposeMatrix(vec3_t matrix[3], vec3_t transpose[3]) {
-	int i, j;
-	for (i = 0; i < 3; i++) {
-		for (j = 0; j < 3; j++) {
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
 			transpose[i][j] = matrix[j][i];
 		}
 	}
@@ -212,8 +202,6 @@ If false is returned, *obstacle will be the blocking entity
 ============
 */
 bool G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **obstacle ) {
-	int			i, e;
-	gentity_t	*check;
 	vec3_t		mins, maxs;
 	pushed_t	*p;
 	int			entityList[MAX_GENTITIES];
@@ -229,7 +217,7 @@ bool G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **obst
 		|| amove[0] || amove[1] || amove[2] ) 
 	{
 		float		radius;
-
+		int i;
 		radius = RadiusFromBounds( pusher->r.mins, pusher->r.maxs );
 		for ( i = 0 ; i < 3 ; i++ ) 
 		{
@@ -260,14 +248,14 @@ bool G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **obst
 	} 
 	else 
 	{
-		for (i=0 ; i<3 ; i++) {
+		for (int i=0 ; i<3 ; i++) {
 			mins[i] = pusher->r.absmin[i] + move[i];
 			maxs[i] = pusher->r.absmax[i] + move[i];
 		}
 
 		VectorCopy( pusher->r.absmin, totalMins );
 		VectorCopy( pusher->r.absmax, totalMaxs );
-		for (i=0 ; i<3 ; i++) {
+		for (int i=0 ; i<3 ; i++) {
 			if ( move[i] > 0 ) {
 				totalMaxs[i] += move[i];
 			} else {
@@ -287,8 +275,8 @@ bool G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **obst
 	trap_LinkEntity( pusher );
 
 	// see if any solid entities are inside the final position
-	for ( e = 0 ; e < listedEntities ; e++ ) {
-		check = &g_entities[ entityList[ e ] ];
+	for (int e = 0 ; e < listedEntities ; e++ ) {
+		gentity_t *check = &g_entities[ entityList[ e ] ];
 
 		// Dont bother with corpses for now
 		if ( check->s.eType == ET_BODY )
@@ -442,16 +430,6 @@ void G_RunMover( gentity_t *ent ) {
 	// check think function
 	G_RunThink( ent );
 }
-
-/*
-============================================================================
-
-GENERAL MOVERS
-
-Doors, plats, and buttons are all binary (two position) movers
-Pos1 is "at rest", pos2 is "activated"
-============================================================================
-*/
 
 /*
 ===============
@@ -722,18 +700,6 @@ void InitMover( gentity_t *ent ) {
 	}
 }
 
-
-/*
-===============================================================================
-
-DOOR
-
-A use can be triggered either by a touch function, by being shot, or by being
-targeted by another entity.
-
-===============================================================================
-*/
-
 /*
 ================
 Blocked_Door
@@ -776,7 +742,7 @@ Touch_DoorTriggerSpectator
 ================
 */
 static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_t *trace ) {
-	int i, axis;
+	int axis;
 	vec3_t origin, dir, angles;
 
 	axis = ent->count;
@@ -790,7 +756,7 @@ static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_
 		origin[axis] = ent->r.absmax[axis] + 10;
 		dir[axis] = 1;
 	}
-	for (i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (i == axis) continue;
 		origin[i] = (ent->r.absmin[i] + ent->r.absmax[i]) * 0.5;
 	}
@@ -832,7 +798,7 @@ void Think_SpawnNewDoorTrigger( gentity_t *ent )
 {
 	gentity_t	*other;
 	vec3_t		mins, maxs;
-	int			i, best;
+	int			best;
 
 	// set all of the slaves as shootable
 	for ( other = ent ; other ; other = other->teamchain ) {
@@ -850,7 +816,7 @@ void Think_SpawnNewDoorTrigger( gentity_t *ent )
 
 	// find the thinnest axis, which will be the one we expand
 	best = 0;
-	for ( i = 1 ; i < 3 ; i++ ) {
+	for (int i = 1 ; i < 3 ; i++ ) {
 		if ( maxs[i] - mins[i] < maxs[best] - mins[best] ) {
 			best = i;
 		}
@@ -961,14 +927,6 @@ void SP_func_door (gentity_t *ent) {
 
 
 }
-
-/*
-===============================================================================
-
-PLAT
-
-===============================================================================
-*/
 
 /*
 ==============
@@ -1103,15 +1061,6 @@ void SP_func_plat (gentity_t *ent) {
 	}
 }
 
-
-/*
-===============================================================================
-
-BUTTON
-
-===============================================================================
-*/
-
 /*
 ==============
 Touch_Button
@@ -1184,19 +1133,6 @@ void SP_func_button( gentity_t *ent ) {
 	InitMover( ent );
 }
 
-
-
-/*
-===============================================================================
-
-TRAIN
-
-===============================================================================
-*/
-
-
-#define TRAIN_START_ON		1
-#define TRAIN_TOGGLE		2
 #define TRAIN_BLOCK_STOPS	4
 
 /*
@@ -1379,15 +1315,6 @@ void SP_func_train (gentity_t *self) {
 	self->think = Think_SetupTrainTargets;
 }
 
-/*
-===============================================================================
-
-STATIC
-
-===============================================================================
-*/
-
-
 /*QUAKED func_static (0 .5 .8) ?
 A bmodel that just sits there, doing nothing.  Can be used for conditional walls and models.
 "model2"	.md3 model to also draw
@@ -1406,16 +1333,6 @@ void SP_func_static( gentity_t *ent ) {
 		ent->s.eFlags = EF_PERMANENT;
 	}
 }
-
-
-/*
-===============================================================================
-
-ROTATING
-
-===============================================================================
-*/
-
 
 /*QUAKED func_rotating (0 .5 .8) ? START_ON - X_AXIS Y_AXIS
 You need to have an origin brush as part of this entity.  The center of that brush will be
@@ -1455,16 +1372,6 @@ void SP_func_rotating (gentity_t *ent) {
 	trap_LinkEntity( ent );
 }
 
-
-/*
-===============================================================================
-
-BOBBING
-
-===============================================================================
-*/
-
-
 /*QUAKED func_bobbing (0 .5 .8) ? X_AXIS Y_AXIS
 Normally bobs on the Z axis
 "model2"	.md3 model to also draw
@@ -1501,15 +1408,6 @@ void SP_func_bobbing (gentity_t *ent) {
 		ent->s.pos.trDelta[2] = height;
 	}
 }
-
-/*
-===============================================================================
-
-PENDULUM
-
-===============================================================================
-*/
-
 
 /*QUAKED func_pendulum (0 .5 .8) ?
 You need to have an origin brush as part of this entity.
@@ -1554,14 +1452,6 @@ void SP_func_pendulum(gentity_t *ent) {
 	ent->s.apos.trType = TR_SINE;
 	ent->s.apos.trDelta[2] = speed;
 }
-
-/*
-===============================================================================
-
-GLASS
-
-===============================================================================
-*/
 
 void G_ResetGlass ( void )
 {

@@ -5,14 +5,12 @@
 
 bool G_SpawnString( const char *key, const char *defaultString, char **out ) 
 {
-	int		i;
-
 	if ( !level.spawning ) 
 	{
 		*out = (char *)defaultString;
 	}
 
-	for ( i = 0 ; i < level.numSpawnVars ; i++ ) 
+	for (int i = 0 ; i < level.numSpawnVars ; i++ ) 
 	{
 		if ( !strcmp( key, level.spawnVars[i][0] ) ) 
 		{
@@ -44,18 +42,6 @@ bool G_SpawnInt( const char *key, const char *defaultString, int *out )
 	*out = atoi( s );
 	return present;
 }
-
-bool G_SpawnVector( const char *key, const char *defaultString, float *out ) 
-{
-	char		*s;
-	bool	present;
-
-	present = G_SpawnString( key, defaultString, &s );
-	sscanf( s, "%f %f %f", &out[0], &out[1], &out[2] );
-	return present;
-}
-
-
 
 //
 // fields are needed for spawning from the entity string
@@ -119,7 +105,6 @@ typedef struct
 } spawn_t;
 
 void SP_info_player_deathmatch		(gentity_t *ent);
-void SP_info_player_intermission	(gentity_t *ent);
 
 void SP_func_plat					(gentity_t *ent);
 void SP_func_static					(gentity_t *ent);
@@ -154,7 +139,6 @@ void SP_target_push					(gentity_t *ent);
 void SP_target_effect				(gentity_t *ent);
 
 void SP_info_notnull				(gentity_t *ent);
-void SP_info_camp					(gentity_t *ent);
 void SP_path_corner					(gentity_t *ent);
 
 void SP_misc_teleporter_dest		(gentity_t *ent);
@@ -179,7 +163,6 @@ spawn_t	spawns[] =
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
 	{"info_player_deathmatch",		SP_info_player_deathmatch},
-	{"info_player_intermission",	SP_info_player_intermission},
 	{"info_notnull",				SP_info_notnull},		// use target_position instead
 
 	{"func_plat",					SP_func_plat},
@@ -357,7 +340,7 @@ so message texts can be multi-line
 char *G_NewString( const char *string ) 
 {
 	char	*newb, *new_p;
-	int		i,l;
+	int		l;
 	
 	l = strlen(string) + 1;
 
@@ -366,7 +349,7 @@ char *G_NewString( const char *string )
 	new_p = newb;
 
 	// turn \n into a real linefeed
-	for ( i=0 ; i< l ; i++ ) {
+	for (int i=0 ; i< l ; i++ ) {
 		if (string[i] == '\\' && i < l-1) {
 			i++;
 			if (string[i] == 'n') {
@@ -442,7 +425,6 @@ level.spawnVars[], then call the class specfic spawn function
 */
 void G_SpawnGEntityFromSpawnVars( bool inSubBSP ) 
 {
-	int			i;
 	gentity_t	*ent;
 	char		*value;
 
@@ -459,8 +441,8 @@ void G_SpawnGEntityFromSpawnVars( bool inSubBSP )
 
 	// get the next free entity
 	ent = G_Spawn();
-
-	for ( i = 0 ; i < level.numSpawnVars ; i++ ) 
+	int i;
+	for (i = 0 ; i < level.numSpawnVars ; i++ ) 
 	{
 		G_ParseField( level.spawnVars[i][0], level.spawnVars[i][1], ent );
 	}
@@ -535,9 +517,7 @@ char *G_AddSpawnVarToken( const char *string )
 
 void AddSpawnField(char *field, char *value)
 {
-	int	i;
-
-	for(i=0;i<level.numSpawnVars;i++)
+	for(int i=0;i<level.numSpawnVars;i++)
 	{
 		if (strcmp(level.spawnVars[i][0], field) == 0)
 		{

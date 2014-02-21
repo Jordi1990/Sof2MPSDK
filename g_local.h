@@ -504,7 +504,6 @@ bool	G_SpawnString( const char *key, const char *defaultString, char **out );
 // spawn string returns a temporary reference, you must CopyString() if you want to keep it
 bool	G_SpawnFloat( const char *key, const char *defaultString, float *out );
 bool	G_SpawnInt( const char *key, const char *defaultString, int *out );
-bool	G_SpawnVector( const char *key, const char *defaultString, float *out );
 bool	G_ParseSpawnVars( bool inSubBSP );
 void		G_SpawnGEntityFromSpawnVars( bool inSubBSP );
 void		G_SpawnEntitiesFromString( bool inSubBSP );
@@ -531,24 +530,16 @@ bool	G_CanVoiceGlobal		( void );
 //
 // g_items.c
 //
-void ItemUse_Shield(gentity_t *ent);
-void ItemUse_Sentry(gentity_t *ent);
-void ItemUse_Seeker(gentity_t *ent);
-void ItemUse_MedPack(gentity_t *ent);
 
 void G_RunItem( gentity_t *ent );
 void RespawnItem( gentity_t *ent );
 
-void		PrecacheItem		( gitem_t *it );
 gentity_t*	G_DropItem			( gentity_t *ent, gitem_t *item, float angle );
-gentity_t*	G_LaunchItem		( gitem_t *item, vec3_t origin, vec3_t velocity );
 gentity_t*	G_DropWeapon		( gentity_t* ent, weapon_t weapon, int pickupDelay );
 
-void SetRespawn (gentity_t *ent, float delay);
 void G_SpawnItem (gentity_t *ent, gitem_t *item);
 void FinishSpawningItem( gentity_t *ent );
-void Think_Weapon (gentity_t *ent);
-int ArmorIndex (gentity_t *ent);
+
 void	Add_Ammo (gentity_t *ent, int weapon, int count);
 void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace);
 
@@ -563,40 +554,25 @@ int		G_ModelIndex		( char *name );
 int		G_SoundIndex		( char *name );
 int		G_AmbientSoundSetIndex( char *name ); 
 int		G_BSPIndex			( char *name );
-int		G_IconIndex			( char *name );
 int		G_EffectIndex		( char *name );
 
 void	G_TeamCommand( team_t team, char *cmd );
 void	G_KillBox (gentity_t *ent);
 gentity_t *G_Find (gentity_t *from, int fieldofs, const char *match);
-int		G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, bool takeDamage, gentity_t *ent_list[MAX_GENTITIES]);
 gentity_t *G_PickTarget (char *targetname);
 void	G_UseTargets (gentity_t *ent, gentity_t *activator);
 void	G_UseTargetsByName( const char* name, gentity_t *exclude, gentity_t *activator );
 void	G_SetMovedir ( vec3_t angles, vec3_t movedir);
-void	G_SetAngles( gentity_t *ent, vec3_t angles );
 
 void	G_InitGentity( gentity_t *e );
 gentity_t	*G_Spawn (void);
 gentity_t *G_TempEntity( vec3_t origin, int event );
 void	G_PlayEffect(int fxID, vec3_t org, vec3_t ang);
 void	G_Sound( gentity_t *ent, int channel, int soundIndex );
-void	G_SoundAtLoc( vec3_t loc, int channel, int soundIndex );
-void	G_EntitySound( gentity_t *ent, int channel, int soundIndex );
 void	G_FreeEntity( gentity_t *e );
-bool	G_EntitiesFree( void );
 
 void	G_TouchTriggers (gentity_t *ent);
-void	G_TouchSolids (gentity_t *ent);
 
-//
-// g_object.c
-//
-
-extern void G_RunObject			( gentity_t *ent );
-
-
-float	*tv (float x, float y, float z);
 char	*vtos( const vec3_t v );
 
 float vectoyaw( const vec3_t vec );
@@ -615,25 +591,12 @@ qhandle_t	trap_G2API_RegisterSkin			( const char *skinName, int numPairs, const 
 bool	trap_G2API_SetSkin				( void* ghoul2, int modelIndex, qhandle_t customSkin);
 bool	trap_G2API_GetAnimFileNameIndex ( void* ghoul2, qhandle_t modelIndex, const char* name );
 
-void		trap_G2_ListModelSurfaces(void *ghlInfo);
-void		trap_G2_ListModelBones(void *ghlInfo, int frame);
-int			trap_G2API_AddBolt(void *ghoul2, const int modelIndex, const char *boneName);
-bool	trap_G2API_RemoveBolt(void *ghlInfo, const int modelIndex, const int index);
-bool	trap_G2API_AttachG2Model(void *ghoul2From, int modelFrom, void *ghoul2To, int toBoltIndex, int toModel);
-void		trap_G2_SetGhoul2ModelIndexes(void *ghoul2, qhandle_t *modelList, qhandle_t *skinList);
-bool	trap_G2_HaveWeGhoul2Models(void *ghoul2);
 int			trap_G2API_InitGhoul2Model(void **ghoul2Ptr, const char *fileName, int modelIndex, qhandle_t customSkin,
 						  qhandle_t customShader, int modelFlags, int lodBias);
-
-int			trap_G2API_CopyGhoul2Instance(void *g2From, void *g2To, int modelIndex);
-int			trap_G2API_CopySpecificGhoul2Model(void *g2From, int modelFrom, void *g2To, int modelTo);
-void		trap_G2API_DuplicateGhoul2Instance(void *g2From, void **g2To);
-bool	trap_G2API_RemoveGhoul2Model(void **ghlInfo, int modelIndex);
 
 bool	trap_G2API_SetBoneAngles(void *ghoul2, int modelIndex, const char *boneName, const vec3_t angles, const int flags,
 								const int up, const int right, const int forward, qhandle_t *modelList,
 								int blendTime , int currentTime );
-char		*trap_G2API_GetGLAName(void *ghoul2, int modelIndex);
 bool	trap_G2API_SetBoneAnim(void *ghoul2, const int modelIndex, const char *boneName, const int startFrame, const int endFrame,
 							  const int flags, const float animSpeed, const int currentTime, const float setFrame , const int blendTime );
 
@@ -665,7 +628,6 @@ void		TossClientItems		( gentity_t *self );
 void		G_RunMissile		( gentity_t *ent );
 gentity_t*	G_CreateMissile		( vec3_t org, vec3_t dir, float vel, int life, gentity_t *owner, attackType_t attack );
 gentity_t*	G_CreateDamageArea	( vec3_t origin, gentity_t* attacker, float damage, float radius, int duration, int mod );
-void		G_BounceProjectile	( vec3_t start, vec3_t impact, vec3_t dir, vec3_t endout );
 void		G_ExplodeMissile	( gentity_t *ent );
 void		G_GrenadeThink		( gentity_t* ent );
 
@@ -700,15 +662,12 @@ void		G_InitHitModels					( void );
 //
 bool	G_IsClientSpectating			( gclient_t* client );
 bool	G_IsClientDead					( const gclient_t* client );
-void		G_ClientCleanName				( const char *in, char *out, int outSize, bool colors );
 int			TeamCount						( int ignoreClientNum, team_t team, int* alive );
 team_t		PickTeam						( int ignoreClientNum );
 void		SetClientViewAngle				( gentity_t *ent, vec3_t angle );
 void		CopyToBodyQue					( gentity_t *ent, int hitLocation, vec3_t hitDirection );
 void		respawn							( gentity_t *ent);
 void		BeginIntermission				( void);
-void		InitClientPersistant			( gclient_t *client);
-void		InitClientResp					( gclient_t *client);
 void		ClientSpawn						( gentity_t *ent );
 void		player_die						( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod, int hitLocation, vec3_t hitDir );
 void		G_InitBodyQueue					( void);
@@ -745,7 +704,6 @@ void		DeathmatchScoreboardMessage		( gentity_t *client );
 // g_main.c
 //
 void		FindIntermissionPoint				( void );
-void		SetLeader							( int team, int client );
 void		G_RunThink							( gentity_t *ent );
 void 	G_LogPrintf							( const char *fmt, ... );
 void		SendScoreboardMessageToAllClients	( void );
@@ -774,7 +732,6 @@ void G_RunClient			( gentity_t *ent );
 // g_team.c
 //
 bool OnSameTeam( gentity_t *ent1, gentity_t *ent2 );
-void Team_CheckDroppedItem( gentity_t *dropped );
 
 //
 // g_session.c
@@ -794,13 +751,9 @@ void G_LoadArenas ( void );
 //
 // g_gametype.c
 //
-gentity_t*	G_SelectGametypeSpawnPoint			( team_t team, vec3_t origin, vec3_t angles );
 gentity_t*	G_SpawnGametypeItem					( const char* pickup_name, bool dropped );
-gentity_t*	G_SelectRandomGametypeSpawnPoint	( team_t team );
 bool	G_ParseGametypeFile					( void );
-bool	G_ExecuteGametypeScript				( gentity_t* activator, const char* name );
 void		G_ResetGametype						( void );
-bool	G_CanGametypeTriggerBeUsed			( gentity_t* self, gentity_t* activator );
 void		G_ResetGametypeItem					( gitem_t* item );
 void		G_DropGametypeItems(gentity_t* self, int delayPickup);
 
@@ -931,71 +884,6 @@ void	trap_BotFreeMemoryGame(void *ptr);
 int		trap_DebugPolygonCreate(int color, int numPoints, vec3_t *points);
 void	trap_DebugPolygonDelete(int id);
 
-int		trap_AAS_BBoxAreas(vec3_t absmins, vec3_t absmaxs, int *areas, int maxareas);
-int		trap_AAS_AreaInfo( int areanum, void /* struct aas_areainfo_s */ *info );
-void	trap_AAS_EntityInfo(int entnum, void /* struct aas_entityinfo_s */ *info);
-
-int		trap_AAS_Initialized(void);
-void	trap_AAS_PresenceTypeBoundingBox(int presencetype, vec3_t mins, vec3_t maxs);
-float	trap_AAS_Time(void);
-
-int		trap_AAS_PointAreaNum(vec3_t point);
-int		trap_AAS_PointReachabilityAreaIndex(vec3_t point);
-int		trap_AAS_TraceAreas(vec3_t start, vec3_t end, int *areas, vec3_t *points, int maxareas);
-
-int		trap_AAS_PointContents(vec3_t point);
-int		trap_AAS_NextBSPEntity(int ent);
-int		trap_AAS_ValueForBSPEpairKey(int ent, char *key, char *value, int size);
-int		trap_AAS_VectorForBSPEpairKey(int ent, char *key, vec3_t v);
-int		trap_AAS_FloatForBSPEpairKey(int ent, char *key, float *value);
-int		trap_AAS_IntForBSPEpairKey(int ent, char *key, int *value);
-
-int		trap_AAS_AreaReachability(int areanum);
-
-int		trap_AAS_AreaTravelTimeToGoalArea(int areanum, vec3_t origin, int goalareanum, int travelflags);
-int		trap_AAS_EnableRoutingArea( int areanum, int enable );
-int		trap_AAS_PredictRoute(void /*struct aas_predictroute_s*/ *route, int areanum, vec3_t origin,
-							int goalareanum, int travelflags, int maxareas, int maxtime,
-							int stopevent, int stopcontents, int stoptfl, int stopareanum);
-
-int		trap_AAS_AlternativeRouteGoals(vec3_t start, int startareanum, vec3_t goal, int goalareanum, int travelflags,
-										void /*struct aas_altroutegoal_s*/ *altroutegoals, int maxaltroutegoals,
-										int type);
-int		trap_AAS_Swimming(vec3_t origin);
-int		trap_AAS_PredictClientMovement(void /* aas_clientmove_s */ *move, int entnum, vec3_t origin, int presencetype, int onground, vec3_t velocity, vec3_t cmdmove, int cmdframes, int maxframes, float frametime, int stopevent, int stopareanum, int visualize);
-
-
-void	trap_EA_Say(int client, char *str);
-void	trap_EA_SayTeam(int client, char *str);
-void	trap_EA_Command(int client, char *command);
-
-void	trap_EA_Action(int client, int action);
-void	trap_EA_Gesture(int client);
-void	trap_EA_Talk(int client);
-void	trap_EA_Attack(int client);
-void	trap_EA_Use(int client);
-void	trap_EA_Respawn(int client);
-void	trap_EA_Crouch(int client);
-void	trap_EA_MoveUp(int client);
-void	trap_EA_MoveDown(int client);
-void	trap_EA_MoveForward(int client);
-void	trap_EA_MoveBack(int client);
-void	trap_EA_MoveLeft(int client);
-void	trap_EA_MoveRight(int client);
-void	trap_EA_SelectWeapon(int client, int weapon);
-void	trap_EA_Jump(int client);
-void	trap_EA_DelayedJump(int client);
-void	trap_EA_Move(int client, vec3_t dir, float speed);
-void	trap_EA_View(int client, vec3_t viewangles);
-void	trap_EA_Alt_Attack(int client);
-void	trap_EA_ForcePower(int client);
-
-void	trap_EA_EndRegular(int client, float thinktime);
-void	trap_EA_GetInput(int client, float thinktime, void /* struct bot_input_s */ *input);
-void	trap_EA_ResetInput(int client);
-
-int		trap_GeneticParentsAndChildSelection(int numranks, float *ranks, int *parent1, int *parent2, int *child);
-
 void	trap_SnapVector( float *v );
 
 int			trap_CM_RegisterTerrain(const char *config);
@@ -1011,6 +899,7 @@ void G_UndoAntiLag			( void );
 void G_ApplyAntiLag			( gentity_t* ref, bool enlargeHitBox );
 void G_RespawnClients(bool force, team_t team);
 void gametype_trigger_touch(gentity_t *self, gentity_t *other, trace_t *trace);
+
 #include "gametype.h"
 #include "gametype_inf.h"
 

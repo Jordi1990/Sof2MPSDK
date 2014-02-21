@@ -765,57 +765,6 @@ TModelSounds* BG_GetModelSoundsGroup ( const char* Identity, const char* SoundGr
 
 /*
 =================
-BG_GetModelSoundCount
-
-Return the number of sounds for the given model
-=================
-*/
-int BG_GetModelSoundCount ( const char *Identity, const char *SoundGroup )
-{
-	TModelSounds* sounds;
-
-	// Grab the sounds
-	sounds = BG_GetModelSoundsGroup( Identity, SoundGroup );
-	if ( !sounds )
-	{
-		return 0;
-	}
-
-	// Return the sound count
-	return sounds->mCount;
-}
-
-/*
-=================
-BG_GetModelSound
-
-Returns the model sound for the given sound group and index.  If the sound
-could not be found then NULL is returned.
-=================
-*/
-const char *BG_GetModelSound ( const char *Identity, const char *SoundGroup, int index )
-{
-	TModelSounds	*sounds;
-
-	// Grab the sounds
-	sounds = BG_GetModelSoundsGroup( Identity, SoundGroup );
-	if ( !sounds )
-	{		
-		return NULL;
-	}
-
-	// Invalid index?
-	if ( index >= sounds->mCount )
-	{
-		return "";
-	}
-
-	// Run through the sounds and look for the match
-	return sounds->mSounds[index];
-}
-
-/*
-=================
 BG_FindIdentity
 
 Returns the identity with the given name
@@ -1454,54 +1403,6 @@ void BG_DecompressOutfitting ( const char* compressed, goutfitting_t* outfitting
 
 /*
 ========================
-BG_CompressOutfitting
-
-Compresses the given outfitting structure into the given string
-========================
-*/
-void BG_CompressOutfitting ( goutfitting_t* outfitting, char* compressed, int size )
-{
-	for (int i = 0; i < OUTFITTING_GROUP_MAX && size; i ++, size-- )
-	{
-		*compressed++ = outfitting->items[i] + 'A';
-	}
-
-	*compressed = '\0';
-}
-
-/*
-========================
-BG_FindOutfitting
-
-Finds the real outfitting that matches the given outfitting
-========================
-*/
-int BG_FindOutfitting ( goutfitting_t* outfitting )
-{
-	// Loop through all the outfittings linearly
-	for (int i = 0; i < bg_outfittingCount; i ++ )
-	{
-		int l;
-		for ( l = 0; l < OUTFITTING_GROUP_MAX; l ++ )
-		{
-			if ( bg_outfittings[i].items[l] != outfitting->items[l] )
-			{
-				break;
-			}
-		}
-
-		// Both iterators at the end signifies a match
-		if ( l == OUTFITTING_GROUP_MAX )
-		{
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-/*
-========================
 BG_ParseOutfittingTemplate
 
 Parses a single outfitting template
@@ -1628,56 +1529,4 @@ bool BG_ParseOutfittingTemplate ( const char* fileName, goutfitting_t* outfittin
 
 	return true;
 }
-
-/*
-========================
-BG_ParseOutfittingTemplates
-
-Parses the available outfitting templates
-========================
-*/
-int BG_ParseOutfittingTemplates ( bool force )
-{
-	int		numOutfittingFiles;
-	int		filelen;
-	char	outfittingFiles[4096];
-	char	*fileptr;
-
-	// Dont reload unless forced
-	if ( bg_outfittingCount && !force )
-	{
-		return bg_outfittingCount;
-	}
-
-	// Clear the current list 
-	bg_outfittingCount = 1;
-	strcpy ( bg_outfittings[0].name, "CUSTOM" );
-
-	// Grab the list of NPC files
-	numOutfittingFiles = trap_FS_GetFileList("scripts", ".outfitting", outfittingFiles, 4096 );
-	if ( !numOutfittingFiles )
-	{
-		return 0;
-	}
-
-	// Parse each of the NPC files
-	fileptr = outfittingFiles;
-	for(int i = 0; i < numOutfittingFiles; i++, fileptr += filelen+1 )
-	{
-		char	fileName[MAX_QPATH];
-		// Grab the length so we can skip this file later
-		filelen = strlen(fileptr);
-
-		sprintf_s ( fileName, sizeof(fileName), "scripts/%s", fileptr );
-
-		// Parse the outfitting template
-		if ( BG_ParseOutfittingTemplate ( fileName, &bg_outfittings[bg_outfittingCount]	) )
-		{
-			bg_outfittingCount++;
-		}
-	}
-
-	return bg_outfittingCount;
-}
-
 

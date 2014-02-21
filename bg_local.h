@@ -63,5 +63,4 @@ void PM_StartTorsoAnim		( playerState_t* ps, int anim, int time );
 void PM_ContinueLegsAnim	( playerState_t* ps, int anim );
 void PM_ForceLegsAnim		( playerState_t* ps, int anim );
 void PM_TorsoAnimation		( playerState_t* ps );
-void PM_SetAnim				( playerState_t* ps, int setAnimParts,int anim,int setAnimFlags, int blendTime);
 

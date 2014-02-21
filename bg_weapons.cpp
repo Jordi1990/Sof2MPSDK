@@ -368,8 +368,6 @@ bool BG_InitWeaponStats(void)
 	return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-
 TWeaponParseInfo	weaponParseInfo[WP_NUM_WEAPONS];
 char				weaponLeftHand[MAX_QPATH];
 char				weaponRightHand[MAX_QPATH];
@@ -443,7 +441,7 @@ static void	*frameGroup[MAX_WEAPON_FILES];
 static int	numWeaponFiles = 0;
 static int	numInitialFiles = 0;
 
-static	bool BG_OpenWeaponFrames(const char *name)
+static bool BG_OpenWeaponFrames(const char *name)
 {
 	weaponFrames[numWeaponFiles] = trap_GP_ParseFile((char *)name, true, false);
 

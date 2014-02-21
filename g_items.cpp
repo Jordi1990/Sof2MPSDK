@@ -21,9 +21,6 @@
 #define	RESPAWN_AMMO		40
 #define RESPAWN_BACKPACK	40
 
-extern gentity_t *droppedRedFlag;
-extern gentity_t *droppedBlueFlag;
-
 //======================================================================
 void Add_Ammo (gentity_t *ent, int ammoindex, int count)
 {
@@ -182,10 +179,7 @@ int Pickup_Gametype (gentity_t *ent, gentity_t *other)
 int Pickup_Backpack ( gentity_t* ent, gentity_t* other )
 {
 	float			percent = (float)ent->item->quantity / 100.0f;
-	int				i;
-	playerState_t	*ps;
-
-	ps = &other->client->ps;
+	playerState_t	*ps = &other->client->ps;
 
 	// Fill up their health
 	ps->stats[STAT_HEALTH] += MAX_HEALTH * percent;
@@ -206,7 +200,7 @@ int Pickup_Backpack ( gentity_t* ent, gentity_t* other )
 	}
 
 	// Give them some ammo
-	for ( i = 0; i < MAX_AMMO; i ++ )
+	for (int i = 0; i < MAX_AMMO; i ++ )
 	{
 		int	maxammo;
 
@@ -317,11 +311,6 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace)
 	{
 		if (!gtCore->onItemTouch(ent->item, other->client))
 			return;
-		// Let the gametype decide if it can be picked up
-		//if ( !trap_GT_SendEvent ( GTEV_ITEM_TOUCHED, level.time, ent->item->quantity, other->s.number, other->client->sess.team, 0, 0 ) )
-		//{
-		//	return;
-		//}
 	}
 	// the same pickup rules are used for client side and server side
 	else if ( !BG_CanItemBeGrabbed( level.gametype, &ent->s, &other->client->ps ) ) 
@@ -726,14 +715,6 @@ void FinishSpawningItem( gentity_t *ent )
 	// useing an item causes it to respawn
 	ent->use = Use_Item;
 
-	// create a Ghoul2 model if the world model is a glm
-/*	item = &bg_itemlist[ ent->s.modelindex ];
-	if (!stricmp(&item->world_model[0][strlen(item->world_model[0]) - 4], ".glm"))
-	{
-		trap_G2API_InitGhoul2Model(&ent->s, item->world_model[0], G_ModelIndex(item->world_model[0] ), 0, 0, 0, 0);
-		ent->s.radius = 60;
-	}
-*/
 	if ( ent->item->giType != IT_GAMETYPE && ent->spawnflags & 1 ) 
 	{
 		// suspended
@@ -813,11 +794,10 @@ so the client will know which ones to precache
 void SaveRegisteredItems( void ) 
 {
 	char	string[MAX_ITEMS+1];
-	int		i;
 	int		count;
 
 	count = 0;
-	for ( i = 0 ; i < bg_numItems ; i++ ) 
+	for (int i = 0 ; i < bg_numItems ; i++ ) 
 	{
 		if ( itemRegistered[i] ) 
 		{
@@ -992,11 +972,6 @@ void G_RunItem( gentity_t *ent )
 		{
 			gtCore->onItemStuck(ent->item);
 			// Let the gametype handle the problem, if it doenst handle it and return 1 then 
-			// just reset the gametype item
-			//if ( !trap_GT_SendEvent ( GTEV_ITEM_STUCK, level.time, ent->item->quantity, 0, 0, 0, 0 ) )
-			//{
-			//	G_ResetGametypeItem ( ent->item );
-			//}
 		}
 
 		G_FreeEntity( ent );

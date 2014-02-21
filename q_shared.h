@@ -295,20 +295,11 @@ typedef enum {
 	FS_APPEND_SYNC_TEXT
 } fsMode_t;
 
-//=============================================
-
-// strlen that discounts Quake color sequences
-int Q_PrintStrlen( const char *string );
-// removes color sequences from string
-char *Q_CleanStr( char *string );
-
-char	*  va(char *format, ...);
+char *va(char *format, ...);
 
 char *Info_ValueForKey( const char *s, const char *key );
 void Info_RemoveKey( char *s, const char *key );
-void Info_RemoveKey_big( char *s, const char *key );
 void Info_SetValueForKey( char *s, const char *key, const char *value );
-bool Info_Validate( const char *s );
 
 void	 Com_Error( int level, const char *error, ... );
 void	 Com_Printf( const char *msg, ... );
@@ -739,7 +730,6 @@ typedef struct entityState_s
 
 float flrand(float min, float max);
 int irand(int min, int max);
-int Q_irand(int value1, int value2);
 
 typedef enum Eorientations
 {
@@ -767,6 +757,5 @@ typedef struct stringID_table_s
 } stringID_table_t;
 
 int GetIDForString ( stringID_table_t *table, const char *string );
-const char *GetStringForID( stringID_table_t *table, int id );
 
 #endif	// __Q_SHARED_H

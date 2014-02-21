@@ -17,23 +17,32 @@ userinfo::userinfo(int id){
 	}
 }
 
+void userinfo::writeUserInfo(int id){
+	char userInfoBuf[1024];
+	sprintf_s(userInfoBuf, 1024, "\\ip\\%s\rate\\%i\\cg_predictItems\\%i\\cl_anonymous\\%i\\identity\\%s\\snaps\\%i\\name\\%s\\cg_thirdPerson\\%i\\cg_antiLag\\%i\\cg_autoReload\\%i\\cg_smoothClients\\%i\\cg_rpmClient\\%s\\team_identity\\%s\\outfitting\\%s", ip.c_str(), rate, cg_predictItems, cl_anonymous, identity.c_str(), snaps, name.c_str(), cg_thirdPerson, cg_antiLag, cg_autoReload, cg_smoothClients, cg_rpmClient.c_str(), team_identity.c_str(), outfitting.c_str());
+	trap_SetUserinfo(id, userInfoBuf);
+}
+
 void userinfo::setIdentity(int id, string identity){
+	identity = identity;
+	team_identity = identity;
+	writeUserInfo(id);
 	//format a new userinfo string then set it, replace identity value and team_identity value with identity value
 	//trap_SetUserinfo(id, "");
 }
+/*\ip\192.168.1.100:20101\rate\15000\cg_predictItems\1\cl_anonymous\0\identity\marinesoldier1\snaps\20
+\name\^teamtask\0\cg_thirdPerson\1\cg_disableVoiceChat\0\cg_disableSpreeSounds\0\cg_antiLag\1\cg_autoReload\1\cg_smoothClients\0
+\cg_rpmClient\2.0\team_identity\shopguard1\outfitting\AAA@A*/
 
 string parseName(const string &name1)
 {
 	string name = string(name1);
 	boost::replace_all(name, "^^", "");// replace double color tags
 	boost::replace_all(name, "  ", "");// remove double spaces
-	try{
-		if (name.back() == ' ' || name.back() == '\t')
-			name.pop_back(); // delete last whitespace
-	}
-	catch (...){
+	if (name.length() < 1)
 		throw "Error while parsing name";
-	}
+	if (name.back() == ' ' || name.back() == '\t')
+		name.pop_back(); // delete last whitespace
 	// after a ^3 there always has to be another character
 	for (unsigned int i = 0; i<name.length()-1; ++i){
 		if (name[i] == '^' && !(name[i+1] >= 33 && name[i+1] < 128))

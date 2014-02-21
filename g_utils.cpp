@@ -19,9 +19,7 @@ shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
 
 void AddRemap(const char *oldShader, const char *newShader, float timeOffset) 
 {
-	int i;
-
-	for (i = 0; i < remapCount; i++) 
+	for (int i = 0; i < remapCount; i++) 
 	{
 		if (strcmp(oldShader, remappedShaders[i].oldShader) == 0) 
 		{
@@ -45,12 +43,11 @@ const char *BuildShaderStateConfig(void)
 {
 	static char	buff[MAX_STRING_CHARS*4];
 	char out[(MAX_QPATH * 2) + 5];
-	int i;
   
 	memset(buff, 0, MAX_STRING_CHARS*4);
-	for (i = 0; i < remapCount; i++) {
+	for (int i = 0; i < remapCount; i++) {
 		sprintf_s(out, (MAX_QPATH * 2) + 5, "%s=%s:%5.2f@", remappedShaders[i].oldShader, remappedShaders[i].newShader, remappedShaders[i].timeOffset);
-		strncat(buff, out, sizeof(buff));
+		strncat(buff, out, MAX_STRING_CHARS * 4);
 	}
 	return buff;
 }
@@ -70,7 +67,7 @@ int G_FindConfigstringIndex( char *name, int start, int max, bool create )
 		return 0;
 	}
 
-	for ( i=1 ; i<max ; i++ ) 
+	for (i=1 ; i<max ; i++ ) 
 	{
 		trap_GetConfigstring( start + i, s, sizeof( s ) );
 		if ( !s[0] ) 
@@ -113,12 +110,6 @@ int G_AmbientSoundSetIndex( char *name )
 	return G_FindConfigstringIndex (name, CS_AMBIENT_SOUNDSETS, MAX_AMBIENT_SOUNDSETS, true);
 }
 
-
-int G_IconIndex( char *name ) 
-{
-	return G_FindConfigstringIndex (name, CS_ICONS, MAX_ICONS, true);
-}
-
 int G_EffectIndex( char *name ) 
 {
 	return G_FindConfigstringIndex (name, CS_EFFECTS, MAX_FX, true);
@@ -138,9 +129,7 @@ Broadcasts a command to only a specific team
 */
 void G_TeamCommand( team_t team, char *cmd ) 
 {
-	int		i;
-
-	for ( i = 0 ; i < level.maxclients ; i++ ) 
+	for (int i = 0 ; i < level.maxclients ; i++ ) 
 	{
 		if ( level.clients[i].pers.connected == CON_CONNECTED ) 
 		{
@@ -293,33 +282,6 @@ void G_UseTargets( gentity_t *ent, gentity_t *activator )
 	G_UseTargetsByName ( ent->target, ent, activator );
 }
 
-
-/*
-=============
-TempVector
-
-This is just a convenience function
-for making temporary vectors for function calls
-=============
-*/
-float	*tv( float x, float y, float z ) {
-	static	int		index;
-	static	vec3_t	vecs[8];
-	float	*v;
-
-	// use an array so that multiple tempvectors won't collide
-	// for a while
-	v = vecs[index];
-	index = (index + 1)&7;
-
-	v[0] = x;
-	v[1] = y;
-	v[2] = z;
-
-	return v;
-}
-
-
 /*
 =============
 VectorToString
@@ -416,17 +378,15 @@ angles and bad trails.
 */
 gentity_t* G_Spawn( void ) 
 {
-	int			i, force;
-	gentity_t	*e;
-
-	e = NULL;	// shut up warning
-	i = 0;		// shut up warning
-	for ( force = 0 ; force < 2 ; force++ ) 
+	int i;
+	int storeEntId = -1;
+	gentity_t *e = NULL;
+	for (int force = 0 ; force < 2 ; force++ ) 
 	{
 		// if we go through all entities and can't find one to free,
 		// override the normal minimum times before use
 		e = &g_entities[MAX_CLIENTS];
-		for ( i = MAX_CLIENTS ; i<level.num_entities ; i++, e++) 
+		for (i = MAX_CLIENTS ; i<level.num_entities ; i++, e++) 
 		{
 			if ( e->inuse ) 
 			{
@@ -439,7 +399,7 @@ gentity_t* G_Spawn( void )
 			{
 				continue;
 			}
-
+			
 			// reuse this slot
 			G_InitGentity( e );
 			return e;
@@ -470,30 +430,6 @@ gentity_t* G_Spawn( void )
 
 	G_InitGentity( e );
 	return e;
-}
-
-/*
-=================
-G_EntitiesFree
-=================
-*/
-bool G_EntitiesFree( void ) 
-{
-	int			i;
-	gentity_t	*e;
-
-	e = &g_entities[MAX_CLIENTS];
-	for ( i = MAX_CLIENTS; i < level.num_entities; i++, e++) 
-	{
-		if ( e->inuse ) 
-		{
-			continue;
-		}
-		
-		// slot available
-		return true;
-	}
-	return false;
 }
 
 /*
@@ -549,16 +485,6 @@ gentity_t *G_TempEntity( vec3_t origin, int event )
 	return e;
 }
 
-
-
-/*
-==============================================================================
-
-Kill box
-
-==============================================================================
-*/
-
 /*
 =================
 G_KillBox
@@ -568,18 +494,17 @@ of ent.  Ent should be unlinked before calling this!
 =================
 */
 void G_KillBox (gentity_t *ent) {
-	int			i, num;
+	int			num;
 	int			touch[MAX_GENTITIES];
-	gentity_t	*hit;
 	vec3_t		mins, maxs;
 
 	VectorAdd( ent->client->ps.origin, ent->r.mins, mins );
 	VectorAdd( ent->client->ps.origin, ent->r.maxs, maxs );
 	num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
 
-	for ( i = 0; i < num ; i++ ) 
+	for (int i = 0; i < num ; i++ ) 
 	{
-		hit = &g_entities[touch[i]];
+		gentity_t *hit = &g_entities[touch[i]];
 		if ( !hit->client ) 
 		{
 			continue;
@@ -676,106 +601,6 @@ void G_Sound( gentity_t *ent, int channel, int soundIndex ) {
 }
 
 /*
-=============
-G_SoundAtLoc
-=============
-*/
-void G_SoundAtLoc( vec3_t loc, int channel, int soundIndex ) {
-	gentity_t	*te;
-
-	te = G_TempEntity( loc, EV_GENERAL_SOUND );
-	te->s.eventParm = soundIndex;
-}
-
-/*
-=============
-G_EntitySound
-=============
-*/
-void G_EntitySound( gentity_t *ent, int channel, int soundIndex ) {
-	gentity_t	*te;
-
-	te = G_TempEntity( ent->r.currentOrigin, EV_ENTITY_SOUND );
-	te->s.eventParm = soundIndex;
-	te->s.weapon = ent->s.number;
-}
-
-
-//==============================================================================
-
-bool G_PointInBounds( vec3_t point, vec3_t mins, vec3_t maxs )
-{
-	int i;
-
-	for(i = 0; i < 3; i++ )
-	{
-		if ( point[i] < mins[i] )
-		{
-			return false;
-		}
-		if ( point[i] > maxs[i] )
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool G_BoxInBounds( vec3_t point, vec3_t mins, vec3_t maxs, vec3_t boundsMins, vec3_t boundsMaxs )
-{
-	vec3_t boxMins;
-	vec3_t boxMaxs;
-
-	VectorAdd( point, mins, boxMins );
-	VectorAdd( point, maxs, boxMaxs );
-
-	if(boxMaxs[0]>boundsMaxs[0])
-		return false;
-
-	if(boxMaxs[1]>boundsMaxs[1])
-		return false;
-
-	if(boxMaxs[2]>boundsMaxs[2])
-		return false;
-
-	if(boxMins[0]<boundsMins[0])
-		return false;
-
-	if(boxMins[1]<boundsMins[1])
-		return false;
-
-	if(boxMins[2]<boundsMins[2])
-		return false;
-
-	//box is completely contained within bounds
-	return true;
-}
-
-
-void G_SetAngles( gentity_t *ent, vec3_t angles )
-{
-	VectorCopy( angles, ent->r.currentAngles );
-	VectorCopy( angles, ent->s.angles );
-	VectorCopy( angles, ent->s.apos.trBase );
-}
-
-bool G_ClearTrace( vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int ignore, int clipmask )
-{
-	static	trace_t	tr;
-
-	trap_Trace( &tr, start, mins, maxs, end, ignore, clipmask );
-
-	if ( tr.allsolid || tr.startsolid || tr.fraction < 1.0 )
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-/*
 ================
 G_SetOrigin
 
@@ -790,41 +615,5 @@ void G_SetOrigin( gentity_t *ent, vec3_t origin ) {
 	VectorClear( ent->s.pos.trDelta );
 
 	VectorCopy( origin, ent->r.currentOrigin );
-}
-
-/*
-================
-DebugLine
-
-  debug polygons only work when running a local game
-  with r_debugSurface set to 2
-================
-*/
-int DebugLine(vec3_t start, vec3_t end, int color) {
-	vec3_t points[4], dir, cross, up = {0, 0, 1};
-	float dot;
-
-	VectorCopy(start, points[0]);
-	VectorCopy(start, points[1]);
-	//points[1][2] -= 2;
-	VectorCopy(end, points[2]);
-	//points[2][2] -= 2;
-	VectorCopy(end, points[3]);
-
-
-	VectorSubtract(end, start, dir);
-	VectorNormalize(dir);
-	dot = DotProduct(dir, up);
-	if (dot > 0.99 || dot < -0.99) VectorSet(cross, 1, 0, 0);
-	else CrossProduct(dir, up, cross);
-
-	VectorNormalize(cross);
-
-	VectorMA(points[0], 2, cross, points[0]);
-	VectorMA(points[1], -2, cross, points[1]);
-	VectorMA(points[2], -2, cross, points[2]);
-	VectorMA(points[3], 2, cross, points[3]);
-
-	return trap_DebugPolygonCreate(color, 4, points);
 }
 

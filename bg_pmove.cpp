@@ -550,50 +550,6 @@ static void PM_WaterMove( void )
 
 /*
 ===================
-PM_FlyMove
-===================
-*/
-static void PM_FlyMove( void ) 
-{
-	vec3_t	wishvel;
-	float	wishspeed;
-	vec3_t	wishdir;
-	float	scale;
-
-	// normal slowdown
-	PM_Friction ();
-
-	scale = PM_CmdScale( &pm->cmd );
-	//
-	// user intentions
-	//
-	if ( !scale ) 
-	{
-		wishvel[0] = 0;
-		wishvel[1] = 0;
-		wishvel[2] = 0;
-	} 
-	else 
-	{
-		for (int i=0 ; i<3 ; i++) 
-		{
-			wishvel[i] = scale * pml.forward[i]*pm->cmd.forwardmove + scale * pml.right[i]*pm->cmd.rightmove;
-		}
-
-		wishvel[2] += scale * pm->cmd.upmove;
-	}
-
-	VectorCopy (wishvel, wishdir);
-	wishspeed = VectorNormalize(wishdir);
-
-	PM_Accelerate (wishdir, wishspeed, pm_flyaccelerate);
-
-	PM_StepSlideMove( false );
-}
-
-
-/*
-===================
 PM_AirMove
 
 ===================
@@ -1101,50 +1057,6 @@ static void PM_CrashLand( int impactMaterial, vec3_t impactNormal )
 		}
 	}
 }
-
-/*
-=============
-PM_CorrectAllSolid
-=============
-*/
-static bool PM_CorrectAllSolid( trace_t *trace ) 
-{
-	vec3_t		point;
-
-	if ( pm->debugLevel ) 
-	{
-		Com_Printf("%i:allsolid\n", c_pmove);
-	}
-
-	// jitter around
-	for (int i = -1; i <= 1; i++) {
-		for (int j = -1; j <= 1; j++) {
-			for (int k = -1; k <= 1; k++) {
-				VectorCopy(pm->ps->origin, point);
-				point[0] += (float) i;
-				point[1] += (float) j;
-				point[2] += (float) k;
-				pm->trace (trace, point, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
-				if ( !trace->allsolid ) {
-					point[0] = pm->ps->origin[0];
-					point[1] = pm->ps->origin[1];
-					point[2] = pm->ps->origin[2] - 0.25;
-
-					pm->trace (trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
-					pml.groundTrace = *trace;
-					return true;
-				}
-			}
-		}
-	}
-
-	pm->ps->groundEntityNum = ENTITYNUM_NONE;
-	pml.groundPlane = false;
-	pml.walking = false;
-
-	return false;
-}
-
 
 /*
 =============
@@ -1740,37 +1652,6 @@ static void PM_SetWeaponTime ( TAnimWeapon *aW )
 }
 
 /*
-===============
-BG_GetWeaponNote
-===============
-*/
-TNoteTrack *BG_GetWeaponNote( playerState_t* ps, int weapon, int anim, int animChoice, int callbackStep )
-{
-	TAnimWeapon		*aW;
-	TAnimInfoWeapon *aIW;
-	aW=BG_GetInviewAnimFromIndex( weapon, anim&~ANIM_TOGGLEBIT);
-	if (!aW)
-	{
-		return 0;
-	}
-
-	aIW = aW->mWeaponModelInfo;
-	if ( !aIW )
-	{
-		return 0;
-	}
-	TNoteTrack *note;
-	int n;
-	// Find the callback for the given step
-	for ( note = aIW->mNoteTracks[ps->weaponAnimIdChoice], n=0; note && n < callbackStep; note = note->mNext, n++ )
-	{
-		// Do nothing, loop does it all
-	}
-
-	return(note);
-}
-
-/*
 ==============
 PM_CheckWeaponNotes
 ==============
@@ -2252,20 +2133,6 @@ static void PM_FinishWeaponChange( void )
 
 	PM_StartTorsoAnim( pm->ps, weaponData[pm->ps->weapon].animRaise, pm->ps->weaponAnimTime );
 }
-
-/*
-==============
-PM_LoadShell
-
-Only used for the M590 shotgun.
-==============
-*/
-void PM_LoadShell(void)
-{
-	pm->ps->clip[ATTACK_NORMAL][pm->ps->weapon]++;
-	pm->ps->ammo[weaponData[pm->ps->weapon].attack[ATTACK_NORMAL].ammoIndex]--;
-}
-
 /*
 ==============
 PM_StartRefillClip
@@ -2452,7 +2319,6 @@ int PM_GetAttackButtons(void)
 PM_Weapon_AddInaccuracy
 ==============
 */
-#define ACCURACY_FADERATE	0.2
 #define RECOVER_TIME		800
 #define RECOVER_TIME_SQ		200000.0 
 

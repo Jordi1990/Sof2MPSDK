@@ -84,14 +84,6 @@ vmCvar_t	g_voiceFloodPenalty;			// Amount of time a void flooder must wait befor
 vmCvar_t	RMG;
 vmCvar_t	g_debugRMG;
 
-//New cvars
-vmCvar_t	server_color1;					// Server color 1-6.
-vmCvar_t	server_color2;					// Used for displaying colors.
-vmCvar_t	server_color3;					// In either commands or prefixes.
-vmCvar_t	server_color4;
-vmCvar_t	server_color5;
-vmCvar_t	server_color6;
-
 static cvarTable_t gameCvarTable[] = 
 {
 	// don't override the cheat state set by the system
@@ -194,14 +186,6 @@ static cvarTable_t gameCvarTable[] =
 	{ &g_teamkillPenalty,		"g_teamkillPenalty",		"-1",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,	false },
 	{ &g_teamkillDamageMax,		"g_teamkillDamageMax",		"300",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
 	{ &g_teamkillDamageForgive,	"g_teamkillDamageForgive",	"50",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
-
-	// New cvars
-	{ &server_color1, "server_color1", "^G", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
-	{ &server_color2, "server_color2", "^g", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
-	{ &server_color3, "server_color3", "^K", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
-	{ &server_color4, "server_color4", "^k", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
-	{ &server_color5, "server_color5", "^+", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
-	{ &server_color6, "server_color6", "^7", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
 };
 
 // bk001129 - made static to avoid aliasing
@@ -264,8 +248,6 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 			return 0;
 		case GAME_CONSOLE_COMMAND:
 			return ConsoleCommand();
-		//case BOTAI_START_FRAME:
-		//	return BotAIStartFrame( arg0 );
 		case GAME_SPAWN_RMG_ENTITY:
 			if (G_ParseSpawnVars(false))
 			{
@@ -665,8 +647,6 @@ void G_ShutdownGame( int restart )
 }
 
 
-#ifndef GAME_HARD_LINKED
-
 void  Com_Error ( int level, const char *fmt, ... ) 
 {
 	va_list		argptr;
@@ -690,8 +670,6 @@ void  Com_Printf( const char *msg, ... )
 
 	trap_Print( text );
 }
-
-#endif
 
 /*
 =============
@@ -799,7 +777,6 @@ and team change.
 */
 void CalculateRanks( void ) 
 {
-	int			i;
 	int			rank;
 	int			score;
 	int			newScore;
@@ -812,7 +789,7 @@ void CalculateRanks( void )
 	level.numPlayingClients = 0;
 	level.numVotingClients = 0;		// don't count bots
 
-	for ( i = 0 ; i < level.maxclients ; i++ ) 
+	for (int i = 0 ; i < level.maxclients ; i++ ) 
 	{
 		if ( level.clients[i].pers.connected != CON_DISCONNECTED ) 
 		{
@@ -865,7 +842,7 @@ void CalculateRanks( void )
 		}
 
 		// in team games, rank is just the order of the teams, 0=red, 1=blue, 2=tied
-		for ( i = 0;  i < level.numConnectedClients; i++ ) 
+		for (int i = 0;  i < level.numConnectedClients; i++ ) 
 		{
 			cl = &level.clients[ level.sortedClients[i] ];
 			cl->ps.persistant[PERS_RANK] = rank;
@@ -875,7 +852,7 @@ void CalculateRanks( void )
 	{	
 		rank = -1;
 		score = 0;
-		for ( i = 0;  i < level.numPlayingClients; i++ ) 
+		for (int i = 0;  i < level.numPlayingClients; i++ ) 
 		{
 			cl = &level.clients[ level.sortedClients[i] ];
 			newScore = cl->sess.score;
@@ -908,14 +885,6 @@ void CalculateRanks( void )
 
 
 /*
-========================================================================
-
-MAP CHANGING
-
-========================================================================
-*/
-
-/*
 ========================
 SendScoreboardMessageToAllClients
 
@@ -924,9 +893,7 @@ due to enters/exits/forced team changes
 ========================
 */
 void SendScoreboardMessageToAllClients( void ) {
-	int		i;
-
-	for ( i = 0 ; i < level.maxclients ; i++ ) {
+	for (int i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[ i ].pers.connected == CON_CONNECTED ) {
 			DeathmatchScoreboardMessage( g_entities + i );
 		}
@@ -975,11 +942,8 @@ This is also used for spectator spawns
 */
 void FindIntermissionPoint( void ) 
 {
-	gentity_t	*ent, *target;
-	vec3_t		dir;
-
 	// find the intermission spot
-	ent = G_Find (NULL, FOFS(classname), "info_player_intermission");
+	gentity_t *ent = G_Find (NULL, FOFS(classname), "info_player_intermission");
 	if ( !ent ) 		
 	{	
 		gspawn_t* spawn = G_SelectRandomSpawnPoint ( (team_t)-1 );
@@ -998,9 +962,10 @@ void FindIntermissionPoint( void )
 	// if it has a target, look towards it
 	if ( ent->target ) 
 	{
-		target = G_PickTarget( ent->target );
+		gentity_t *target = G_PickTarget( ent->target );
 		if ( target ) 
 		{
+			vec3_t dir;
 			VectorSubtract( target->s.origin, level.intermission_origin, dir );
 			vectoangles( dir, level.intermission_angle );
 		}
@@ -1014,9 +979,6 @@ BeginIntermission
 */
 void BeginIntermission( void ) 
 {
-	int			i;
-	gentity_t	*ent;
-
 	if ( level.intermissiontime ) 
 	{
 		// already active
@@ -1032,9 +994,9 @@ void BeginIntermission( void )
 	FindIntermissionPoint();
 
 	// move all clients to the intermission point
-	for (i=0 ; i< level.maxclients ; i++) 
+	for (int i=0 ; i< level.maxclients ; i++) 
 	{
-		ent = g_entities + i;
+		gentity_t *ent = g_entities + i;
 		if (!ent->inuse)
 		{
 			continue;
@@ -1071,9 +1033,6 @@ or moved to a new level based on the "nextmap" cvar
 */
 void ExitLevel (void) 
 {
-	int			i;
-	gclient_t	*cl;
-
 	// Next map
 	trap_SendConsoleCommand( EXEC_APPEND, "mapcycle\n" );
 	level.changemap = NULL;
@@ -1082,9 +1041,9 @@ void ExitLevel (void)
 	// reset all the scores so we don't enter the intermission again
 	level.teamScores[TEAM_RED] = 0;
 	level.teamScores[TEAM_BLUE] = 0;
-	for ( i=0 ; i< g_maxclients.integer ; i++ ) 
+	for ( int i=0 ; i< g_maxclients.integer ; i++ ) 
 	{
-		cl = level.clients + i;
+		gclient_t *cl = level.clients + i;
 		if ( cl->pers.connected != CON_CONNECTED ) 
 		{
 			continue;
@@ -1099,7 +1058,7 @@ void ExitLevel (void)
 
 	// change all client states to connecting, so the early players into the
 	// next level will know the others aren't done reconnecting
-	for (i=0 ; i< g_maxclients.integer ; i++) 
+	for (int i=0 ; i< g_maxclients.integer ; i++) 
 	{
 		if ( level.clients[i].pers.connected == CON_CONNECTED ) 
 		{
@@ -1158,9 +1117,7 @@ Append information about this game to the log file
 */
 void LogExit( const char *string ) 
 {
-	int				i;
 	int				numSorted;
-	gclient_t		*cl;
 
 	G_LogPrintf( "Exit: %s\n", string );
 
@@ -1182,11 +1139,11 @@ void LogExit( const char *string )
 		G_LogPrintf( "red:%i  blue:%i\n", level.teamScores[TEAM_RED], level.teamScores[TEAM_BLUE] );
 	}
 
-	for (i=0 ; i < numSorted ; i++) 
+	for (int i=0 ; i < numSorted ; i++) 
 	{
 		int	ping;
 
-		cl = &level.clients[level.sortedClients[i]];
+		gclient_t *cl = &level.clients[level.sortedClients[i]];
 
 		if ( cl->sess.team == TEAM_SPECTATOR ) 
 		{
@@ -1218,16 +1175,14 @@ wait 10 seconds before going on.
 void CheckIntermissionExit( void ) 
 {
 	int			ready, notReady;
-	int			i;
-	gclient_t	*cl;
 	int			readyMask;
 
 	// see which players are ready
 	ready = 0;
 	notReady = 0;
 	readyMask = 0;
-	for (i=0 ; i< g_maxclients.integer ; i++) {
-		cl = level.clients + i;
+	for (int i=0 ; i< g_maxclients.integer ; i++) {
+		gclient_t *cl = level.clients + i;
 		if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
 		}
@@ -1247,8 +1202,8 @@ void CheckIntermissionExit( void )
 
 	// copy the readyMask to each player's stats so
 	// it can be displayed on the scoreboard
-	for (i=0 ; i< g_maxclients.integer ; i++) {
-		cl = level.clients + i;
+	for (int i=0 ; i< g_maxclients.integer ; i++) {
+		gclient_t *cl = level.clients + i;
 		if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
 		}
@@ -1324,9 +1279,6 @@ can see the last frag.
 */
 void CheckExitRules( void ) 
 {
- 	int			i;
-	gclient_t	*cl;
-
 	// if at the intermission, wait for all non-bots to
 	// signal ready, then go to next level
 	if ( level.intermissiontime ) 
@@ -1401,9 +1353,9 @@ void CheckExitRules( void )
 		else
 		{
 			// Check to see if any of the clients scores have crossed the scorelimit
-			for ( i = 0 ; i < level.numConnectedClients ; i++ ) 
+			for (int i = 0 ; i < level.numConnectedClients ; i++ ) 
 			{
-				cl = g_entities[level.sortedClients[i]].client;
+				gclient_t *cl = g_entities[level.sortedClients[i]].client;
 
 				if ( cl->pers.connected != CON_CONNECTED )
 				{
@@ -1565,26 +1517,6 @@ void CheckVote( void )
 
 /*
 ==================
-PrintTeam
-==================
-*/
-void PrintTeam(int team, char *message) 
-{
-	int i;
-
-	for ( i = 0 ; i < level.maxclients ; i++ ) 
-	{
-		if (level.clients[i].sess.team != team)
-		{
-			continue;
-		}
-
-		trap_SendServerCommand( i, message );
-	}
-}
-
-/*
-==================
 CheckCvars
 ==================
 */
@@ -1644,8 +1576,6 @@ Advances the non-player objects in the world
 */
 void G_RunFrame( int levelTime ) 
 {
-	int			i;
-	gentity_t	*ent;
 	int			msec;
 
 	//NT - store the time the frame started
@@ -1666,8 +1596,8 @@ void G_RunFrame( int levelTime )
 	G_UpdateCvars();
 
 	// go through all allocated objects
-	ent = &g_entities[0];
-	for (i=0 ; i<level.num_entities ; i++, ent++) 
+	gentity_t *ent = &g_entities[0];
+	for (int i=0 ; i<level.num_entities ; i++, ent++) 
 	{
 		if ( !ent->inuse ) 
 		{
@@ -1745,7 +1675,7 @@ void G_RunFrame( int levelTime )
 
 	// perform final fixups on the players
 	ent = &g_entities[0];
-	for (i=0 ; i < level.maxclients ; i++, ent++ ) 
+	for (int i=0 ; i < level.maxclients ; i++, ent++ ) 
 	{
 		if ( ent->inuse ) 
 		{
@@ -1770,7 +1700,7 @@ void G_RunFrame( int levelTime )
 
 	if (g_listEntity.integer) 
 	{
-		for (i = 0; i < MAX_GENTITIES; i++) 
+		for (int i = 0; i < MAX_GENTITIES; i++) 
 		{
 			Com_Printf("%4i: %s\n", i, g_entities[i].classname);
 		}

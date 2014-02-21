@@ -908,23 +908,6 @@ gitem_t	*BG_FindItem( const char *pickupName )
 
 	return NULL;
 }
-/*
-===============
-BG_FindClassnameItem
-===============
-*/
-gitem_t	*BG_FindClassnameItem ( const char *classname ) 
-{
-	for (gitem_t* it = bg_itemlist + 1; it->classname; it++)
-	{
-		if ( !strcmp( it->classname, classname ) )
-		{
-			return it;
-		}
-	}
-
-	return NULL;
-}
 
 /*
 ============
@@ -1184,8 +1167,6 @@ bool BG_CanItemBeGrabbed( int gametype, const entityState_t *ent, const playerSt
 
 	return false;
 }
-
-//======================================================================
 
 /*
 ================

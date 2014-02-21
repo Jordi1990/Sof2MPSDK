@@ -5,20 +5,6 @@
 
 /*
 ==============
-OtherTeam
-==============
-*/
-int OtherTeam(team_t team) 
-{
-	if (team==TEAM_RED)
-		return TEAM_BLUE;
-	else if (team==TEAM_BLUE)
-		return TEAM_RED;
-	return team;
-}
-
-/*
-==============
 TeamName
 ==============
 */
@@ -40,61 +26,6 @@ const char *TeamName(team_t team)
 	}
 
 	return "";
-}
-
-/*
-==============
-OtherTeamName
-==============
-*/
-const char *OtherTeamName(team_t team) 
-{
-	if (team==TEAM_RED)
-		return TeamName ( TEAM_BLUE );
-	else if (team==TEAM_BLUE)
-		return TeamName ( TEAM_BLUE );
-
-	return TeamName ( team );
-}
-
-/*
-==============
-TeamColorString
-==============
-*/
-const char *TeamColorString(team_t team) 
-{
-	if (team==TEAM_RED)
-		return S_COLOR_RED;
-	else if (team==TEAM_BLUE)
-		return S_COLOR_BLUE;
-	else if (team==TEAM_SPECTATOR)
-		return S_COLOR_YELLOW;
-
-	return S_COLOR_WHITE;
-}
-
-// NULL for everyone
-void  PrintMsg( gentity_t *ent, const char *fmt, ... ) 
-{
-	char		msg[1024];
-	va_list		argptr;
-	char		*p;
-	
-	va_start (argptr,fmt);
-	if (vsprintf (msg, fmt, argptr) > sizeof(msg)) 
-	{
-		Com_Error ( ERR_FATAL, "PrintMsg overrun" );
-	}
-	va_end (argptr);
-
-	// double quotes are bad
-	while ((p = strchr(msg, '"')) != NULL)
-	{
-		*p = '\'';
-	}
-
-	trap_SendServerCommand ( ( (ent == NULL) ? -1 : ent-g_entities ), va("print \"%s\"", msg ));
 }
 
 /*

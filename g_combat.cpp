@@ -4,8 +4,6 @@
 
 #include "g_local.h"
 
-void BotDamageNotification	( gclient_t *bot, gentity_t *attacker );
-
 /*
 ============
 G_AddScore
@@ -44,7 +42,6 @@ void TossClientItems( gentity_t *self )
 	gitem_t		*item;
 	int			weapon;
 	float		angle;
-	int			i;
 	gentity_t	*drop;
 
 	// drop the weapon if not a gauntlet or machinegun
@@ -73,7 +70,7 @@ void TossClientItems( gentity_t *self )
 
 	// drop all custom gametype items
 	angle = 45;
-	for ( i = 0 ; i < MAX_GAMETYPE_ITEMS ; i++ ) 
+	for ( int i = 0 ; i < MAX_GAMETYPE_ITEMS ; i++ ) 
 	{
 		// skip this gametype item if the client doenst have it
 		if ( !(self->client->ps.stats[STAT_GAMETYPE_ITEMS] & (1<<i)) ) 
@@ -199,7 +196,6 @@ void player_die(
 	int				anim;
 	int				contents;
 	int				killer;
-	int				i;
 	char			*killerName, *obit;
 	attackType_t	attack;
 	int				meansOfDeath;
@@ -347,7 +343,7 @@ void player_die(
 	{
 		// Any gametype items that are dropped into a no drop area need to be reported
 		// to the gametype so it can handle it accordingly
-		for ( i = 0 ; i < MAX_GAMETYPE_ITEMS ; i++ ) 
+		for (int i = 0 ; i < MAX_GAMETYPE_ITEMS ; i++ ) 
 		{
 			gitem_t* item;
 
@@ -375,7 +371,7 @@ void player_die(
 
 	// send updated scores to any clients that are following this one,
 	// or they would get stale scoreboards
-	for ( i = 0 ; i < level.numConnectedClients; i++ ) 
+	for (int i = 0 ; i < level.numConnectedClients; i++ ) 
 	{
 		gclient_t	*client;
 
@@ -616,43 +612,6 @@ void G_ApplyKnockback( gentity_t *targ, vec3_t newDir, float knockback )
 		targ->client->ps.pm_time = t;
 		targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	}
-}
-
-/*
-================
-RaySphereIntersections
-================
-*/
-int RaySphereIntersections( vec3_t origin, float radius, vec3_t point, vec3_t dir, vec3_t intersections[2] ) {
-	float b, c, d, t;
-
-	//	| origin - (point + t * dir) | = radius
-	//	a = dir[0]^2 + dir[1]^2 + dir[2]^2;
-	//	b = 2 * (dir[0] * (point[0] - origin[0]) + dir[1] * (point[1] - origin[1]) + dir[2] * (point[2] - origin[2]));
-	//	c = (point[0] - origin[0])^2 + (point[1] - origin[1])^2 + (point[2] - origin[2])^2 - radius^2;
-
-	// normalize dir so a = 1
-	VectorNormalize(dir);
-	b = 2 * (dir[0] * (point[0] - origin[0]) + dir[1] * (point[1] - origin[1]) + dir[2] * (point[2] - origin[2]));
-	c = (point[0] - origin[0]) * (point[0] - origin[0]) +
-		(point[1] - origin[1]) * (point[1] - origin[1]) +
-		(point[2] - origin[2]) * (point[2] - origin[2]) -
-		radius * radius;
-
-	d = b * b - 4 * c;
-	if (d > 0) {
-		t = (- b + sqrt(d)) / 2;
-		VectorMA(point, t, dir, intersections[0]);
-		t = (- b - sqrt(d)) / 2;
-		VectorMA(point, t, dir, intersections[1]);
-		return 2;
-	}
-	else if (d == 0) {
-		t = (- b ) / 2;
-		VectorMA(point, t, dir, intersections[0]);
-		return 1;
-	}
-	return 0;
 }
 
 int G_GetHitLocation(gentity_t *target, vec3_t ppoint, vec3_t dir )
@@ -1025,15 +984,6 @@ int G_Damage (
 			VectorCopy ( targ->r.currentOrigin, client->damage_from );
 			client->damage_fromWorld = true;
 		}
-
-		if (attacker && attacker->client)
-		{
-			//BotDamageNotification(client, attacker);
-		}
-		else if (inflictor && inflictor->client)
-		{
-			//BotDamageNotification(client, inflictor);
-		}
 	}
 
 	if (targ->client) 
@@ -1284,13 +1234,11 @@ bool G_RadiusDamage (
 	) 
 {
 	float		points, dist;
-	gentity_t	*ent, *tent;
 	int			entityList[MAX_GENTITIES];
 	int			numListedEntities;
 	vec3_t		mins, maxs;
 	vec3_t		v;
 	vec3_t		dir;
-	int			i, e;
 	bool	hitClient = false;
 
 	if ( radius < 1 ) 
@@ -1298,7 +1246,7 @@ bool G_RadiusDamage (
 		radius = 1;
 	}
 
-	for ( i = 0 ; i < 3 ; i++ ) 
+	for (int i = 0 ; i < 3 ; i++ ) 
 	{
 		mins[i] = origin[i] - radius;
 		maxs[i] = origin[i] + radius;
@@ -1306,9 +1254,9 @@ bool G_RadiusDamage (
 
 	numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
 
-	for ( e = 0 ; e < numListedEntities ; e++ ) 
+	for (int e = 0 ; e < numListedEntities ; e++ ) 
 	{
-		ent = &g_entities[entityList[ e ]];
+		gentity_t *ent = &g_entities[entityList[ e ]];
 
 		if (ent == ignore)
 		{
@@ -1321,7 +1269,7 @@ bool G_RadiusDamage (
 		}
 
 		// find the distance from the edge of the bounding box
-		for ( i = 0 ; i < 3 ; i++ ) 
+		for (int i = 0 ; i < 3 ; i++ ) 
 		{
 			if ( origin[i] < ent->r.absmin[i] ) 
 			{
@@ -1371,7 +1319,7 @@ bool G_RadiusDamage (
 			if ( d && ent->client )
 			{
 				// Put some procedural gore on the target.
-				tent = G_TempEntity( origin, EV_EXPLOSION_HIT_FLESH );
+				gentity_t *tent = G_TempEntity( origin, EV_EXPLOSION_HIT_FLESH );
 				
 				// send entity and direction
 				tent->s.eventParm = DirToByte( hitdir );

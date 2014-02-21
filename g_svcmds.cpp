@@ -13,11 +13,10 @@ Svcmd_EntityList_f
 ===================
 */
 void	Svcmd_EntityList_f (void) {
-	int			e;
 	gentity_t		*check;
 
 	check = g_entities+1;
-	for (e = 1; e < level.num_entities ; e++, check++) {
+	for (int e = 1; e < level.num_entities ; e++, check++) {
 		if ( !check->inuse ) {
 			continue;
 		}
@@ -94,8 +93,6 @@ void Svcmd_ExtendTime_f (void)
 }
 
 gclient_t	*ClientForString( const char *s ) {
-	gclient_t	*cl;
-	int			i;
 	int			idnum;
 
 	// numeric values are just slot numbers
@@ -106,7 +103,7 @@ gclient_t	*ClientForString( const char *s ) {
 			return NULL;
 		}
 
-		cl = &level.clients[idnum];
+		gclient_t *cl = &level.clients[idnum];
 		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			Com_Printf( "Client %i is not connected\n", idnum );
 			return NULL;
@@ -115,8 +112,8 @@ gclient_t	*ClientForString( const char *s ) {
 	}
 
 	// check for a name match
-	for ( i=0 ; i < level.maxclients ; i++ ) {
-		cl = &level.clients[i];
+	for (int i=0 ; i < level.maxclients ; i++ ) {
+		gclient_t *cl = &level.clients[i];
 		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			continue;
 		}
@@ -180,7 +177,7 @@ bool ConsoleCommand( void )
 {
 	char cmd[MAX_TOKEN_CHARS];
 
-	trap_Argv( 0, cmd, sizeof( cmd ) );
+	trap_Argv(0, cmd, MAX_TOKEN_CHARS);
 
 	if ( strcmp (cmd, "entitylist") == 0 ) 
 	{

@@ -2,10 +2,6 @@
 //
 #include "g_local.h"
 
-//#include "../../ui/menudef.h"
-
-int AcceptBotCommand(char *cmd, gentity_t *pl);
-
 /*
 ==================
 DeathmatchScoreboardMessage
@@ -16,7 +12,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 	char		entry[1024];
 	char		string[1400];
 	int			stringlength;
-	int			i, j;
+	int			j;
 	gclient_t	*cl;
 	int			numSorted;
 
@@ -26,7 +22,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 
 	numSorted = level.numConnectedClients;
 	
-	for (i=0 ; i < numSorted ; i++) 
+	for (int i=0 ; i < numSorted ; i++) 
 	{
 		int	ping;
 
@@ -62,12 +58,12 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 
 		strcpy (string + stringlength, entry);
 		stringlength += j;
-	}
 
-	trap_SendServerCommand( ent-g_entities, va("scores %i %i %i%s", i, 
-							level.teamScores[TEAM_RED], 
-							level.teamScores[TEAM_BLUE],
-							string ) );
+		trap_SendServerCommand(ent - g_entities, va("scores %i %i %i%s", i,
+			level.teamScores[TEAM_RED],
+			level.teamScores[TEAM_BLUE],
+			string));
+	}
 }
 
 
@@ -107,14 +103,14 @@ ConcatArgs
 ==================
 */
 char	*ConcatArgs( int start ) {
-	int		i, c, tlen;
+	int		c, tlen;
 	static char	line[MAX_STRING_CHARS];
 	int		len;
 	char	arg[MAX_STRING_CHARS];
 
 	len = 0;
 	c = trap_Argc();
-	for ( i = start ; i < c ; i++ ) {
+	for (int i = start ; i < c ; i++ ) {
 		trap_Argv( i, arg, sizeof( arg ) );
 		tlen = strlen( arg );
 		if ( len + tlen >= MAX_STRING_CHARS - 1 ) {
@@ -131,29 +127,6 @@ char	*ConcatArgs( int start ) {
 	line[len] = 0;
 
 	return line;
-}
-
-/*
-==================
-SanitizeString
-
-Remove case and control characters
-==================
-*/
-void SanitizeString( char *in, char *out ) {
-	while ( *in ) {
-		if ( *in == 27 ) {
-			in += 2;		// skip color code
-			continue;
-		}
-		if ( *in < 32 ) {
-			in++;
-			continue;
-		}
-		*out++ = tolower( *in++ );
-	}
-
-	*out = 0;
 }
 
 /*
@@ -217,7 +190,6 @@ void Cmd_Give_f (gentity_t *ent)
 {
 	char		*name;
 	gitem_t		*it;
-	int			i;
 	bool	give_all;
 	gentity_t		*it_ent;
 	trace_t		trace;
@@ -225,7 +197,6 @@ void Cmd_Give_f (gentity_t *ent)
 
 	int start;
 	int end;
-	int l;
 
 	trap_Argv( 1, arg, sizeof( arg ) );
 
@@ -245,7 +216,7 @@ void Cmd_Give_f (gentity_t *ent)
 		end = start + 1;
 	}
 
-	for ( l = start; l < end; l ++ )
+	for (int l = start; l < end; l ++ )
 	{
 		ent = &g_entities[l];
 
@@ -286,7 +257,7 @@ void Cmd_Give_f (gentity_t *ent)
 
 	if (give_all || strcmp(name, "ammo") == 0)
 	{
-		for ( i = WP_NONE + 1 ; i < WP_NUM_WEAPONS ; i++ ) 
+		for (int i = WP_NONE + 1 ; i < WP_NUM_WEAPONS ; i++ ) 
 		{
 			for ( int a = ATTACK_NORMAL; a < ATTACK_MAX; a ++ )
 			{
@@ -363,33 +334,6 @@ void Cmd_God_f (gentity_t *ent)
 
 	trap_SendServerCommand( ent-g_entities, va("print \"%s\"", msg));
 }
-
-
-/*
-==================
-Cmd_Notarget_f
-
-Sets client to notarget
-
-argv(0) notarget
-==================
-*/
-void Cmd_Notarget_f( gentity_t *ent ) {
-	char	*msg;
-
-	if ( !CheatsOk( ent ) ) {
-		return;
-	}
-
-	ent->flags ^= FL_NOTARGET;
-	if (!(ent->flags & FL_NOTARGET) )
-		msg = "notarget OFF\n";
-	else
-		msg = "notarget ON\n";
-
-	trap_SendServerCommand( ent-g_entities, va("print \"%s\"", msg));
-}
-
 
 /*
 ==================
@@ -474,22 +418,22 @@ void BroadcastTeamChange( gclient_t *client, int oldTeam )
 	switch ( client->sess.team )
 	{
 		case TEAM_RED:
-			trap_SendServerCommand(-1, va("cp \"%s" S_COLOR_WHITE " joined the red team.\n\"", client->pers.netname.c_str()));
+			trap_SendServerCommand(-1, va("cp \"%s ^7joined the red team.\n\"", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_BLUE:
-			trap_SendServerCommand(-1, va("cp \"%s" S_COLOR_WHITE " joined the blue team.\n\"", client->pers.netname.c_str()));
+			trap_SendServerCommand(-1, va("cp \"%s ^7joined the blue team.\n\"", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_SPECTATOR:
 			if ( oldTeam != TEAM_SPECTATOR )
 			{
-				trap_SendServerCommand(-1, va("cp \"%s" S_COLOR_WHITE " joined the spectators.\n\"", client->pers.netname.c_str()));
+				trap_SendServerCommand(-1, va("cp \"%s ^7joined the spectators.\n\"", client->pers.netname.c_str()));
 			}
 			break;
 
 		case TEAM_FREE:
-			trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " joined the battle.\n\"", client->pers.netname.c_str()));
+			trap_SendServerCommand( -1, va("cp \"%s ^7joined the battle.\n\"", client->pers.netname.c_str()));
 			break;
 	}
 }
@@ -724,8 +668,6 @@ Starts a client ghosting.  This essentially will kill a player which is alive
 */
 void G_StartGhosting ( gentity_t* ent )
 {
-	int i;
-
 	// Dont start ghosting if already ghosting
 	if ( ent->client->sess.ghost )
 	{
@@ -743,7 +685,7 @@ void G_StartGhosting ( gentity_t* ent )
 	trap_UnlinkEntity (ent);
 
 	// stop any following clients
-	for ( i = 0 ; i < level.maxclients ; i++ ) 
+	for (int i = 0 ; i < level.maxclients ; i++ ) 
 	{
 		if ( G_IsClientSpectating ( &level.clients[i] )
 			&& level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW
@@ -829,8 +771,7 @@ void G_StopFollowing( gentity_t *ent )
    	{
    		gclient_t* cl = &level.clients[ent->client->sess.spectatorClient];
     
-   		int i;
-   		for ( i = 0; i < 3; i ++ )
+   		for (int i = 0; i < 3; i ++ )
 		{
    			ent->client->ps.delta_angles[i] = ANGLE2SHORT(cl->ps.viewangles[i] - SHORT2ANGLE(ent->client->pers.cmd.angles[i]));
 		}
@@ -1230,7 +1171,6 @@ G_Say
 */
 void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 {
-	int			j;
 	gentity_t	*other;
 	char		text[MAX_SAY_TEXT];
 	char		name[64];
@@ -1266,7 +1206,7 @@ void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
 	}
 
 	// send it to all the apropriate clients
-	for (j = 0; j < level.numConnectedClients; j++) 
+	for (int j = 0; j < level.numConnectedClients; j++) 
 	{
 		other = &g_entities[level.sortedClients[j]];
 		G_SayTo( ent, other, mode, name, text );
@@ -1410,7 +1350,6 @@ G_Voice
 */
 void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, bool voiceonly ) 
 {
-	int			j;
 	gentity_t	*other;
 	char		name[MAX_SAY_TEXT];
 
@@ -1458,7 +1397,7 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, bool 
 	}
 
 	// send it to all the apropriate clients
-	for (j = 0; j < level.maxclients; j++) 
+	for (int j = 0; j < level.maxclients; j++) 
 	{
 		other = &g_entities[j];
 		G_VoiceTo( ent, other, mode, name, id, voiceonly );
@@ -1868,8 +1807,6 @@ void ClientCommand( int clientNum ) {
 		Cmd_Give_f (ent);
 	else if (strcmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
-	else if (strcmp (cmd, "notarget") == 0)
-		Cmd_Notarget_f (ent);
 	else if (strcmp (cmd, "noclip") == 0)
 		Cmd_Noclip_f (ent);
 	else if (strcmp (cmd, "kill") == 0)

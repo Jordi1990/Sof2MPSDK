@@ -80,13 +80,6 @@ void SP_info_player_deathmatch( gentity_t *ent )
 	G_FreeEntity ( ent );
 }
 
-/*QUAKED info_player_intermission (1 0 1) (-16 -16 -46) (16 16 48)
-The intermission will be viewed from this point.  Target an info_notnull for the view direction.
-*/
-void SP_info_player_intermission( gentity_t *ent ) 
-{
-}
-
 /*
 ================
 G_SpotWouldTelefrag
@@ -94,18 +87,17 @@ G_SpotWouldTelefrag
 */
 bool G_SpotWouldTelefrag( gspawn_t* spawn ) 
 {
-	int			i, num;
+	int			num;
 	int			touch[MAX_GENTITIES];
-	gentity_t	*hit;
 	vec3_t		mins, maxs;
 
 	VectorAdd( spawn->origin, playerMins, mins );
 	VectorAdd( spawn->origin, playerMaxs, maxs );
 	num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
 
-	for (i=0 ; i<num ; i++) 
+	for (int i=0 ; i<num ; i++) 
 	{
-		hit = &g_entities[touch[i]];
+		gentity_t *hit = &g_entities[touch[i]];
 
 		if ( hit->client) 
 		{
@@ -135,7 +127,6 @@ go to a random point that doesn't telefrag
 */
 gspawn_t* G_SelectRandomSpawnPoint ( team_t team ) 
 {	
-	int			i;
 	int			count;
 	int			tfcount;
 	gspawn_t	*spawns[MAX_SPAWNS];
@@ -144,7 +135,7 @@ gspawn_t* G_SelectRandomSpawnPoint ( team_t team )
 	count = 0;
 	tfcount = 0;
 
-	for ( i = 0; i < level.spawnCount; i ++ )
+	for (int i = 0; i < level.spawnCount; i ++ )
 	{
 		gspawn_t* spawn = &level.spawns[i];
 
@@ -190,14 +181,13 @@ gspawn_t* G_SelectRandomSafeSpawnPoint ( team_t team, float safeDistance )
 {
 	gspawn_t*	spawns[MAX_SPAWNS];
 	float		safeDistanceSquared;
-	int			count;
-	int			i;
+	int			count = -1;
 
 	// Square the distance for faster comparisons
 	safeDistanceSquared = safeDistance * safeDistance;
 
 	// Build a list of spawns
-	for ( i = 0, count = 0; i < level.spawnCount; i ++ )
+	for (int i = 0, count = 0; i < level.spawnCount; i ++ )
 	{
 		gspawn_t* spawn = &level.spawns[i];
 		int		  j;
@@ -441,10 +431,8 @@ SetClientViewAngle
 */
 void SetClientViewAngle( gentity_t *ent, vec3_t angle ) 
 {
-	int			i;
-
 	// set the delta angle
-	for (i=0 ; i<3 ; i++) 
+	for (int i=0 ; i<3 ; i++) 
 	{
 		int		cmdAngle;
 
@@ -583,7 +571,6 @@ Returns number of players on a team
 */
 int TeamCount( int ignoreClientNum, team_t team, int *alive ) 
 {
-	int		i;
 	int		count = 0;
 
 	if ( alive )
@@ -591,7 +578,7 @@ int TeamCount( int ignoreClientNum, team_t team, int *alive )
 		*alive = 0;
 	}
 
-	for ( i = 0 ; i < level.maxclients ; i++ ) 
+	for (int i = 0 ; i < level.maxclients ; i++ ) 
 	{
 		if ( i == ignoreClientNum ) 
 		{
@@ -649,109 +636,6 @@ team_t PickTeam( int ignoreClientNum )
 
 /*
 ===========
-G_ClientCleanName
-============
-*/
-void G_ClientCleanName ( const char *in, char *out, int outSize, bool colors ) 
-{
-	int		len;
-	int		colorlessLen;
-	char	ch;
-	char	*p;
-	int		spaces;
-
-	//save room for trailing null byte
-	outSize--;
-
-	len = 0;
-	colorlessLen = 0;
-	p = out;
-	*p = 0;
-	spaces = 0;
-
-	while( 1 ) 
-	{
-		ch = *in++;
-		if( !ch ) 
-		{
-			break;
-		}
-
-		// don't allow leading spaces
-		if( !*p && ch == ' ' ) 
-		{
-			continue;
-		}
-
-		// check colors
-		if( ch == Q_COLOR_ESCAPE ) 
-		{
-			// solo trailing carat is not a color prefix
-			if( !*in ) 
-			{
-				break;
-			}
-
-			// don't allow black in a name, period
-			if( !colors || ColorIndex(*in) == 0 ) 
-			{
-				in++;
-				continue;
-			}
-
-			// make sure room in dest for both chars
-			if( len > outSize - 2 ) 
-			{
-				break;
-			}
-
-			*out++ = ch;
-			*out++ = *in++;
-			len += 2;
-			continue;
-		}
-
-		// don't allow too many consecutive spaces
-		if( ch == ' ' ) 
-		{
-			spaces++;
-			if( spaces > 3 ) 
-			{
-				continue;
-			}
-		}
-		else 
-		{
-			spaces = 0;
-		}
-
-		if( len > outSize - 1 ) 
-		{
-			break;
-		}
-
-		*out++ = ch;
-		colorlessLen++;
-		len++;
-	}
-
-	*out = 0;
-
-	// Trim whitespace off the end of the name
-	for ( out --; out >= p && (*out == ' ' || *out == '\t'); out -- )
-	{
-		*out = 0;
-	}
-
-	// don't allow empty names
-	if( *p == 0 || colorlessLen == 0 ) 
-	{
-		strncpy( p, "UnnamedPlayer", outSize );
-	}
-}
-
-/*
-===========
 Updates the clients current outfittin
 ===========
 */
@@ -759,7 +643,6 @@ void G_UpdateOutfitting ( int clientNum )
 {
 	gentity_t	*ent;
 	gclient_t	*client;
-	int			group;
 	int			ammoIndex;
 	int			idle;
 
@@ -795,7 +678,7 @@ void G_UpdateOutfitting ( int clientNum )
 	equipWeaponGroup = OUTFITTING_GROUP_KNIFE;
 
 	// Give all the outfitting groups to the player		
-	for ( group = 0; group < OUTFITTING_GROUP_ACCESSORY; group ++ )
+	for ( int group = 0; group < OUTFITTING_GROUP_ACCESSORY; group ++ )
 	{
 		gitem_t* item;
 		int		 ammoIndex;
@@ -1005,9 +888,9 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 	// print scoreboards, display models, and play custom sounds
 	char s[1024];
 	if (ent->r.svFlags & SVF_BOT)
-		sprintf_s(s, sizeof(s), "n\\%s\\t\\%i\\identity\\%s\\skill\\5", ent->client->pers.netname.c_str(), ent->client->sess.team, ent->client->pers.identity->mName);
+		sprintf_s(s, 1024, "n\\%s\\t\\%i\\identity\\%s\\skill\\5", ent->client->pers.netname.c_str(), ent->client->sess.team, ent->client->pers.identity->mName);
 	else
-		sprintf_s(s, sizeof(s), "n\\%s\\t\\%i\\identity\\%s", ent->client->pers.netname.c_str(), ent->client->sess.team, ent->client->pers.identity->mName);
+		sprintf_s(s, 1024, "n\\%s\\t\\%i\\identity\\%s", ent->client->pers.netname.c_str(), ent->client->sess.team, ent->client->pers.identity->mName);
 
 	trap_SetConfigstring( CS_PLAYERS+clientNum, s );
 
@@ -1079,7 +962,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	if ( firstTime ) 
 	{
-		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " is connecting...\n\"", client->pers.netname.c_str()) );
+		trap_SendServerCommand( -1, va("print \"%s ^7is connecting...\n\"", client->pers.netname.c_str()) );
 	}
 
 	// Broadcast team change if not going to spectator
@@ -1158,7 +1041,7 @@ void ClientBegin( int clientNum )
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
 		tent->s.clientNum = ent->s.clientNum;
 
-		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname.c_str()) );
+		trap_SendServerCommand( -1, va("print \"%s ^7entered the game\n\"", client->pers.netname.c_str()) );
 	}
 	
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
@@ -1488,7 +1371,7 @@ void ClientSpawn(gentity_t *ent)
 	// Handle a deferred name change
 	if ( client->pers.deferredname[0] )
 	{
-		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", client->pers.netname.c_str(), client->pers.deferredname) );
+		trap_SendServerCommand( -1, va("print \"%s ^7renamed to %s\n\"", client->pers.netname.c_str(), client->pers.deferredname) );
 		client->pers.netname = client->pers.deferredname;
 		client->pers.deferredname[0] = '\0';
 		client->pers.netnameTime = level.time;

@@ -7,11 +7,6 @@
 #include "g_team.h"
 #include "inv.h"
 
-#define	MAX_GAMETYPE_SPAWN_POINTS	32
-
-int			g_gametypeItemCount = 0;
-vec3_t		g_effectOrigin;
-
 /*QUAKED gametype_player (0 1 0) (-16 -16 -46) (16 16 48) REDTEAM BLUETEAM
 Potential spawning position for red or blue team in custom gametype games.
 */
@@ -66,14 +61,6 @@ void SP_mission_player ( gentity_t* ent )
 	ent->classname = "gametype_player";
 
 	SP_gametype_player ( ent );
-}
-
-void gametype_trigger_use ( gentity_t *self, gentity_t *other, gentity_t *activator ) 
-{
-	if ( level.gametypeResetTime )
-	{
-		return;
-	}
 }
 
 void gametype_trigger_touch ( gentity_t *self, gentity_t *other, trace_t *trace ) 
@@ -190,7 +177,6 @@ G_ResetGametypeItem
 void G_ResetGametypeItem ( gitem_t* item )
 {
 	gentity_t *find;
-	int		  i;
 
 	// Convience check
 	if ( !item )
@@ -208,7 +194,7 @@ void G_ResetGametypeItem ( gitem_t* item )
 	}
 
 	// Strip the item from all connected clients
-	for ( i = 0; i < level.numConnectedClients; i ++ )
+	for (int i = 0; i < level.numConnectedClients; i ++ )
 	{
 		g_entities[level.sortedClients[i]].client->ps.stats[STAT_GAMETYPE_ITEMS] &= ~(1<<item->giTag);
 	}
@@ -256,17 +242,14 @@ G_RespawnClients
 */
 void G_RespawnClients ( bool force, team_t team )
 {
-	int i;
-
 	// Respawn all clients back at a spawn pointer
-	for ( i = 0; i < level.numConnectedClients; i ++ )
+	for (int i = 0; i < level.numConnectedClients; i ++ )
 	{
 		// Save the clients weapons
 		playerState_t	ps;
-		gentity_t*		ent;
 		bool		ghost;
 
-		ent = &g_entities[level.sortedClients[i]];
+		gentity_t *	ent = &g_entities[level.sortedClients[i]];
 
 		// Make sure they are actually connected
 		if ( ent->client->pers.connected != CON_CONNECTED )
@@ -318,11 +301,9 @@ G_ResetPickups
 */
 void G_ResetEntities ( void )
 {
-	int i;
-
 	// Run through all the entities in the level and reset those which
 	// need to be reset
-	for ( i = 0; i < level.num_entities; i ++ )
+	for (int i = 0; i < level.num_entities; i ++ )
 	{
 		gentity_t* ent;
 

@@ -34,5 +34,6 @@ public:
 	~userinfo();
 
 	void setIdentity(int id, string identity);
+	void writeUserInfo(int id);
 };
 #endif

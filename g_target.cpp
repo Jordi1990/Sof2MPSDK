@@ -66,9 +66,6 @@ void SP_target_delay( gentity_t *ent ) {
 	ent->use = Use_Target_Delay;
 }
 
-
-//==========================================================
-
 /*QUAKED target_score (1 0 0) (-8 -8 -8) (8 8 8)
 "count" number of points to add, default 1
 

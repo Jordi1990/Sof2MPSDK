@@ -317,7 +317,7 @@ void SP_terrain(gentity_t *ent)
 	char				seed[MAX_QPATH];
 	char				missionType[MAX_QPATH];
 	char				soundSet[MAX_QPATH];
-	int					shaderNum, i;
+	int					shaderNum;
 	char				*value;
 	int					terrainID;
 
@@ -348,13 +348,6 @@ void SP_terrain(gentity_t *ent)
 
 		trap_Cvar_VariableStringBuffer("RMG_soundset", soundSet, MAX_QPATH);
 		trap_SetConfigstring(CS_AMBIENT_SOUNDSETS, soundSet );
-	}
-
-	// Arbitrary (but sane) limits to the number of terxels
-//	if((mTerxels < MIN_TERXELS) || (mTerxels > MAX_TERXELS))
-	{
-//		Com_printf("G_Terrain: terxels out of range - defaulting to 4\n");
-//		mTerxels = 4;
 	}
 
 	// Get info required for the common init
@@ -389,7 +382,7 @@ void SP_terrain(gentity_t *ent)
 
 	Info_SetValueForKey(temp, "missionType", missionType);
 	
-	for(i = 0; i < MAX_INSTANCE_TYPES; i++)
+	for(int i = 0; i < MAX_INSTANCE_TYPES; i++)
 	{
 		trap_Cvar_VariableStringBuffer(va("RMG_instance%d", i), final, MAX_QPATH);
 		if(strlen(final))

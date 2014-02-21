@@ -4,9 +4,6 @@
 // perform the server side effects of a weapon firing
 
 #include "g_local.h"
-//#include "be_aas.h"
-
-extern bool G_BoxInBounds( vec3_t point, vec3_t mins, vec3_t maxs, vec3_t boundsMins, vec3_t boundsMaxs );
 
 typedef struct hitLocationConversion_s
 {
@@ -207,7 +204,6 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 	vec3_t		end;
 	gentity_t	*tent;
 	gentity_t	*traceEnt;
-	int			i;
 	vec3_t		muzzlePoint;
 	vec3_t		fwd;
 	vec3_t		fireAngs;
@@ -276,7 +272,7 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 	seed = ent->client->ps.stats[STAT_SEED];
 
 	// Run a trace for each pellet being fired
-	for (i = 0; i < attackDat->pellets; i++) 
+	for (int i = 0; i < attackDat->pellets; i++) 
 	{
 		int location = HL_NONE;
 
@@ -354,7 +350,6 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 				}
 				else
 				{
-					int		z;
 					float	accuracyRatio;
 					float	maxinaccuracy;
 					float	addinaccuracy;
@@ -372,19 +367,18 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 						accuracyRatio = Com_Clampf ( 0.0f, 1.0f, accuracyRatio );
 					}
 
-					for ( z = 0; z < MAX_G2_COLLISIONS && G2Trace[z].mEntityNum != -1; z ++ )
+					for (int z = 0; z < MAX_G2_COLLISIONS && G2Trace[z].mEntityNum != -1; z ++ )
 					{
 						int			 temp_location;
 						float		  temp_damageMult;
 						int			  pose;
-						int			  l;
 
 						pose			= ( G2Trace[z].mLocation >> 2 );
 						temp_damageMult = 0.0f;
 						temp_location   = HL_NONE;
 
 						// Convert hitregions (SOF2.poses) to hitlocation
-						for ( l=0; l < HL_CONV_MAX; l++)
+						for (int l=0; l < HL_CONV_MAX; l++)
 						{
 							// Found the SOF2pose
 							if (hitLocationConversion[l].SOF2poses == pose )
@@ -414,7 +408,7 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 							temp_location = HL_WAIST;
 
 							// Search to find waist damageMultiplier
-							for ( l=0; l < HL_CONV_MAX; l++)
+							for (int l=0; l < HL_CONV_MAX; l++)
 							{
 								if (temp_location == hitLocationConversion[l].hitLocation)
 								{
@@ -540,14 +534,13 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 	if ( hitcount )
 	{
 		int flags;
-		int	h;
 
 		flags  = 0;
 		flags |= (attackDat->gore ? 0 : DAMAGE_NO_GORE);
 		flags |= (attackDat->melee ? DAMAGE_NO_ARMOR : 0);
 		flags |= (hitcount > 2 ? DAMAGE_FORCE_GORE : 0 );
 
-		for ( h = 0; h < hitcount; h ++ )
+		for (int h = 0; h < hitcount; h ++ )
 		{	
 			// We wann all pellets counting towards team damage		
 			if ( ent->client )
@@ -569,7 +562,6 @@ Fires a projectile from the given client entity
 */
 gentity_t* G_FireProjectile ( gentity_t *ent, weapon_t weapon, attackType_t attack, int projectileLifetime, int flags )
 {
-	int			i;
 	vec3_t		muzzlePoint;
 	vec3_t		fwd, right, up, fireAngs;
 	gentity_t*		missile = NULL;
@@ -617,7 +609,7 @@ gentity_t* G_FireProjectile ( gentity_t *ent, weapon_t weapon, attackType_t atta
 
 	AngleVectors( fireAngs, fwd, right, up );
 
-	for (i = 0; i < attackDat->pellets; i++) 
+	for (int i = 0; i < attackDat->pellets; i++) 
 	{
 		vec3_t		dir;
 		VectorCopy( fwd, dir );
@@ -703,9 +695,7 @@ into a wall.
 ======================
 */
 void SnapVectorTowards( vec3_t v, vec3_t to ) {
-	int		i;
-
-	for ( i = 0 ; i < 3 ; i++ ) {
+	for (int i = 0 ; i < 3 ; i++ ) {
 		if ( to[i] <= v[i] ) {
 			v[i] = (int)v[i];
 		} else {
@@ -771,7 +761,7 @@ G_InitHitModel
 void* G_InitHitModel ( void )
 {
 	void*		ghoul2;
-	char		temp[20480];
+	char		temp[8096];
 	int			numPairs;
 	qhandle_t	handle;
 

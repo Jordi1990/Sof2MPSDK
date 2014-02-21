@@ -147,44 +147,6 @@ void G_GrenadeThink ( gentity_t* ent )
 	ent->s.eFlags |= EF_EXPLODE;
 }
 
-void G_RunStuckMissile( gentity_t *ent )
-{
-	if ( ent->takedamage )
-	{
-		if ( ent->s.groundEntityNum >= 0 && ent->s.groundEntityNum < ENTITYNUM_WORLD )
-		{
-			gentity_t *other = &g_entities[ent->s.groundEntityNum];
-
-			if ( (!VectorCompare( vec3_origin, other->s.pos.trDelta ) && other->s.pos.trType != TR_STATIONARY) || 
-				(!VectorCompare( vec3_origin, other->s.apos.trDelta ) && other->s.apos.trType != TR_STATIONARY) )
-			{//thing I stuck to is moving or rotating now, kill me
-				G_Damage( ent, other, other, NULL, NULL, 99999, 0, MOD_CRUSH, HL_NONE );
-				return;
-			}
-		}
-	}
-	// check think function
-	G_RunThink( ent );
-}
-
-/*
-================
-G_BounceProjectile
-================
-*/
-void G_BounceProjectile( vec3_t start, vec3_t impact, vec3_t dir, vec3_t endout ) {
-	vec3_t v, newv;
-	float dot;
-
-	VectorSubtract( impact, start, v );
-	dot = DotProduct( v, dir );
-	VectorMA( v, -2*dot, dir, newv );
-
-	VectorNormalize(newv);
-	VectorMA(impact, 8192, newv, endout);
-}
-
-
 /*
 ================
 G_CreateMissile
@@ -615,10 +577,3 @@ void G_RunMissile( gentity_t *ent )
 	// check think function after bouncing
 	G_RunThink( ent );
 }
-
-
-//=============================================================================
-
-
-
-

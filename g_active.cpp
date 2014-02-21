@@ -358,88 +358,6 @@ void G_TouchTriggers( gentity_t *ent )
 	ent->client->ps.pm_flags &= (~PMF_SIAMESETWINS);
 }
 
-
-/*
-============
-G_MoverTouchTriggers
-
-Find all trigger entities that ent's current position touches.
-Spectators will only interact with teleporters.
-============
-*/
-void G_MoverTouchPushTriggers( gentity_t *ent, vec3_t oldOrg ) 
-{
-	int			num;
-	float		stepSize, dist;
-	vec3_t		dir, size;
-
-	// non-moving movers don't hit triggers!
-	if ( !VectorLengthSquared( ent->s.pos.trDelta ) ) 
-	{
-		return;
-	}
-
-	VectorSubtract( ent->r.mins, ent->r.maxs, size );
-	stepSize = VectorLength( size );
-	if ( stepSize < 1 )
-	{
-		stepSize = 1;
-	}
-
-	VectorSubtract( ent->r.currentOrigin, oldOrg, dir );
-	dist = VectorNormalize( dir );
-	for (int step = 0; step <= dist; step += stepSize )
-	{
-		int			touch[MAX_GENTITIES];
-		vec3_t checkSpot, mins, maxs;
-		const vec3_t	range = { 40, 40, 52 };
-
-		VectorMA( ent->r.currentOrigin, step, dir, checkSpot );
-		VectorSubtract( checkSpot, range, mins );
-		VectorAdd( checkSpot, range, maxs );
-
-		num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
-
-		// can't use ent->r.absmin, because that has a one unit pad
-		VectorAdd( checkSpot, ent->r.mins, mins );
-		VectorAdd( checkSpot, ent->r.maxs, maxs );
-
-		for ( int i=0 ; i<num ; i++ ) 
-		{
-			gentity_t	*hit = &g_entities[touch[i]];
-			trace_t		trace;
-
-			if ( hit->s.eType != ET_PUSH_TRIGGER )
-			{
-				continue;
-			}
-
-			if ( hit->touch == NULL ) 
-			{
-				continue;
-			}
-
-			if ( !( hit->r.contents & CONTENTS_TRIGGER ) ) 
-			{
-				continue;
-			}
-
-
-			if ( !trap_EntityContact( mins, maxs, hit ) ) 
-			{
-				continue;
-			}
-
-			memset( &trace, 0, sizeof(trace) );
-
-			if ( hit->touch != NULL ) 
-			{
-				hit->touch(hit, ent, &trace);
-			}
-		}
-	}
-}
-
 /*
 =================
 G_UpdatePlayerStateScores
@@ -638,10 +556,8 @@ use key pressed
 */
 void G_Use ( gentity_t* ent )
 {
-	int				i;
 	int				num;
 	int				touch[MAX_GENTITIES];
-	gentity_t		*hit;
 	vec3_t			mins;
 	vec3_t			maxs;
 	static vec3_t	range = { 20, 20, 40 };
@@ -665,9 +581,9 @@ void G_Use ( gentity_t* ent )
 	VectorAdd( ent->client->ps.origin, ent->r.mins, mins );
 	VectorAdd( ent->client->ps.origin, ent->r.maxs, maxs );
 
-	for ( i=0 ; i<num ; i++ ) 
+	for (int i=0 ; i<num ; i++ ) 
 	{
-		hit = &g_entities[touch[i]];
+		gentity_t *hit = &g_entities[touch[i]];
 
 		if ( !hit->use ) 
 		{
@@ -757,58 +673,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 	}
 
 }
-
-/*
-==============
-StuckInOtherClient
-==============
-*/
-static bool StuckInOtherClient(gentity_t *ent) 
-{
-	gentity_t	*ent2;
-
-	ent2 = &g_entities[0];
-	for (int i = 0; i < MAX_CLIENTS; i++, ent2++ ) 
-	{
-		if ( ent2 == ent ) 
-		{
-			continue;
-		}
-
-		if ( !ent2->inuse ) 
-		{
-			continue;
-		}
-		
-		if ( !ent2->client ) 
-		{
-			continue;
-		}
-		
-		if ( ent2->health <= 0 ) 
-		{
-			continue;
-		}
-		
-		//
-		if (ent2->r.absmin[0] > ent->r.absmax[0])
-			continue;	
-		if (ent2->r.absmin[1] > ent->r.absmax[1])
-			continue;
-		if (ent2->r.absmin[2] > ent->r.absmax[2])
-			continue;
-		if (ent2->r.absmax[0] < ent->r.absmin[0])
-			continue;
-		if (ent2->r.absmax[1] < ent->r.absmin[1])
-			continue;
-		if (ent2->r.absmax[2] < ent->r.absmin[2])
-			continue;
-		return true;
-	}
-	return false;
-}
-
-void BotTestSolid(vec3_t origin);
 
 /*
 ==============
