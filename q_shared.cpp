@@ -248,7 +248,8 @@ char *va( char *format, ... ) {
 	index++;
 
 	va_start (argptr, format);
-	vsprintf (buf, format,argptr);
+	vsnprintf(buf, 4095, format, argptr);
+	//vsprintf (buf, format,argptr);
 	va_end (argptr);
 
 	return buf;

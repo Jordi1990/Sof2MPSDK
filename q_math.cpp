@@ -2,6 +2,11 @@
 //
 // q_math.c -- stateless support routines that are included in each code module
 #include "q_shared.h"
+#include <random>
+
+std::random_device rd;
+std::mt19937 eng(rd());                         // Mersenne Twister generator with
+// a different seed at each run
 
 vec3_t	vec3_origin = { 0.0f, 0.0f, 0.0f };
 vec3_t	vec3_identity = { 1.0f, 1.0f, 1.0f };
@@ -243,13 +248,11 @@ float AngleDelta(float angle1, float angle2) {
 }
 
 float RadiusFromBounds(const vec3_t mins, const vec3_t maxs) {
-	int		i;
 	vec3_t	corner;
-	float	a, b;
 
-	for (i = 0; i<3; i++) {
-		a = fabs(mins[i]);
-		b = fabs(maxs[i]);
+	for (int i = 0; i<3; i++) {
+		float a = fabs(mins[i]);
+		float b = fabs(maxs[i]);
 		corner[i] = a > b ? a : b;
 	}
 
@@ -317,8 +320,7 @@ vec_t VectorNormalize2(const vec3_t v, vec3_t out) {
 
 void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up) {
 	float		angle;
-	static float		sr, sp, sy, cr, cp, cy;
-	// static to help MS compiler fp bugs
+	float		sr, sp, sy, cr, cp, cy;
 
 	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy = sin(angle);
@@ -350,34 +352,18 @@ void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up) 
 	}
 }
 
-static unsigned long	holdrand = 0x89abcdef;
-
 // Returns a float min <= x < max (exclusive; will get max - 0.00001; but never max)
 
 float flrand(float min, float max)
 {
-	float	result;
-
-	assert((max - min) < 32768);
-
-	holdrand = (holdrand * 214013L) + 2531011L;
-	result = (float)(holdrand >> 17);						// 0 - 32767 range
-	result = ((result * (max - min)) / 32768.0F) + min;
-
-	return(result);
+	std::uniform_real_distribution<float> dist(min, max);
+	return dist(eng);
 }
 
 // Returns an integer min <= x <= max (ie inclusive)
 
 int irand(int min, int max)
 {
-	int		result;
-
-	assert((max - min) < 32768);
-
-	max++;
-	holdrand = (holdrand * 214013L) + 2531011L;
-	result = holdrand >> 17;
-	result = ((result * (max - min)) >> 15) + min;
-	return(result);
+	std::uniform_int_distribution<int> dist(min, max);
+	return dist(eng);
 }
