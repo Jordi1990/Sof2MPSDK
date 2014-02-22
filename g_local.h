@@ -825,14 +825,6 @@ extern	vmCvar_t	g_teamkillDamageForgive;
 extern	vmCvar_t	g_voiceFloodCount;
 extern	vmCvar_t	g_voiceFloodPenalty;
 
-// New cvars
-extern	vmCvar_t	server_color1;
-extern	vmCvar_t	server_color2;
-extern	vmCvar_t	server_color3;
-extern	vmCvar_t	server_color4;
-extern	vmCvar_t	server_color5;
-extern	vmCvar_t	server_color6;
-
 void	trap_Print( const char *text );
 void	trap_Error( const char *text );
 int		trap_Milliseconds( void );
@@ -881,9 +873,6 @@ void		trap_GetWorldBounds ( vec3_t mins, vec3_t maxs );
 void	*trap_BotGetMemoryGame(int size);
 void	trap_BotFreeMemoryGame(void *ptr);
 
-int		trap_DebugPolygonCreate(int color, int numPoints, vec3_t *points);
-void	trap_DebugPolygonDelete(int id);
-
 void	trap_SnapVector( float *v );
 
 int			trap_CM_RegisterTerrain(const char *config);
@@ -899,6 +888,8 @@ void G_UndoAntiLag			( void );
 void G_ApplyAntiLag			( gentity_t* ref, bool enlargeHitBox );
 void G_RespawnClients(bool force, team_t team);
 void gametype_trigger_touch(gentity_t *self, gentity_t *other, trace_t *trace);
+
+void infoMsgToClients(int clientNum, const char *msg);
 
 #include "gametype.h"
 #include "gametype_inf.h"

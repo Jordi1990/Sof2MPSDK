@@ -1108,12 +1108,12 @@ void BG_CalculateBulletEndpoint ( vec3_t muzzlePoint, vec3_t fireAngs, float ina
 		float f1;
 		float f2;
 
-		f1 = (float)(Q_rand ( seed ) % 15000) / 15000.0f;
-		f2 = (float)(Q_rand ( seed ) % 15000) / 15000.0f;
+		f1 = (float)flrand(0, 15000) / 15000.0f;
+		f2 = (float)flrand(0, 15000) / 15000.0f;
 		fGaussianX = (f1-0.5f) + (f2-0.5f); 
 
-		f1 = (float)(Q_rand ( seed ) % 15000) / 15000.0f;
-		f2 = (float)(Q_rand ( seed ) % 15000) / 15000.0f;
+		f1 = (float)flrand(0, 15000) / 15000.0f;
+		f2 = (float)flrand(0, 15000) / 15000.0f;
 		fGaussianY = (f1-0.5f) + (f2-0.5f); 
 
 		fGaussian = fGaussianX * fGaussianX + fGaussianY * fGaussianY;

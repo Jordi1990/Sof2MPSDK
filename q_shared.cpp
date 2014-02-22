@@ -249,7 +249,6 @@ char *va( char *format, ... ) {
 
 	va_start (argptr, format);
 	vsnprintf(buf, 4095, format, argptr);
-	//vsprintf (buf, format,argptr);
 	va_end (argptr);
 
 	return buf;

@@ -1,6 +1,7 @@
 // Copyright (C) 2001-2002 Raven Software
 //
 #include "g_local.h"
+#include <boost/algorithm/string/replace.hpp>
 // g_client.c -- client functions that don't happen every frame
 
 static vec3_t	playerMins = {-15, -15, -46};
@@ -761,6 +762,29 @@ void G_UpdateOutfitting ( int clientNum )
 	// the backpack code
 	client->ps.stats[STAT_OUTFIT_GRENADE] = bg_itemlist[bg_outfittingGroups[OUTFITTING_GROUP_GRENADE][client->pers.outfitting.items[OUTFITTING_GROUP_GRENADE]]].giTag;
 }
+
+string parseName(const string &name1)
+{
+	string name = string(name1);
+	boost::replace_all(name, "^^", "");// replace double color tags
+	boost::replace_all(name, "  ", "");// remove double spaces
+	if (name.length() < 1)
+		throw "Error while parsing name";
+	if (name.back() == ' ' || name.back() == '\t')
+		name.pop_back(); // delete last whitespace
+	// after a ^3 there always has to be another character
+	for (unsigned int i = 0; i<name.length() - 1; ++i){
+		if (name[i] == '^' && !(name[i + 1] >= 33 && name[i + 1] < 128))
+			throw "Invalid color specified";
+	}
+	// define a max length
+	if (name.length() > 64)
+		throw "Maximum name length exceeded";
+	else if (name.length() < 2)
+		throw "Please use a name with more than 1 character";
+	return name;
+}
+
 /*
 ===========
 ClientUserInfoChanged
@@ -793,8 +817,14 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 	oldname = client->pers.netname;
 
 	//set name
-	client->pers.netname = userInfo->name;
-
+	try{
+		client->pers.netname = parseName(userInfo->name);
+	}
+	catch (const char *err){
+		client->pers.netname = "Unnamed Player";
+		if (oldname != client->pers.netname)
+			trap_SendServerCommand(clientNum, va("print \"^_[Error] ^7Rename failed: %s.\n\"", err));
+	}
 	if ( client->sess.team == TEAM_SPECTATOR ) 
 	{
 		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) 
@@ -849,7 +879,7 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 	{
 		if ( client->pers.identity && oldidentity && client->pers.identity != oldidentity && team != TEAM_SPECTATOR )
 		{
-			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " has changed identities\n\"", client->pers.netname.c_str() ) );
+			infoMsgToClients(-1, va("%s ^7has changed identities", client->pers.netname.c_str()));
 		}
 
 		// If the client is changing their name then handle some delayed name changes
@@ -858,19 +888,19 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 			// Dont let them change their name too much
 			if ( level.time - client->pers.netnameTime < 5000 )
 			{
-				trap_SendServerCommand ( client - &level.clients[0], "print \"You must wait 5 seconds before changing your name again.\n\"" );
+				infoMsgToClients(client->ps.clientNum, "You must wait 5 seconds before changing your name again");
 				client->pers.netname = oldname;
 			}
 			// If they are a ghost or spectating in an inf game their name is deferred
 			else if ( level.gametypeData->respawnType == RT_NONE && (client->sess.ghost || G_IsClientDead ( client ) ) )
 			{
-				trap_SendServerCommand ( client - &level.clients[0], "print \"Name changes while dead will be deferred until you spawn again.\n\"" );
+				infoMsgToClients(client->ps.clientNum, "Name changes while dead will be deferred until you spawn again");
 				strcpy ( client->pers.deferredname, client->pers.netname.c_str() );
 				client->pers.netname = oldname;
 			}
 			else
 			{
-				trap_SendServerCommand( -1, va("print \"%s ^7renamed to %s\n\"", oldname.c_str(), client->pers.netname.c_str()) );
+				infoMsgToClients(-1, va("%s ^7renamed to %s", oldname.c_str(), client->pers.netname.c_str()));
 				client->pers.netnameTime = level.time;
 			}
 		}
@@ -934,7 +964,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 		if (g_password.string[0] && strcmp(g_password.string, "none") != 0 &&
 			strcmp(g_password.string, userInfo.password.c_str()) != 0)
 		{
-			return "Invalid password";
+			return va("Invalid password: %s", userInfo.password.c_str());
 		}
 	}
 
@@ -962,7 +992,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	if ( firstTime ) 
 	{
-		trap_SendServerCommand( -1, va("print \"%s ^7is connecting...\n\"", client->pers.netname.c_str()) );
+		infoMsgToClients(-1, va("%s ^7is connecting..", client->pers.netname.c_str()));
 	}
 
 	// Broadcast team change if not going to spectator
@@ -1041,7 +1071,7 @@ void ClientBegin( int clientNum )
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
 		tent->s.clientNum = ent->s.clientNum;
 
-		trap_SendServerCommand( -1, va("print \"%s ^7entered the game\n\"", client->pers.netname.c_str()) );
+		infoMsgToClients(-1, va("%s ^7entered the game", client->pers.netname.c_str()));
 	}
 	
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
@@ -1371,7 +1401,7 @@ void ClientSpawn(gentity_t *ent)
 	// Handle a deferred name change
 	if ( client->pers.deferredname[0] )
 	{
-		trap_SendServerCommand( -1, va("print \"%s ^7renamed to %s\n\"", client->pers.netname.c_str(), client->pers.deferredname) );
+		infoMsgToClients(-1, va("%s ^7renamed to %s", client->pers.netname.c_str(), client->pers.deferredname));
 		client->pers.netname = client->pers.deferredname;
 		client->pers.deferredname[0] = '\0';
 		client->pers.netnameTime = level.time;

@@ -219,7 +219,6 @@ Handles user intended acceleration
 static void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel ) 
 {
 	// q2 style
-	int			i;
 	float		addspeed, accelspeed, currentspeed;
 
 	currentspeed = DotProduct (pm->ps->velocity, wishdir);
@@ -232,7 +231,7 @@ static void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel )
 		accelspeed = addspeed;
 	}
 	
-	for (i=0 ; i<3 ; i++) {
+	for (int i=0 ; i<3 ; i++) {
 		pm->ps->velocity[i] += accelspeed*wishdir[i];	
 	}
 }
@@ -1702,8 +1701,7 @@ void PM_CheckWeaponNotes ( void )
 						
 						// Update the seed
 						seed = pm->ps->stats[STAT_SEED];
-						Q_rand ( &seed );
-						seed = seed & 0xFFFF;
+						seed = irand(0, 65535);
 						pm->ps->stats[STAT_SEED] = seed;
 
 						PM_AddEvent(EV_FIRE_WEAPON);
@@ -2129,7 +2127,7 @@ static void PM_FinishWeaponChange( void )
 
 	PM_HandleWeaponAction(WACT_READY);
 
-	pm->ps->weaponTime = min(500,pm->ps->weaponTime);
+	pm->ps->weaponTime = min(150,pm->ps->weaponTime); // Henk 12/04/10 -> Faster weapon switch
 
 	PM_StartTorsoAnim( pm->ps, weaponData[pm->ps->weapon].animRaise, pm->ps->weaponAnimTime );
 }
@@ -2397,7 +2395,6 @@ PM_Weapon_UpdateKickAngles
 static void PM_Weapon_UpdateKickAngles(void)
 {
 	// bring our kickAngles back down to zero over time
-	int			i;
 	float		degreesCorrectedPerMSecond = 0.01f;
 	bool	firing;
 	float		degreesToCorrect = degreesCorrectedPerMSecond*pml.msec;
@@ -2422,7 +2419,7 @@ static void PM_Weapon_UpdateKickAngles(void)
 		// return a whole lot faster if not firing
 		VectorScale( kickAngles, 1.0f - (0.3f*((float)pml.msec/50.0f)), kickAngles );
 
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			if (kickAngles[i] >= 0 && kickAngles[i] < 0.05f)
 			{
@@ -2436,7 +2433,7 @@ static void PM_Weapon_UpdateKickAngles(void)
 	}
 	else
 	{
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			if (kickAngles[i] > 0)
 			{

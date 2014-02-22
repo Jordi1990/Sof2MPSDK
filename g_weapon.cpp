@@ -362,6 +362,7 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 
 					if ( maxinaccuracy )
 					{
+						
 						// Calculate the ratio of how far along the inaccuracy spread they are
 						accuracyRatio = 1.0f - ((inaccuracy - addinaccuracy) / (maxinaccuracy));
 						accuracyRatio = Com_Clampf ( 0.0f, 1.0f, accuracyRatio );

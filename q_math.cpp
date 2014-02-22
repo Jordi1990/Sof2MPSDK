@@ -96,13 +96,6 @@ vec3_t	bytedirs[NUMVERTEXNORMALS] =
 	{ -0.587785f, -0.425325f, -0.688191f }, { -0.688191f, -0.587785f, -0.425325f }
 };
 
-//==============================================================
-
-int		Q_rand(int *seed) {
-	*seed = (69069 * *seed + 1);
-	return *seed;
-}
-
 // this isn't a real cheap function to call!
 int DirToByte(vec3_t dir) {
 	int		i, best;

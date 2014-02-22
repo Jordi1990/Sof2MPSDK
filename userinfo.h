@@ -8,7 +8,7 @@ using namespace std;
 
 class userinfo {
 private:
-	void parseValue(const string &tag, const string &value, int clientId);
+	void parseValue(const string &tag, const string &value);
 public:
 	string ip;
 	int challenge;

@@ -251,8 +251,6 @@ static __inline void CrossProduct( const vec3_t v1, const vec3_t v2, vec3_t cros
 vec_t VectorNormalize (vec3_t v);		// returns vector length
 vec_t VectorNormalize2( const vec3_t v, vec3_t out );
 
-int		Q_rand( int *seed );
-
 #define random()	((rand () & 0x7fff) / ((float)0x7fff))
 #define crandom()	(2.0 * (random() - 0.5))
 

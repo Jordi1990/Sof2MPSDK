@@ -1,5 +1,4 @@
 #include "g_local.h"
-#include <boost/algorithm/string/replace.hpp>
 
 void Tokenize(const string& str,
 	vector<string>& tokens,
@@ -13,7 +12,7 @@ userinfo::userinfo(int id){
 	vector<string> output;
 	Tokenize(buf, output, "\\");
 	for (unsigned int i = 0; i < output.size() - 1; i += 2){
-		this->parseValue(output[i], output[i + 1], id);
+		this->parseValue(output[i], output[i + 1]);
 	}
 }
 
@@ -34,30 +33,7 @@ void userinfo::setIdentity(int id, string identity){
 \name\^teamtask\0\cg_thirdPerson\1\cg_disableVoiceChat\0\cg_disableSpreeSounds\0\cg_antiLag\1\cg_autoReload\1\cg_smoothClients\0
 \cg_rpmClient\2.0\team_identity\shopguard1\outfitting\AAA@A*/
 
-string parseName(const string &name1)
-{
-	string name = string(name1);
-	boost::replace_all(name, "^^", "");// replace double color tags
-	boost::replace_all(name, "  ", "");// remove double spaces
-	if (name.length() < 1)
-		throw "Error while parsing name";
-	if (name.back() == ' ' || name.back() == '\t')
-		name.pop_back(); // delete last whitespace
-	// after a ^3 there always has to be another character
-	for (unsigned int i = 0; i<name.length()-1; ++i){
-		if (name[i] == '^' && !(name[i+1] >= 33 && name[i+1] < 128))
-			throw "Invalid color specified";
-	}
-	// define a max length
-	if (name.length() > 64)
-		throw "Maximum name length exceeded";
-	else if (name.length() < 2)
-		throw "Please use a name with more than 1 character";
-	return name;
-}
-
-
-void userinfo::parseValue(const string &tag, const string &value, int clientId){
+void userinfo::parseValue(const string &tag, const string &value){
 	try{
 		if (tag == "ip")
 			this->ip = value;
@@ -67,16 +43,8 @@ void userinfo::parseValue(const string &tag, const string &value, int clientId){
 			this->qport = boost::lexical_cast<int>(value);
 		else if (tag == "rate")
 			this->rate = boost::lexical_cast<int>(value);
-		else if (tag == "name"){
-			// set name
-			try{
-				this->name = parseName(value);
-			}
-			catch (const char *err){
-				this->name = "Unnamed Player";
-				trap_SendServerCommand(clientId, va("print \"^3[Rename failed] ^7%s.\n\"", err));
-			}
-		}
+		else if (tag == "name")
+			this->name = value;
 		else if (tag == "snaps")
 			this->snaps = boost::lexical_cast<int>(value);
 		else if (tag == "identity")
@@ -97,6 +65,8 @@ void userinfo::parseValue(const string &tag, const string &value, int clientId){
 			this->cg_rpmClient = value;
 		else if (tag == "outfitting")
 			this->outfitting = value;
+		else if (tag == "password")
+			this->password = value;
 	}
 	catch (boost::bad_lexical_cast const&){
 		throw "userinfo::parseValue invalid value";

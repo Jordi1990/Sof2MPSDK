@@ -13,6 +13,10 @@ Q_EXPORT void dllEntry( intptr_t ( *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
 }
 
+void infoMsgToClients(int clientNum, const char *msg){ 
+	trap_SendServerCommand(clientNum, va("print \"^3[Info] ^7%s.\n\"", msg));
+} // Henk 22/02/2014 -> So we use less code and have the same layout message everywhere.
+
 int PASSFLOAT( float x ) {
 	float	floatTemp;
 	floatTemp = x;
@@ -207,14 +211,6 @@ void *trap_BotGetMemoryGame(int size)
 void trap_BotFreeMemoryGame(void *ptr)
 {
 	syscall( G_BOT_FREE_MEMORY, ptr);
-}
-
-int trap_DebugPolygonCreate(int color, int numPoints, vec3_t *points) {
-	return syscall( G_DEBUG_POLYGON_CREATE, color, numPoints, points );
-}
-
-void trap_DebugPolygonDelete(int id) {
-	syscall( G_DEBUG_POLYGON_DELETE, id );
 }
 
 void trap_SnapVector( float *v ) {

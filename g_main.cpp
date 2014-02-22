@@ -225,7 +225,12 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 			G_ShutdownGame( arg0 );
 			return 0;
 		case GAME_CLIENT_CONNECT:
-			return (int)ClientConnect( arg0, arg1, arg2 );
+			try{
+				return (intptr_t)ClientConnect(arg0, arg1, arg2);
+			}
+			catch (char *ex){
+				return (intptr_t)ex;
+			}
 		case GAME_CLIENT_THINK:
 			ClientThink( arg0 );
 			return 0;
