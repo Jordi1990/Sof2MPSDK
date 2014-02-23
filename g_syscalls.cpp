@@ -13,9 +13,10 @@ Q_EXPORT void dllEntry( intptr_t ( *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
 }
 
+// Henk 22/02/2014 -> So we use less code and have the same layout message everywhere.
 void infoMsgToClients(int clientNum, const char *msg){ 
 	trap_SendServerCommand(clientNum, va("print \"^3[Info] ^7%s.\n\"", msg));
-} // Henk 22/02/2014 -> So we use less code and have the same layout message everywhere.
+}
 
 int PASSFLOAT( float x ) {
 	float	floatTemp;

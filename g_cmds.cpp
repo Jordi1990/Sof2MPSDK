@@ -2,6 +2,13 @@
 //
 #include "g_local.h"
 
+// Henk 23/02/14 -> New command system for normal commands
+typedef struct
+{
+	string	cmd; // command
+	void(*Function)(gentity_t *ent); // store pointer to the given function so we can call it later
+} cmd_t;
+
 /*
 ==================
 DeathmatchScoreboardMessage
@@ -1742,6 +1749,55 @@ void Cmd_SetViewpos_f( gentity_t *ent )
 	TeleportPlayer( ent, origin, angles );
 }
 
+//Some wrappers for new command system
+void Cmd_Say_All(gentity_t *ent){
+	Cmd_Say_f(ent, SAY_ALL, false);
+}
+
+void Cmd_Say_Team(gentity_t *ent){
+	Cmd_Say_f(ent, SAY_TEAM, false);
+}
+
+void Cmd_Voice(gentity_t *ent){
+	Cmd_Voice_f(ent, SAY_TEAM, false, false);
+}
+
+void Cmd_FollowCycle_next(gentity_t *ent){
+	Cmd_FollowCycle_f(ent, 1);
+}
+
+void Cmd_FollowCycle_prev(gentity_t *ent){
+	Cmd_FollowCycle_f(ent, -1);
+}
+// End wrappers
+
+static cmd_t consoleCommands[] =
+{
+	{ "say", &Cmd_Say_All },
+	{ "say_team", &Cmd_Say_Team },
+	{ "tell", &Cmd_Tell_f },
+	{ "vsay_team", &Cmd_Voice },
+	{ "score", &Cmd_Score_f },
+	{ "team", &Cmd_Team_f},
+
+	{ "drop", &Cmd_Drop_f },
+	{ "dropitem", &Cmd_DropItem_f },
+	{ "give", &Cmd_Give_f },
+	{ "god", &Cmd_God_f },
+	{ "noclip", &Cmd_Noclip_f },
+	{ "kill", &Cmd_Kill_f },
+	{ "levelshot", &Cmd_LevelShot_f },
+	{ "follow", &Cmd_Follow_f },
+	{ "follownext", &Cmd_FollowCycle_next },
+	{ "followprev", &Cmd_FollowCycle_prev },
+	{ "where", &Cmd_Where_f },
+	{ "callvote", &Cmd_CallVote_f },
+	{ "vote", &Cmd_Vote_f },
+	{ "setviewpos", &Cmd_SetViewpos_f },
+};
+
+static int consoleCommandsSize = sizeof(consoleCommands) / sizeof(consoleCommands[0]);
+
 /*
 =================
 ClientCommand
@@ -1756,77 +1812,13 @@ void ClientCommand( int clientNum ) {
 		return;		// not fully in game yet
 	}
 
-
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-	if (strcmp (cmd, "say") == 0) {
-		Cmd_Say_f (ent, SAY_ALL, false);
-		return;
+	for (int i = 0; i < consoleCommandsSize; i++){
+		if (consoleCommands[i].cmd.compare(cmd)){
+			consoleCommands[i].Function(ent);
+			return;
+		}
 	}
-	if (strcmp (cmd, "say_team") == 0) {
-		Cmd_Say_f (ent, SAY_TEAM, false);
-		return;
-	}
-	
-	if (strcmp (cmd, "tell") == 0) 
-	{
-		Cmd_Tell_f ( ent );
-		return;
-	}
-
-	if (strcmp (cmd, "vsay_team") == 0) 
-	{
-		Cmd_Voice_f (ent, SAY_TEAM, false, false);
-		return;
-	}
-
-	if (strcmp (cmd, "score") == 0) {
-		Cmd_Score_f (ent);
-		return;
-	}
-
-	if (strcmp (cmd, "team") == 0)
-	{
-		Cmd_Team_f (ent);
-		return;
-	}
-
-	// ignore all other commands when at intermission
-	if (level.intermissiontime) 
-	{
-//		Cmd_Say_f (ent, false, true);
-		return;
-	}
-
-	if (strcmp(cmd, "drop") == 0)
-		Cmd_Drop_f(ent);
-	else if (strcmp(cmd, "dropitem") == 0)
-		Cmd_DropItem_f(ent);
-	else if (strcmp (cmd, "give") == 0)
-		Cmd_Give_f (ent);
-	else if (strcmp (cmd, "god") == 0)
-		Cmd_God_f (ent);
-	else if (strcmp (cmd, "noclip") == 0)
-		Cmd_Noclip_f (ent);
-	else if (strcmp (cmd, "kill") == 0)
-		Cmd_Kill_f (ent);
-	else if (strcmp (cmd, "levelshot") == 0)
-		Cmd_LevelShot_f (ent);
-	else if (strcmp (cmd, "follow") == 0)
-		Cmd_Follow_f (ent);
-	else if (strcmp (cmd, "follownext") == 0)
-		Cmd_FollowCycle_f (ent, 1);
-	else if (strcmp (cmd, "followprev") == 0)
-		Cmd_FollowCycle_f (ent, -1);
-	else if (strcmp (cmd, "where") == 0)
-		Cmd_Where_f (ent);
-	else if (strcmp (cmd, "callvote") == 0)
-		Cmd_CallVote_f (ent);
-	else if (strcmp (cmd, "vote") == 0)
-		Cmd_Vote_f (ent);
-	else if (strcmp (cmd, "setviewpos") == 0)
-		Cmd_SetViewpos_f( ent );
-
-	else
-		infoMsgToClients(clientNum, va("unknown cmd %s", cmd));
+	infoMsgToClients(clientNum, va("Unknown command: %s", cmd));
 }
