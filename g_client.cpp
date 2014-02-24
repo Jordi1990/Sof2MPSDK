@@ -950,10 +950,8 @@ restarts.
 */
 char *ClientConnect( int clientNum, bool firstTime, bool isBot ) 
 {
-	char		userinfoBuf[MAX_INFO_STRING];
 	gentity_t	*ent = &g_entities[ clientNum ];
 
-	trap_GetUserinfo(clientNum, userinfoBuf, MAX_INFO_STRING);
 
 	userinfo userInfo(clientNum); // exception will be catched one call up so connect returns the reason why it failed
 	bool isLocal = userInfo.ip.compare("localhost") != 0;
@@ -990,6 +988,9 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	ClientUserinfoChanged( clientNum, &userInfo);
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
+
+	// TODO: create an Async task which fetches country and shows message when done
+	// Use API: http://ip2country.sourceforge.net/ip2c.php?ip=
 	if ( firstTime ) 
 	{
 		infoMsgToClients(-1, va("%s ^7is connecting..", client->pers.netname.c_str()));

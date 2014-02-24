@@ -239,6 +239,38 @@ typedef struct
 #define MAX_IDENTITY		64
 #define	MAX_VOTE_COUNT		3
 
+typedef struct statinfo_s
+{
+	int weapon_shots[2][WP_NUM_WEAPONS];
+	int weapon_hits[2][WP_NUM_WEAPONS];
+	int weapon_headshots[2][WP_NUM_WEAPONS];
+	int			weapon;
+	int			attack;
+	int         shotcount;
+	int		    hitcount;
+	float		accuracy;
+	float		ratio;
+	int         handhits;
+	int         foothits;
+	int         armhits;
+	int         leghits;
+	int         headhits;
+	int         neckhits;
+	int         torsohits;
+	int         waisthits;
+	int			headShotKills;
+	int			kills;
+	int			killsinarow;
+	int			deaths;
+	int			damageDone;
+	int			damageTaken;
+	int			lastclient_hurt;
+	int			lasthurtby;
+	int			overallScore;
+	int			explosiveKills;
+	int			knifeKills;
+} statinfo_t;
+
 // client data that stays across multiple respawns, but is cleared
 // on each level change or team change at ClientBegin()
 typedef struct 
@@ -260,6 +292,8 @@ typedef struct
 	playerTeamState_t	teamState;					// status in teamplay games
 	int					voteCount;					// to prevent people from constantly calling votes
 	int					firemode[MAX_WEAPONS];		// weapon firemodes
+
+	statinfo_t			statinfo;					// This holds the client's stats (stuns, last damage by, etc..).
 
 } clientPersistant_t;
 
@@ -368,6 +402,8 @@ struct gclient_s
 	vec3_t			ghoulHeadAngles;
 
 	gentity_t		*siameseTwin;
+
+	float	rpmClient;
 };
 
 
@@ -494,6 +530,8 @@ typedef struct
 	bool		pickupsDisabled;
 
 	int				timeExtension;
+
+	int lastTMIUpdate;
 
 } level_locals_t;
 
@@ -825,6 +863,9 @@ extern	vmCvar_t	g_teamkillDamageForgive;
 extern	vmCvar_t	g_voiceFloodCount;
 extern	vmCvar_t	g_voiceFloodPenalty;
 
+// new cvars
+extern	vmCvar_t	g_clientTMIUpdate;
+
 void	trap_Print( const char *text );
 void	trap_Error( const char *text );
 int		trap_Milliseconds( void );
@@ -895,4 +936,6 @@ void infoMsgToClients(int clientNum, const char *msg);
 #include "gametype_inf.h"
 
 extern Gametype *gtCore;
+
+void RPM_UpdateTMI();
 #endif

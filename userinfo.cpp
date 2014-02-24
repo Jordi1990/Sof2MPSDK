@@ -67,6 +67,8 @@ void userinfo::parseValue(const string &tag, const string &value){
 			this->outfitting = value;
 		else if (tag == "password")
 			this->password = value;
+		else if (tag == "cg_rpmClient")
+			this->cg_rpmClient = boost::lexical_cast<float>(value);;
 	}
 	catch (boost::bad_lexical_cast const&){
 		throw "userinfo::parseValue invalid value";

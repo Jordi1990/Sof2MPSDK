@@ -114,6 +114,7 @@
     <ClCompile Include="g_weapon.cpp" />
     <ClCompile Include="q_math.cpp" />
     <ClCompile Include="q_shared.cpp" />
+    <ClCompile Include="rpm.cpp" />
     <ClCompile Include="userinfo.cpp" />
   </ItemGroup>
   <ItemGroup>

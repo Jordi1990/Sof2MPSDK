@@ -117,6 +117,9 @@
     <ClCompile Include="userinfo.cpp">
       <Filter>Source Files\userinfo</Filter>
     </ClCompile>
+    <ClCompile Include="rpm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h">

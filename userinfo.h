@@ -22,7 +22,7 @@ public:
 	bool cl_anonymous;
 	bool cg_predictItems;
 	bool teamtask;
-	bool cg_thirdPerson;
+	short cg_thirdPerson = 2; // short because it can be another value besides true/false
 	bool cg_antiLag;
 	bool cg_autoReload;
 	bool cg_smoothClients;

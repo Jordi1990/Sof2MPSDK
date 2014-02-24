@@ -16,61 +16,57 @@ DeathmatchScoreboardMessage
 */
 void DeathmatchScoreboardMessage( gentity_t *ent ) 
 {
-	char		entry[1024];
-	char		string[1400];
-	int			stringlength;
-	int			j;
-	gclient_t	*cl;
-	int			numSorted;
+	string scoreboardString;
 
-	// send the latest information on all clients
-	string[0]    = 0;
-	stringlength = 0;
-
-	numSorted = level.numConnectedClients;
-	
-	for (int i=0 ; i < numSorted ; i++) 
+	for (int i = 0; i < level.numConnectedClients; i++)
 	{
 		int	ping;
+		char entry[36];
+		gclient_t *cl = &level.clients[level.sortedClients[i]];
 
-		cl = &level.clients[level.sortedClients[i]];
-
-		if ( cl->pers.connected == CON_CONNECTING ) 
+		if (cl->pers.connected == CON_CONNECTING)
 		{
 			ping = -1;
-		} 
-		else 
+		}
+		else
 		{
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
-	
-		sprintf_s (entry, sizeof(entry),
-			" %i %i %i %i %i %i %i %i %i", 
+
+		if (cl->rpmClient > 0.5)
+		sprintf_s(entry, 36,
+			" %i %i %i %i %i %i %i %i %i %.2f %i",
 			level.sortedClients[i],
-			cl->sess.score, 
-			cl->sess.kills, 
-			cl->sess.deaths, 
-			ping, 
+			cl->sess.score,
+			cl->sess.kills,
+			cl->sess.deaths,
+			ping,
+			(level.time - cl->pers.enterTime) / 60000,
+			(cl->sess.ghost || cl->ps.pm_type == PM_DEAD) ? true : false,
+			g_entities[level.sortedClients[i]].s.gametypeitems,
+			g_teamkillDamageMax.integer ? 100 * cl->sess.teamkillDamage / g_teamkillDamageMax.integer : 0,
+			cl->pers.statinfo.accuracy,
+			cl->pers.statinfo.headShotKills,
+			cl->pers.statinfo.damageDone
+			);
+		else
+			sprintf_s(entry, 36,
+			" %i %i %i %i %i %i %i %i %i",
+			level.sortedClients[i],
+			cl->sess.score,
+			cl->sess.kills,
+			cl->sess.deaths,
+			ping,
 			(level.time - cl->pers.enterTime)/60000,
 			(cl->sess.ghost || cl->ps.pm_type == PM_DEAD) ? true : false,
 			g_entities[level.sortedClients[i]].s.gametypeitems,
 			g_teamkillDamageMax.integer ? 100 * cl->sess.teamkillDamage / g_teamkillDamageMax.integer : 0
 			);
 
-		j = strlen(entry);
-		if (stringlength + j > 1022 )
-		{
-			break;
-		}
-
-		strcpy (string + stringlength, entry);
-		stringlength += j;
-
-		trap_SendServerCommand(ent - g_entities, va("scores %i %i %i%s", i,
-			level.teamScores[TEAM_RED],
-			level.teamScores[TEAM_BLUE],
-			string));
+		scoreboardString.append(entry);
 	}
+	trap_SendServerCommand(ent->s.number, va("scores %i %i %i%s", level.numConnectedClients, level.teamScores[TEAM_RED], level.teamScores[TEAM_BLUE],
+		scoreboardString.c_str()));
 }
 
 
@@ -1815,7 +1811,7 @@ void ClientCommand( int clientNum ) {
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
 	for (int i = 0; i < consoleCommandsSize; i++){
-		if (consoleCommands[i].cmd.compare(cmd)){
+		if (consoleCommands[i].cmd == cmd){
 			consoleCommands[i].Function(ent);
 			return;
 		}

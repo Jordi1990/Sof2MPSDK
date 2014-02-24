@@ -84,6 +84,10 @@ vmCvar_t	g_voiceFloodPenalty;			// Amount of time a void flooder must wait befor
 vmCvar_t	RMG;
 vmCvar_t	g_debugRMG;
 
+// new cvars
+
+vmCvar_t g_clientTMIUpdate;
+
 static cvarTable_t gameCvarTable[] = 
 {
 	// don't override the cheat state set by the system
@@ -186,6 +190,9 @@ static cvarTable_t gameCvarTable[] =
 	{ &g_teamkillPenalty,		"g_teamkillPenalty",		"-1",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,	false },
 	{ &g_teamkillDamageMax,		"g_teamkillDamageMax",		"300",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
 	{ &g_teamkillDamageForgive,	"g_teamkillDamageForgive",	"50",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
+
+	// new cvars //g_clientTMIUpdate
+	{ &g_clientTMIUpdate, "g_clientTMIUpdate", "2000", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 500, 10000, 0, false },
 };
 
 // bk001129 - made static to avoid aliasing
@@ -898,8 +905,8 @@ due to enters/exits/forced team changes
 ========================
 */
 void SendScoreboardMessageToAllClients( void ) {
-	for (int i = 0 ; i < level.maxclients ; i++ ) {
-		if ( level.clients[ i ].pers.connected == CON_CONNECTED ) {
+	for (int i = 0 ; i < level.numConnectedClients ; i++ ) {
+		if ( level.clients[level.sortedClients[ i ]].pers.connected == CON_CONNECTED ) {
 			DeathmatchScoreboardMessage( g_entities + i );
 		}
 	}
@@ -1696,6 +1703,8 @@ void G_RunFrame( int levelTime )
 
 	// Update gametype stuff
 	gtCore->update();
+
+	RPM_UpdateTMI(); // called every 2sec(default) -> Customizable with cvar g_clientTMIUpdate
 
 	// cancel vote if timed out
 	CheckVote();
