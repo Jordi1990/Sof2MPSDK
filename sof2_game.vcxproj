@@ -104,6 +104,7 @@
     <ClCompile Include="g_missile.cpp" />
     <ClCompile Include="g_mover.cpp" />
     <ClCompile Include="g_session.cpp" />
+    <ClCompile Include="g_sounds.cpp" />
     <ClCompile Include="g_spawn.cpp" />
     <ClCompile Include="g_svcmds.cpp" />
     <ClCompile Include="g_syscalls.cpp" />

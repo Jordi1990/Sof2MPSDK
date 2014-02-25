@@ -23,7 +23,7 @@ void RPM_UpdateTMI()
 
 		char entry[32];
 		sprintf_s(entry, 32,
-			" %i %i %i %i %i %i %s %i %i",
+			" %i %i %i %i %i %i %i %i %i",
 			level.sortedClients[i],
 			cl->ps.stats[STAT_HEALTH],
 			cl->ps.stats[STAT_ARMOR],

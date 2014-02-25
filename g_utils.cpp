@@ -592,12 +592,11 @@ void G_PlayEffect(int fxID, vec3_t org, vec3_t ang)
 G_Sound
 =============
 */
-void G_Sound( gentity_t *ent, int channel, int soundIndex ) {
+void G_Sound( gentity_t *ent, int soundIndex ) {
 	gentity_t	*te;
 
 	te = G_TempEntity( ent->r.currentOrigin, EV_GENERAL_SOUND );
 	te->s.eventParm = soundIndex;
-	te->s.otherEntityNum = channel;
 }
 
 /*

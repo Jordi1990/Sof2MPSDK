@@ -120,6 +120,9 @@
     <ClCompile Include="rpm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_sounds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h">

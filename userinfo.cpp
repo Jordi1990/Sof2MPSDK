@@ -18,7 +18,7 @@ userinfo::userinfo(int id){
 
 void userinfo::writeUserInfo(int id){
 	char userInfoBuf[1024];
-	sprintf_s(userInfoBuf, 1024, "\\ip\\%s\rate\\%i\\cg_predictItems\\%i\\cl_anonymous\\%i\\identity\\%s\\snaps\\%i\\name\\%s\\cg_thirdPerson\\%i\\cg_antiLag\\%i\\cg_autoReload\\%i\\cg_smoothClients\\%i\\cg_rpmClient\\%s\\team_identity\\%s\\outfitting\\%s", ip.c_str(), rate, cg_predictItems, cl_anonymous, identity.c_str(), snaps, name.c_str(), cg_thirdPerson, cg_antiLag, cg_autoReload, cg_smoothClients, cg_rpmClient.c_str(), team_identity.c_str(), outfitting.c_str());
+	sprintf_s(userInfoBuf, 1024, "\\ip\\%s\rate\\%i\\cg_predictItems\\%i\\cl_anonymous\\%i\\identity\\%s\\snaps\\%i\\name\\%s\\cg_thirdPerson\\%i\\cg_antiLag\\%i\\cg_autoReload\\%i\\cg_smoothClients\\%i\\cg_rpmClient\\%.2f\\team_identity\\%s\\outfitting\\%s", ip.c_str(), rate, cg_predictItems, cl_anonymous, identity.c_str(), snaps, name.c_str(), cg_thirdPerson, cg_antiLag, cg_autoReload, cg_smoothClients, cg_rpmClient, team_identity.c_str(), outfitting.c_str());
 	trap_SetUserinfo(id, userInfoBuf);
 }
 
@@ -61,14 +61,12 @@ void userinfo::parseValue(const string &tag, const string &value){
 			this->cg_autoReload = boost::lexical_cast<bool>(value);
 		else if (tag == "cg_smoothClients")
 			this->cg_smoothClients = boost::lexical_cast<bool>(value);
-		else if (tag == "cg_rpmClient")
-			this->cg_rpmClient = value;
 		else if (tag == "outfitting")
 			this->outfitting = value;
 		else if (tag == "password")
 			this->password = value;
 		else if (tag == "cg_rpmClient")
-			this->cg_rpmClient = boost::lexical_cast<float>(value);;
+			this->cg_rpmClient = boost::lexical_cast<float>(value);
 	}
 	catch (boost::bad_lexical_cast const&){
 		throw "userinfo::parseValue invalid value";

@@ -606,7 +606,7 @@ void	G_InitGentity( gentity_t *e );
 gentity_t	*G_Spawn (void);
 gentity_t *G_TempEntity( vec3_t origin, int event );
 void	G_PlayEffect(int fxID, vec3_t org, vec3_t ang);
-void	G_Sound( gentity_t *ent, int channel, int soundIndex );
+void	G_Sound( gentity_t *ent, int soundIndex );
 void	G_FreeEntity( gentity_t *e );
 
 void	G_TouchTriggers (gentity_t *ent);
@@ -938,4 +938,9 @@ void infoMsgToClients(int clientNum, const char *msg);
 extern Gametype *gtCore;
 
 void RPM_UpdateTMI();
+
+// g_sounds.cpp
+void ParseChatSounds();
+string parseChatTokens(gentity_t *ent, const char *message, int *outSound);
+void globalSound(int soundIndex);
 #endif

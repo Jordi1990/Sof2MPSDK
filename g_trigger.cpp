@@ -215,7 +215,7 @@ void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator ) 
 	// play fly sound every 1.5 seconds
 	if ( activator->fly_sound_debounce_time < level.time ) {
 		activator->fly_sound_debounce_time = level.time + 1500;
-		G_Sound( activator, 0, self->noise_index );
+		G_Sound( activator, self->noise_index );
 	}
 }
 

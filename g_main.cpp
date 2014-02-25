@@ -635,6 +635,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 		trap_SetConfigstring( CS_MUSIC, temp );
 	}
 
+	ParseChatSounds();
+
 	trap_SetConfigstring( CS_VOTE_TIME, "" );
 }
 

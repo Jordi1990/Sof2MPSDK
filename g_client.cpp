@@ -810,6 +810,8 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 		userInfo = new userinfo(clientNum);
 	}
 
+	client->rpmClient = userInfo->cg_rpmClient;
+
 	ent->client->pers.predictItemPickup = userInfo->cg_predictItems;
 	ent->client->pers.autoReload = userInfo->cg_autoReload;
 	ent->client->pers.antiLag = userInfo->cg_antiLag;
@@ -974,7 +976,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	client->pers.connected = CON_CONNECTING;
 	client->sess.team = TEAM_SPECTATOR;
 	client->pers.localClient = isLocal;
-
+	client->rpmClient = userInfo.cg_rpmClient;
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) 
 	{

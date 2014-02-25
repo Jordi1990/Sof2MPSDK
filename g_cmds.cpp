@@ -1000,22 +1000,6 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, const char *nam
 {
 	bool	 ghost = false;
 	bool	 spec  = false;
-	const char*  type;
-
-	if (!other) 
-	{
-		return;
-	}
-
-	if (!other->inuse) 
-	{
-		return;
-	}
-
-	if (!other->client) 
-	{
-		return;
-	}
 
 	if ( other->client->pers.connected != CON_CONNECTED ) 
 	{
@@ -1052,20 +1036,21 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, const char *nam
 		}
 	}
 
-	type = "";
-	if ( ghost )
+	string type;
+	// Boe!Man 1/7/10: Team prefixes.
+	if (ghost)
 	{
-		type = "*ghost* ";
+		type = "^7[^Cg^7] ";
 	}
-	else if ( spec )
+	else if (spec)
 	{
-		type = "*spec* ";
+		type = "^7[^Cs^7] ";
 	}
 
 	trap_SendServerCommand( other-g_entities, va("%s %d \"%s%s%s\"", 
 							mode == SAY_TEAM ? "tchat" : "chat",
 							ent->s.number,
-							type, name, message));
+							type.c_str(), name, message));
 }
 
 /*
@@ -1174,8 +1159,6 @@ G_Say
 */
 void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 {
-	gentity_t	*other;
-	char		text[MAX_SAY_TEXT];
 	char		name[64];
 
 	// Logging stuff
@@ -1191,28 +1174,33 @@ void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
 	}
 
 	// Generate the chat prefix
-	G_GetChatPrefix ( ent, target, mode, name, sizeof(name) );
+	G_GetChatPrefix ( ent, target, mode, name, 64);
 
-	// Save off the chat text
-	strncpy( text, chatText, sizeof(text) );
+	//TODO: replace chat sounds
+	int outSound = -1;
+	string text = parseChatTokens(ent, chatText, &outSound);
 
 	if ( target ) 
 	{
-		G_SayTo( ent, target, mode, name, text );
+		G_SayTo( ent, target, mode, name, text.c_str() );
 		return;
 	}
 
 	// echo the text to the console
 	if ( g_dedicated.integer ) 
 	{
-		Com_Printf( "%s%s\n", name, text);
+		Com_Printf( "%s%s\n", name, text.c_str());
 	}
+
+	if (mode == SAY_ALL && outSound != -1)
+		globalSound(outSound);
 
 	// send it to all the apropriate clients
 	for (int j = 0; j < level.numConnectedClients; j++) 
 	{
-		other = &g_entities[level.sortedClients[j]];
-		G_SayTo( ent, other, mode, name, text );
+		if (outSound != -1)
+			G_Sound(&g_entities[level.sortedClients[j]], outSound);
+		G_SayTo(ent, &g_entities[level.sortedClients[j]], mode, name, text.c_str());
 	}
 }
 

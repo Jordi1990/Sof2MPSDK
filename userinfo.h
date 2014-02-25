@@ -26,7 +26,7 @@ public:
 	bool cg_antiLag;
 	bool cg_autoReload;
 	bool cg_smoothClients;
-	string cg_rpmClient;
+	float cg_rpmClient;
 	string team_identity = "mullinsjungle";
 	string outfitting = "AAAA";
 
