@@ -6,13 +6,21 @@ void Tokenize(const string& str,
 
 userinfo::userinfo(int id){
 	// parse userinfo
-	char userInfoBuf[MAX_INFO_STRING];
-	trap_GetUserinfo(id, userInfoBuf, MAX_INFO_STRING);
-	string buf = userInfoBuf;
-	vector<string> output;
-	Tokenize(buf, output, "\\");
-	for (unsigned int i = 0; i < output.size() - 1; i += 2){
-		this->parseValue(output[i], output[i + 1]);
+	try{
+		char userInfoBuf[MAX_INFO_STRING];
+		trap_GetUserinfo(id, userInfoBuf, MAX_INFO_STRING);
+		string buf = userInfoBuf;
+		vector<string> output;
+		Tokenize(buf, output, "\\");
+		for (unsigned int i = 0; i < output.size() - 1; i += 2){
+			this->parseValue(output[i], output[i + 1]);
+		}
+	}
+	catch (boost::bad_lexical_cast const &e){
+		Com_Printf("Exception in userinfo parsing(boost::bad_lexical_cast): %s\n", e.what());
+	}
+	catch (std::exception const &e){
+		Com_Printf("Exception in userinfo parsing(std::exception): %s\n", e.what());
 	}
 }
 
@@ -34,43 +42,56 @@ void userinfo::setIdentity(int id, string identity){
 \cg_rpmClient\2.0\team_identity\shopguard1\outfitting\AAA@A*/
 
 void userinfo::parseValue(const string &tag, const string &value){
-	try{
-		if (tag == "ip")
-			this->ip = value;
-		else if (tag == "challenge")
-			this->challenge = boost::lexical_cast<int>(value);
-		else if (tag == "qport")
-			this->qport = boost::lexical_cast<int>(value);
-		else if (tag == "rate")
+	if (tag == "ip")
+		this->ip = value;
+	else if (tag == "challenge")
+		this->challenge = boost::lexical_cast<int>(value);
+	else if (tag == "qport")
+		this->qport = boost::lexical_cast<int>(value);
+	else if (tag == "rate"){
+		try{
 			this->rate = boost::lexical_cast<int>(value);
-		else if (tag == "name")
+		}
+		catch (boost::bad_lexical_cast const&){
+			this->rate = 25000;
+		}
+	}
+	else if (tag == "name"){
+		try{
 			this->name = value;
-		else if (tag == "snaps")
+		}
+		catch (boost::bad_lexical_cast const&){
+			this->name = "Unnamed Player";
+		}
+	}
+	else if (tag == "snaps"){
+		try{
 			this->snaps = boost::lexical_cast<int>(value);
-		else if (tag == "identity")
-			this->identity = value;
-		else if (tag == "team_identity")
-			this->team_identity = value;
-		else if (tag == "cg_predictItems")
-			this->cg_predictItems = boost::lexical_cast<bool>(value);
-		else if (tag == "cg_thirdPerson")
-			this->cg_thirdPerson = boost::lexical_cast<bool>(value);
-		else if (tag == "cg_antiLag")
-			this->cg_antiLag = boost::lexical_cast<bool>(value);
-		else if (tag == "cg_autoReload")
-			this->cg_autoReload = boost::lexical_cast<bool>(value);
-		else if (tag == "cg_smoothClients")
-			this->cg_smoothClients = boost::lexical_cast<bool>(value);
-		else if (tag == "outfitting")
-			this->outfitting = value;
-		else if (tag == "password")
-			this->password = value;
-		else if (tag == "cg_rpmClient")
-			this->cg_rpmClient = boost::lexical_cast<float>(value);
+		}
+		catch (boost::bad_lexical_cast const&){
+			this->snaps = 40;
+		}
 	}
-	catch (boost::bad_lexical_cast const&){
-		throw "userinfo::parseValue invalid value";
-	}
+	else if (tag == "identity")
+		this->identity = value;
+	else if (tag == "team_identity")
+		this->team_identity = value;
+	else if (tag == "cg_predictItems")
+		this->cg_predictItems = boost::lexical_cast<bool>(value);
+	else if (tag == "cg_thirdPerson")
+		this->cg_thirdPerson = boost::lexical_cast<bool>(value);
+	else if (tag == "cg_antiLag")
+		this->cg_antiLag = boost::lexical_cast<bool>(value);
+	else if (tag == "cg_autoReload")
+		this->cg_autoReload = boost::lexical_cast<bool>(value);
+	else if (tag == "cg_smoothClients")
+		this->cg_smoothClients = boost::lexical_cast<bool>(value);
+	else if (tag == "outfitting")
+		this->outfitting = value;
+	else if (tag == "password")
+		this->password = value;
+	else if (tag == "cg_rpmClient")
+		this->cg_rpmClient = boost::lexical_cast<float>(value);
 }
 
 userinfo::~userinfo(){

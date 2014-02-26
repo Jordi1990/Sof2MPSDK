@@ -756,23 +756,23 @@ int  SortRanks( const void *a, const void *b )
 	}
 
 	// then sort by kills
-	if ( ca->sess.kills > cb->sess.kills ) 
+	if ( ca->pers.statinfo.kills > cb->pers.statinfo.kills ) 
 	{
 		return -1;
 	}
 	
-	if ( ca->sess.kills < cb->sess.kills ) 
+	if ( ca->pers.statinfo.kills < cb->pers.statinfo.kills ) 
 	{
 		return 1;
 	}
 
 	// then sort by deaths
-	if ( ca->sess.deaths > cb->sess.deaths ) 
+	if ( ca->pers.statinfo.deaths > cb->pers.statinfo.deaths ) 
 	{
 		return -1;
 	}
 	
-	if ( ca->sess.deaths < cb->sess.deaths ) 
+	if ( ca->pers.statinfo.deaths < cb->pers.statinfo.deaths ) 
 	{
 		return 1;
 	}

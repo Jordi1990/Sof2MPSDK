@@ -225,8 +225,6 @@ typedef struct
 	spectatorState_t	spectatorState;			
 	int					spectatorClient;		// for chasecam and follow mode
 	int					score;					// total score
-	int					kills;					// number of kills
-	int					deaths;					// number of deaths
 	bool			ghost;					// Whether or not the player is a ghost (sticks past team change)
 	int					teamkillDamage;			// amount of damage death to teammates
 	int					teamkillForgiveTime;	// time when team damage will be forgivin
@@ -294,6 +292,8 @@ typedef struct
 	int					firemode[MAX_WEAPONS];		// weapon firemodes
 
 	statinfo_t			statinfo;					// This holds the client's stats (stuns, last damage by, etc..).
+	float	rpmClient;
+	string	cleanName;
 
 } clientPersistant_t;
 
@@ -402,8 +402,6 @@ struct gclient_s
 	vec3_t			ghoulHeadAngles;
 
 	gentity_t		*siameseTwin;
-
-	float	rpmClient;
 };
 
 
@@ -937,10 +935,14 @@ void infoMsgToClients(int clientNum, const char *msg);
 
 extern Gametype *gtCore;
 
+// rpm.cpp
 void RPM_UpdateTMI();
+void clientRefresh(gentity_t *ent);
+void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t attack, int hitLocation);
 
 // g_sounds.cpp
 void ParseChatSounds();
 string parseChatTokens(gentity_t *ent, const char *message, int *outSound);
 void globalSound(int soundIndex);
+bool isVoiceFlooded(gentity_t *ent);
 #endif

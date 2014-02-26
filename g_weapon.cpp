@@ -220,6 +220,8 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 
 	gbullethit_t	hit[MAX_HITS];
 
+	statinfo_t  *stat = &ent->client->pers.statinfo;
+
 	// Grab the firing info
 	weaponDat = &weaponData[ent->s.weapon];
 	attackDat = &weaponDat->attack[attack];
@@ -275,6 +277,9 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 	for (int i = 0; i < attackDat->pellets; i++) 
 	{
 		int location = HL_NONE;
+
+		stat->weapon_shots[attack][weapon]++;
+		stat->shotcount++;
 
 		// Determine the endpoint for the bullet
 		BG_CalculateBulletEndpoint ( muzzlePoint, fireAngs, inaccuracy, attackDat->rV.range + 15, end, &seed );
@@ -464,6 +469,65 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 				VectorCopy ( tr.endpos, hit[hitcount].origin );
 
 				hitcount++;
+
+				stat->weapon = weapon;
+				//set the weapons attack used (for RPM_Obituary)
+				stat->attack = attack;
+
+				//Add to the number of hits for this client, If it was a teamate dont count it
+				if (!level.gametypeData->teams || !OnSameTeam(ent, traceEnt))
+				{
+					//add the total for the weapon
+					stat->weapon_hits[attack][weapon]++;
+					//add to the hit total
+					stat->hitcount++;
+
+					switch (location)
+					{
+					case HL_FOOT_RT:
+					case HL_FOOT_LT:
+						stat->foothits++;
+						break;
+
+					case HL_HAND_RT:
+					case HL_HAND_LT:
+						stat->handhits++;
+						break;
+
+					case HL_ARM_RT:
+					case HL_ARM_LT:
+						stat->armhits++;
+						break;
+
+					case HL_LEG_UPPER_RT:
+					case HL_LEG_UPPER_LT:
+					case HL_LEG_LOWER_RT:
+					case HL_LEG_LOWER_LT:
+						stat->leghits++;
+						break;
+
+					case HL_HEAD:
+						stat->headhits++;
+						break;
+
+					case HL_NECK:
+						stat->neckhits++;
+						break;
+
+					case HL_BACK_RT:
+					case HL_BACK_LT:
+					case HL_BACK:
+					case HL_CHEST_RT:
+					case HL_CHEST_LT:
+					case HL_CHEST:
+						stat->torsohits++;
+						break;
+
+					case HL_WAIST:
+						stat->waisthits++;
+						break;
+					}
+				}
 			}
 		}
 
@@ -531,6 +595,8 @@ void G_FireBullet ( gentity_t* ent, int weapon, int attack )
 	// before damaging the client so the real bounding box and location are stored in
 	// the body
 	G_UndoAntiLag ( );
+
+	stat->accuracy = (float)stat->hitcount / (float)stat->shotcount * 100;
 
 	if ( hitcount )
 	{
@@ -613,6 +679,17 @@ gentity_t* G_FireProjectile ( gentity_t *ent, weapon_t weapon, attackType_t atta
 	for (int i = 0; i < attackDat->pellets; i++) 
 	{
 		vec3_t		dir;
+		{ // on the fly scope
+			statinfo_t  *stat = &ent->client->pers.statinfo;
+
+			stat->shotcount++;
+			if (weapon == WP_M4_ASSAULT_RIFLE)
+				stat->weapon_shots[ATTACK_ALTERNATE][weapon]++;
+			else
+				stat->weapon_shots[ATTACK_NORMAL][weapon]++;
+
+			stat->accuracy = (float)stat->hitcount / (float)stat->shotcount * 100;
+		}
 		VectorCopy( fwd, dir );
 		if ( inaccuracy != 0)
 		{	// add in some spread / scatter

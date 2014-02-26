@@ -180,7 +180,8 @@ string parseChatTokens(gentity_t *ent, const char *message, int *outSound){
 			int soundIndex = boost::lexical_cast<int>(sound)-1;
 			if (soundIndex >= 0 && soundIndex < numChatSounds){
 				result.append(chatSounds[soundIndex].text);
-				*outSound = chatSounds[soundIndex].sound;
+				if (!isVoiceFlooded(ent))
+					*outSound = chatSounds[soundIndex].sound;
 			}
 			else
 				result.append("@" + sound); // append sound string as normal
@@ -198,11 +199,44 @@ string parseChatTokens(gentity_t *ent, const char *message, int *outSound){
 		int soundIndex = boost::lexical_cast<int>(sound)-1;
 		if (soundIndex > 0 && soundIndex < numChatSounds){
 			result.append(chatSounds[soundIndex].text);
-			*outSound = chatSounds[soundIndex].sound;
+			if (!isVoiceFlooded(ent))
+				*outSound = chatSounds[soundIndex].sound;
 		}
 		else
 			result.append("@" + sound); // append sound string as normal
 		parseSound = false;
 	}
 	return result;
+}
+
+bool isVoiceFlooded(gentity_t *ent){
+	if (g_voiceFloodCount.integer)
+	{
+		// If this client has been penalized for voice chatting to much then dont allow the voice chat
+		if (ent->client->voiceFloodPenalty)
+		{
+			if (ent->client->voiceFloodPenalty > level.time)
+			{
+				return true;
+			}
+
+			// No longer penalized
+			ent->client->voiceFloodPenalty = 0;
+		}
+
+		// See if this client flooded with voice chats
+		ent->client->voiceFloodCount++;
+		if (ent->client->voiceFloodCount >= g_voiceFloodCount.integer)
+		{
+			ent->client->voiceFloodCount = 0;
+			ent->client->voiceFloodTimer = 0;
+			ent->client->voiceFloodPenalty = level.time + g_voiceFloodPenalty.integer * 1000;
+
+			infoMsgToClients(ent->client->ps.clientNum, va("Voice chat flooded, you will be able use voice chats again in (%d) seconds", g_voiceFloodPenalty.integer));
+
+			return true;
+		}
+		return false;
+	}else
+		return false;
 }

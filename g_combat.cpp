@@ -224,8 +224,14 @@ void player_die(
 		//trap_GT_SendEvent ( GTEV_CLIENT_DEATH, level.time, self->s.number, self->client->sess.team, -1, -1, 0 ); 
 	}
 
+	if (attacker && attacker != self && attacker->client && self->client->pers.statinfo.killsinarow >= 3)
+	{
+		trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@^7%s's killing spree was ended by ^3%s", level.time + 5000, self->client->pers.netname, attacker->client->pers.netname));
+	}
+
 	// Add to the number of deaths for this player
-	self->client->sess.deaths++;
+	self->client->pers.statinfo.killsinarow = 0;
+	self->client->pers.statinfo.deaths++;
 
 	// This is just to ensure that the player wont render for even a single frame
 	self->s.eFlags |= EF_DEAD;
@@ -275,8 +281,7 @@ void player_die(
 	// If the weapon was charging then drop it with no forward velocity
 	if ( self->client->ps.grenadeTimer )
 	{
-		gentity_t* missile;
-		missile = G_FireWeapon( self, ATTACK_NORMAL );
+		gentity_t* missile = G_FireWeapon( self, ATTACK_NORMAL );
 		if ( missile )
 		{
 			VectorClear ( missile->s.pos.trDelta );
@@ -317,8 +322,9 @@ void player_die(
 		else 
 		{
 			G_AddScore( attacker, 1 );
-			attacker->client->sess.kills++;
-	
+			attacker->client->pers.statinfo.killsinarow++;
+			attacker->client->pers.statinfo.kills++;
+
 			attacker->client->lastKillTime = level.time;
 		}
 	}
@@ -326,6 +332,23 @@ void player_die(
 	{
 		G_AddScore( self, g_suicidePenalty.integer );
 	}
+
+	RPM_Obituary(self, attacker, meansOfDeath, attack, hitLocation);
+
+	if (attacker && attacker->client && attacker != self)
+	{
+		if (attacker->client->pers.statinfo.deaths)
+			attacker->client->pers.statinfo.ratio = (float)attacker->client->pers.statinfo.kills / (float)attacker->client->pers.statinfo.deaths;
+		else
+			attacker->client->pers.statinfo.ratio = attacker->client->pers.statinfo.kills;
+	}
+	//Careful if this "if" isnt here and they die from changing teams
+	//before they have any other deaths we will divide by 0 since
+	//we dont add deaths incurred from changing teams
+	if (self->client->pers.statinfo.deaths)
+		self->client->pers.statinfo.ratio = (float)self->client->pers.statinfo.kills / (float)self->client->pers.statinfo.deaths;
+	else
+		self->client->pers.statinfo.ratio = (float)self->client->pers.statinfo.kills;
 
 	// If client is in a nodrop area, don't drop anything
 	contents = trap_PointContents( self->r.currentOrigin, -1 );
@@ -912,6 +935,8 @@ int G_Damage (
 	asave = CheckArmor (targ, take, dflags);
 	take -= asave;
 
+	int actualtake = Com_Clamp(0, targ->health, take);
+
 	// Teamkill dmage thats not caused by a telefrag?
 	if ( g_teamkillDamageMax.integer && mod != MOD_TELEFRAG )
 	{
@@ -923,8 +948,6 @@ int G_Damage (
 				// Dont count more than one damage call per frame (grenades!)
 				if ( level.time != attacker->client->sess.teamkillForgiveTime )
 				{
-					int actualtake = Com_Clamp ( 0, targ->health, take );
-
 					attacker->client->sess.teamkillDamage	   += actualtake;
 					attacker->client->sess.teamkillForgiveTime  = level.time;
 				}
@@ -992,6 +1015,12 @@ int G_Damage (
 		targ->client->lasthurt_client = attacker->s.number;
 		targ->client->lasthurt_time = level.time;
 		targ->client->lasthurt_mod = mod;
+
+		if (attacker->client)
+		{
+			targ->client->pers.statinfo.lasthurtby = attacker->s.number;
+			attacker->client->pers.statinfo.lastclient_hurt = targ->s.number;
+		}
 	}
 
 	// do the damage
@@ -1001,6 +1030,19 @@ int G_Damage (
 
 		if ( targ->client )
 		{
+			if (targ == attacker)
+			{
+				targ->client->pers.statinfo.damageTaken += actualtake;
+			}
+			else if (level.gametypeData->teams && OnSameTeam(targ, attacker))
+			{
+				attacker->client->pers.statinfo.damageDone -= actualtake;
+			}
+			else if (attacker && attacker->client){
+				attacker->client->pers.statinfo.damageDone += actualtake;
+				targ->client->pers.statinfo.damageTaken += actualtake;
+			}
+
 			targ->client->ps.stats[STAT_HEALTH] = targ->health;
 
 			if ( targ->health > 0 )

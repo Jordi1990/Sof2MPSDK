@@ -33,13 +33,13 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
 
-		if (cl->rpmClient > 0.5)
+		if (cl->pers.rpmClient > 0.5)
 		sprintf_s(entry, 36,
 			" %i %i %i %i %i %i %i %i %i %.2f %i",
 			level.sortedClients[i],
 			cl->sess.score,
-			cl->sess.kills,
-			cl->sess.deaths,
+			cl->pers.statinfo.kills,
+			cl->pers.statinfo.deaths,
 			ping,
 			(level.time - cl->pers.enterTime) / 60000,
 			(cl->sess.ghost || cl->ps.pm_type == PM_DEAD) ? true : false,
@@ -54,8 +54,8 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 			" %i %i %i %i %i %i %i %i %i",
 			level.sortedClients[i],
 			cl->sess.score,
-			cl->sess.kills,
-			cl->sess.deaths,
+			cl->pers.statinfo.kills,
+			cl->pers.statinfo.deaths,
 			ping,
 			(level.time - cl->pers.enterTime)/60000,
 			(cl->sess.ghost || cl->ps.pm_type == PM_DEAD) ? true : false,
@@ -1176,7 +1176,6 @@ void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
 	// Generate the chat prefix
 	G_GetChatPrefix ( ent, target, mode, name, 64);
 
-	//TODO: replace chat sounds
 	int outSound = -1;
 	string text = parseChatTokens(ent, chatText, &outSound);
 
@@ -1341,7 +1340,6 @@ G_Voice
 */
 void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, bool voiceonly ) 
 {
-	gentity_t	*other;
 	char		name[MAX_SAY_TEXT];
 
 	// Spectators and ghosts dont talk
@@ -1351,33 +1349,8 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, bool 
 	}
 
 	// Voice flooding protection on?
-	if ( g_voiceFloodCount.integer )
-	{
-		// If this client has been penalized for voice chatting to much then dont allow the voice chat
-		if ( ent->client->voiceFloodPenalty )
-		{
-			if ( ent->client->voiceFloodPenalty > level.time )
-			{
-				return;
-			}
-
-			// No longer penalized
-			ent->client->voiceFloodPenalty = 0;
-		}
-
-		// See if this client flooded with voice chats
-		ent->client->voiceFloodCount++;
-		if ( ent->client->voiceFloodCount >= g_voiceFloodCount.integer )
-		{
-			ent->client->voiceFloodCount = 0;
-			ent->client->voiceFloodTimer = 0;
-			ent->client->voiceFloodPenalty = level.time + g_voiceFloodPenalty.integer * 1000;
-
-			infoMsgToClients(ent->client->ps.clientNum, va("Voice chat flooded, you will be able use voice chats again in (%d) seconds", g_voiceFloodPenalty.integer));
-
-			return;
-		}
-	}
+	if (isVoiceFlooded(ent))
+		return;
 
 	G_GetChatPrefix ( ent, target, mode, name, sizeof(name) );
 
@@ -1390,8 +1363,7 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, bool 
 	// send it to all the apropriate clients
 	for (int j = 0; j < level.maxclients; j++) 
 	{
-		other = &g_entities[j];
-		G_VoiceTo( ent, other, mode, name, id, voiceonly );
+		G_VoiceTo(ent, &g_entities[j], mode, name, id, voiceonly);
 	}
 }
 
@@ -1778,6 +1750,7 @@ static cmd_t consoleCommands[] =
 	{ "callvote", &Cmd_CallVote_f },
 	{ "vote", &Cmd_Vote_f },
 	{ "setviewpos", &Cmd_SetViewpos_f },
+	{ "refresh", &clientRefresh }
 };
 
 static int consoleCommandsSize = sizeof(consoleCommands) / sizeof(consoleCommands[0]);

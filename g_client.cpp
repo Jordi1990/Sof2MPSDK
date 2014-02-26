@@ -763,8 +763,9 @@ void G_UpdateOutfitting ( int clientNum )
 	client->ps.stats[STAT_OUTFIT_GRENADE] = bg_itemlist[bg_outfittingGroups[OUTFITTING_GROUP_GRENADE][client->pers.outfitting.items[OUTFITTING_GROUP_GRENADE]]].giTag;
 }
 
-string parseName(const string &name1)
+string parseName(const string &name1, string *cleanName)
 {
+	*cleanName = "";
 	string name = string(name1);
 	boost::replace_all(name, "^^", "");// replace double color tags
 	boost::replace_all(name, "  ", "");// remove double spaces
@@ -776,9 +777,11 @@ string parseName(const string &name1)
 	for (unsigned int i = 0; i<name.length() - 1; ++i){
 		if (name[i] == '^' && !(name[i + 1] >= 33 && name[i + 1] < 128))
 			throw "Invalid color specified";
+		else if (!(name[i] == '^' && name[i + 1] >= 33 && name[i + 1] < 1))
+			cleanName->insert(cleanName->end(), name[i]);
 	}
 	// define a max length
-	if (name.length() > 64)
+	if (name.length() > 128)
 		throw "Maximum name length exceeded";
 	else if (name.length() < 2)
 		throw "Please use a name with more than 1 character";
@@ -810,7 +813,7 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 		userInfo = new userinfo(clientNum);
 	}
 
-	client->rpmClient = userInfo->cg_rpmClient;
+	client->pers.rpmClient = userInfo->cg_rpmClient;
 
 	ent->client->pers.predictItemPickup = userInfo->cg_predictItems;
 	ent->client->pers.autoReload = userInfo->cg_autoReload;
@@ -820,10 +823,11 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 
 	//set name
 	try{
-		client->pers.netname = parseName(userInfo->name);
+		client->pers.netname = parseName(userInfo->name, &client->pers.cleanName);
 	}
 	catch (const char *err){
 		client->pers.netname = "Unnamed Player";
+		client->pers.cleanName = client->pers.netname;
 		if (oldname != client->pers.netname)
 			trap_SendServerCommand(clientNum, va("print \"^_[Error] ^7Rename failed: %s.\n\"", err));
 	}
@@ -954,7 +958,6 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 {
 	gentity_t	*ent = &g_entities[ clientNum ];
 
-
 	userinfo userInfo(clientNum); // exception will be catched one call up so connect returns the reason why it failed
 	bool isLocal = userInfo.ip.compare("localhost") != 0;
 
@@ -976,7 +979,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	client->pers.connected = CON_CONNECTING;
 	client->sess.team = TEAM_SPECTATOR;
 	client->pers.localClient = isLocal;
-	client->rpmClient = userInfo.cg_rpmClient;
+	client->pers.rpmClient = userInfo.cg_rpmClient;
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) 
 	{
