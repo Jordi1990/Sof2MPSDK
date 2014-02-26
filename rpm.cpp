@@ -231,7 +231,7 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 				message2 = "Headshot!\n";//g_headShotMessage.string );
 			}
 
-			message3 = "{^3HeaDShoT^7}";
+			message3 = "^7{^3HeaDShoT^7}";
 		}
 		//if not headshot, suicide or tk just play the normal sound
 		else
@@ -256,10 +256,10 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 
 	gender = GENDER_MALE;
 
-	if (strstr(target->client->pers.identity->mCharacter->mModel, "female"))
-	{
-		gender = GENDER_FEMALE;
-	}
+	//if (target->client->pers.identity && target->client->pers.identity->mCharacter && strstr(target->client->pers.identity->mCharacter->mModel, "female"))
+	//{
+	//	gender = GENDER_FEMALE;
+	//}
 	switch (mod)
 	{
 	case MOD_SUICIDE:
@@ -340,7 +340,7 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 	}
 	if (message)
 	{
-		infoMsgToClients(-1, va("%s%s %s", targetColor, target->client->pers.cleanName.c_str(), message));
+		infoMsgToClients(-1, va("%s ^7%s", target->client->pers.netname.c_str(), message));
 		return;
 	}
 	// check for kill messages
@@ -490,9 +490,9 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 		}
 
 		if (message) {
-			infoMsgToClients(-1, va("%s%s %s %s%s%s %s", targetColor, target->client->pers.cleanName.c_str(), message, killerColor, attacker->client->pers.cleanName.c_str(), message2, message3));
+			infoMsgToClients(-1, va("%s ^7%s %s^7%s %s", target->client->pers.netname.c_str(), message, attacker->client->pers.netname.c_str(), message2, message3));
 			return;
 		}
 	}
-	infoMsgToClients(-1, va("%s%s died", targetColor, target->client->pers.cleanName.c_str()));
+	infoMsgToClients(-1, va("%s died", target->client->pers.netname.c_str()));
 }

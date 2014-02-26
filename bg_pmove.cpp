@@ -1671,7 +1671,6 @@ void PM_CheckWeaponNotes ( void )
 	ps   = pm->ps;
 	aW   = BG_GetInviewAnimFromIndex ( ps->weapon, (ps->weaponAnimId&~ANIM_TOGGLEBIT) );
 
-	assert ( aW );
 	if ( !aW )
 	{
 		return;

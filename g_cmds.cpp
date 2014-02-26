@@ -33,7 +33,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent )
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
 
-		if (cl->pers.rpmClient > 0.5)
+		if (ent->client->pers.rpmClient > 0.5)
 		sprintf_s(entry, 36,
 			" %i %i %i %i %i %i %i %i %i %.2f %i",
 			level.sortedClients[i],
@@ -422,21 +422,25 @@ void BroadcastTeamChange( gclient_t *client, int oldTeam )
 	{
 		case TEAM_RED:
 			trap_SendServerCommand(-1, va("cp \"%s ^7joined the red team.\n\"", client->pers.netname.c_str()));
+			infoMsgToClients(-1, va("%s ^7joined the red team", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_BLUE:
 			trap_SendServerCommand(-1, va("cp \"%s ^7joined the blue team.\n\"", client->pers.netname.c_str()));
+			infoMsgToClients(-1, va("%s ^7joined the blue team", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_SPECTATOR:
 			if ( oldTeam != TEAM_SPECTATOR )
 			{
 				trap_SendServerCommand(-1, va("cp \"%s ^7joined the spectators.\n\"", client->pers.netname.c_str()));
+				infoMsgToClients(-1, va("%s ^7joined the spectators", client->pers.netname.c_str()));
 			}
 			break;
 
 		case TEAM_FREE:
 			trap_SendServerCommand( -1, va("cp \"%s ^7joined the battle.\n\"", client->pers.netname.c_str()));
+			infoMsgToClients(-1, va("%s ^7joined the battle", client->pers.netname.c_str()));
 			break;
 	}
 }

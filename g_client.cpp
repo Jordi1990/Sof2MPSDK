@@ -774,12 +774,18 @@ string parseName(const string &name1, string *cleanName)
 	if (name.back() == ' ' || name.back() == '\t')
 		name.pop_back(); // delete last whitespace
 	// after a ^3 there always has to be another character
+	int index = 0;
 	for (unsigned int i = 0; i<name.length() - 1; ++i){
 		if (name[i] == '^' && !(name[i + 1] >= 33 && name[i + 1] < 128))
 			throw "Invalid color specified";
-		else if (!(name[i] == '^' && name[i + 1] >= 33 && name[i + 1] < 1))
-			cleanName->insert(cleanName->end(), name[i]);
+		else if (!(name[i] == '^' && name[i + 1] >= 33 && name[i + 1] < 128)){
+			cleanName->insert(index, 1, name[i]);
+			index++;
+		}
+		else if (name[i] == '^' && name[i + 1] >= 33 && name[i + 1] < 128)
+			i++;
 	}
+	cleanName->insert(index, 1, name.back());
 	// define a max length
 	if (name.length() > 128)
 		throw "Maximum name length exceeded";
@@ -1077,7 +1083,7 @@ void ClientBegin( int clientNum )
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
 		tent->s.clientNum = ent->s.clientNum;
 
-		infoMsgToClients(-1, va("%s ^7entered the game", client->pers.netname.c_str()));
+		//infoMsgToClients(-1, va("%s ^7joined the %s team", client->pers.netname.c_str(), client->sess.team == TEAM_RED?"red":"blue"));
 	}
 	
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );

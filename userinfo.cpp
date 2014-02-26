@@ -10,6 +10,8 @@ userinfo::userinfo(int id){
 		char userInfoBuf[MAX_INFO_STRING];
 		trap_GetUserinfo(id, userInfoBuf, MAX_INFO_STRING);
 		string buf = userInfoBuf;
+		if (buf.length() < 1)
+			throw "Userinfo fetching failed";
 		vector<string> output;
 		Tokenize(buf, output, "\\");
 		for (unsigned int i = 0; i < output.size() - 1; i += 2){

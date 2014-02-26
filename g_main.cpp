@@ -908,8 +908,9 @@ due to enters/exits/forced team changes
 */
 void SendScoreboardMessageToAllClients( void ) {
 	for (int i = 0 ; i < level.numConnectedClients ; i++ ) {
-		if ( level.clients[level.sortedClients[ i ]].pers.connected == CON_CONNECTED ) {
-			DeathmatchScoreboardMessage( g_entities + i );
+		gentity_t *ent = &g_entities[level.sortedClients[i]];
+		if ( ent->client->pers.connected == CON_CONNECTED ) {
+			DeathmatchScoreboardMessage(ent);
 		}
 	}
 }
