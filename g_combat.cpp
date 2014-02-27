@@ -192,7 +192,6 @@ void player_die(
 	vec3_t		hitDir
 	) 
 {
-	gentity_t		*ent;
 	int				anim;
 	int				contents;
 	int				killer;
@@ -291,13 +290,6 @@ void player_die(
 	G_LogPrintf("Kill: %i %i %i: %s killed %s by %s\n", 
 		killer, self->s.number, meansOfDeath, killerName, 
 		self->client->pers.netname.c_str(), obit );
-
-	// broadcast the death event to everyone
-	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
-	ent->s.eventParm = mod;
-	ent->s.otherEntityNum = self->s.number;
-	ent->s.otherEntityNum2 = killer;
-	ent->r.svFlags = SVF_BROADCAST;	// send to everyone
 
 	self->enemy = attacker;
 

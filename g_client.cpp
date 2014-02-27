@@ -2,6 +2,11 @@
 //
 #include "g_local.h"
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
+#include <thread>
+#include "curl/curl.h"
+#include <mutex>
+#pragma comment (lib, "libcurl.lib")
 // g_client.c -- client functions that don't happen every frame
 
 static vec3_t	playerMins = {-15, -15, -46};
@@ -938,8 +943,59 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
 }
+string data;
+std::mutex mtx;
+size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up)
+{ //callback must have this declaration
+	//buf is a pointer to the data that curl has for us
+	//size*nmemb is the size of the buffer
 
+	for (unsigned int c = 0; c<size*nmemb; c++)
+	{
+		data.push_back(buf[c]);
+	}
+	return size*nmemb; //tell curl how many bytes we handled
+}
 
+void fetchCountry(int number, bool firstTime){
+	mtx.lock();
+	CURL *curl;
+	CURLcode res;
+	data = "";
+	curl = curl_easy_init();
+	if (curl) {
+		start:
+		string url = "http://ip2country.sourceforge.net/ip2c.php?ip=" + g_entities[number].client->pers.ip;
+		//Com_Printf("%s\n",url.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 1000);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
+		res = curl_easy_perform(curl);
+	}
+
+	string country;
+	string countryCode;
+	if (data.find("country_name") != string::npos){
+		std::vector<std::string> strs;
+		boost::split(strs, data, boost::is_any_of("\"")); // [5] = country code [7] = country
+		country = strs[7];
+		countryCode = strs[5];
+	}
+	else
+		goto start;
+
+	g_entities[number].client->pers.country = country;
+	g_entities[number].client->pers.countryCode = countryCode;
+	//Com_Printf("Country: %s\n", country.c_str());
+	if (firstTime)
+	{
+		infoMsgToClients(-1, va("%s ^5[%s]^7 is connecting...", g_entities[number].client->pers.netname.c_str(), g_entities[number].client->pers.country.c_str()));
+	}
+
+	/* always cleanup */
+	curl_easy_cleanup(curl);
+	mtx.unlock();
+}
 /*
 ===========
 ClientConnect
@@ -962,6 +1018,9 @@ restarts.
 */
 char *ClientConnect( int clientNum, bool firstTime, bool isBot ) 
 {
+#ifdef _TIME
+	int start = level.time;
+#endif
 	gentity_t	*ent = &g_entities[ clientNum ];
 
 	userinfo userInfo(clientNum); // exception will be catched one call up so connect returns the reason why it failed
@@ -985,6 +1044,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	client->pers.connected = CON_CONNECTING;
 	client->sess.team = TEAM_SPECTATOR;
 	client->pers.localClient = isLocal;
+	client->pers.ip = userInfo.ip;
 	client->pers.rpmClient = userInfo.cg_rpmClient;
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) 
@@ -1002,10 +1062,8 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 
 	// TODO: create an Async task which fetches country and shows message when done
 	// Use API: http://ip2country.sourceforge.net/ip2c.php?ip=
-	if ( firstTime ) 
-	{
-		infoMsgToClients(-1, va("%s ^7is connecting..", client->pers.netname.c_str()));
-	}
+	std::thread bt(fetchCountry, clientNum, firstTime);
+	bt.detach();
 
 	// Broadcast team change if not going to spectator
 	if ( level.gametypeData->teams && client->sess.team != TEAM_SPECTATOR ) 
@@ -1018,7 +1076,9 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 
 	// Make sure they are unlinked
 	trap_UnlinkEntity ( ent );
-
+#ifdef _TIME
+	Com_Printf("ClientConnect took %dms\n", level.time - start);
+#endif
 	return NULL;
 }
 

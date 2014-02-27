@@ -556,7 +556,7 @@ void SP_fx_play_effect(gentity_t *ent)
 
 	if (ent->wait == 0.0)
 	{
-		ent->wait = 0.3;
+		ent->wait = 0.3f;
 	}
 
 	target = G_Find(0, FOFS(targetname), ent->target);

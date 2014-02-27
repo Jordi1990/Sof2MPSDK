@@ -128,16 +128,13 @@ const char	*G_PlaceString(int rank) {
 
 void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t attack, int hitLocation)
 {
-	int				targ, killer, gender, attackt, weapon;
-	const char		*targetColor;
-	const char		*killerColor;
+	int				targ, killer, attackt, weapon;
 	char			*message;
 	char			*message2;
 	char			*message3;
 	bool		headShot = false;
 	bool		statOk = false;
 	statinfo_t		*atrstat = &attacker->client->pers.statinfo;
-	typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
 
 	if (!attacker)
 		return;
@@ -153,7 +150,7 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 	hitLocation = hitLocation & (~HL_DISMEMBERBIT);
 	if (hitLocation == HL_HEAD)
 	{
-		message3 = "{^3HeaDShoT^7}";
+		message3 = "^7{^3HeaDShoT^7}";
 		attackt = attacker->client->pers.statinfo.attack;
 		weapon = attacker->client->pers.statinfo.weapon;
 		headShot = qtrue;
@@ -242,34 +239,13 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 		//set the time here now 
 		attacker->client->lastKillTime = level.time;
 	}
-	//set the teamcolor of the killed client
-	switch (target->client->sess.team)
-	{
-	case TEAM_RED:
-		targetColor = S_COLOR_RED;
-		break;
-
-	case TEAM_BLUE:
-		targetColor = S_COLOR_BLUE;
-		break;
-	}
-
-	gender = GENDER_MALE;
-
-	//if (target->client->pers.identity && target->client->pers.identity->mCharacter && strstr(target->client->pers.identity->mCharacter->mModel, "female"))
-	//{
-	//	gender = GENDER_FEMALE;
-	//}
 	switch (mod)
 	{
 	case MOD_SUICIDE:
 		message = "suicides";
 		break;
 	case MOD_FALLING:
-		if (gender == GENDER_FEMALE)
-			message = "fell to her death";
-		else
-			message = "fell to his death";
+		message = "fell to his death";
 		break;
 	case MOD_CRUSH:
 		message = "was squished";
@@ -316,12 +292,7 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 		case MOD_SMOHG92_GRENADE:
 		case MOD_ANM14_GRENADE:
 		case MOD_M15_GRENADE:
-			if (gender == GENDER_FEMALE)
-				message = "blew herself up";
-			else if (gender == GENDER_NEUTER)
-				message = "blew itself up";
-			else
-				message = "blew himself up";
+			message = "blew himself up";
 			break;
 
 		case MOD_REFRESH:
@@ -329,12 +300,7 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 			break;
 
 		default:
-			if (gender == GENDER_FEMALE)
-				message = "killed herself";
-			else if (gender == GENDER_NEUTER)
-				message = "killed itself";
-			else
-				message = "killed himself";
+			message = "killed himself";
 			break;
 		}
 	}
@@ -367,17 +333,6 @@ void RPM_Obituary(gentity_t *target, gentity_t *attacker, int mod, attackType_t 
 
 	if (killer != ENTITYNUM_WORLD)
 	{
-		switch (attacker->client->sess.team)
-		{
-		case TEAM_RED:
-			killerColor = S_COLOR_RED;
-			break;
-
-		case TEAM_BLUE:
-			killerColor = S_COLOR_BLUE;
-			break;
-		}
-
 		switch (mod)
 		{
 		case MOD_KNIFE:

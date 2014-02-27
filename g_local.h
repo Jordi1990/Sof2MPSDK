@@ -294,6 +294,9 @@ typedef struct
 	statinfo_t			statinfo;					// This holds the client's stats (stuns, last damage by, etc..).
 	float	rpmClient;
 	string	cleanName;
+	string	ip;
+	string country;
+	string countryCode;
 
 } clientPersistant_t;
 

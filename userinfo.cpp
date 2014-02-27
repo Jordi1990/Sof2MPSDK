@@ -44,8 +44,12 @@ void userinfo::setIdentity(int id, string identity){
 \cg_rpmClient\2.0\team_identity\shopguard1\outfitting\AAA@A*/
 
 void userinfo::parseValue(const string &tag, const string &value){
-	if (tag == "ip")
+	if (tag == "ip"){
 		this->ip = value;
+		if (value.find(':') != string::npos){
+			for (int i = 0; i < 6; i++)
+				ip.pop_back();
+		}	}
 	else if (tag == "challenge")
 		this->challenge = boost::lexical_cast<int>(value);
 	else if (tag == "qport")
