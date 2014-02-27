@@ -197,7 +197,7 @@ string parseChatTokens(gentity_t *ent, const char *message, int *outSound){
 
 	if (parseSound){
 		int soundIndex = boost::lexical_cast<int>(sound)-1;
-		if (soundIndex > 0 && soundIndex < numChatSounds){
+		if (soundIndex >= 0 && soundIndex < numChatSounds){
 			result.append(chatSounds[soundIndex].text);
 			if (!isVoiceFlooded(ent))
 				*outSound = chatSounds[soundIndex].sound;

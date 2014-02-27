@@ -1010,11 +1010,6 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, const char *nam
 		return;
 	}
 
-	if ( mode == SAY_TEAM  && !OnSameTeam(ent, other) ) 
-	{
-		return;
-	}
-
 	if ( !level.intermissiontime && !level.intermissionQueued )
 	{
 		// Spectators cant talk to alive people
@@ -1195,12 +1190,17 @@ void G_Say ( gentity_t *ent, gentity_t *target, int mode, const char *chatText )
 		Com_Printf( "%s%s\n", name, text.c_str());
 	}
 
-	if (mode == SAY_ALL && outSound != -1)
+	if (mode == SAY_ALL && ent->client->sess.team != TEAM_SPECTATOR && outSound != -1){
 		globalSound(outSound);
+		outSound = -1; // reset so it won't be played again
+	}
 
 	// send it to all the apropriate clients
 	for (int j = 0; j < level.numConnectedClients; j++) 
 	{
+
+		if (mode == SAY_TEAM  && !OnSameTeam(ent, &g_entities[level.sortedClients[j]]))
+			continue;
 		if (outSound != -1)
 			G_Sound(&g_entities[level.sortedClients[j]], outSound);
 		G_SayTo(ent, &g_entities[level.sortedClients[j]], mode, name, text.c_str());
