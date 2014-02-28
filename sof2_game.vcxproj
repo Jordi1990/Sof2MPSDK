@@ -96,9 +96,11 @@
     <ClCompile Include="bg_weapons.cpp" />
     <ClCompile Include="gametype_inf.cpp" />
     <ClCompile Include="g_active.cpp" />
+    <ClCompile Include="g_admcmds.cpp" />
     <ClCompile Include="g_antilag.cpp" />
     <ClCompile Include="g_bot.cpp" />
     <ClCompile Include="g_client.cpp" />
+    <ClCompile Include="g_clientdata.cpp" />
     <ClCompile Include="g_cmds.cpp" />
     <ClCompile Include="g_combat.cpp" />
     <ClCompile Include="g_gametype.cpp" />
@@ -120,6 +122,13 @@
     <ClCompile Include="q_math.cpp" />
     <ClCompile Include="q_shared.cpp" />
     <ClCompile Include="rpm.cpp" />
+    <ClCompile Include="sqlite++\Column.cpp" />
+    <ClCompile Include="sqlite++\Database.cpp" />
+    <ClCompile Include="sqlite++\sqlite3.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug SoF2|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="sqlite++\Statement.cpp" />
+    <ClCompile Include="sqlite++\Transaction.cpp" />
     <ClCompile Include="userinfo.cpp" />
   </ItemGroup>
   <ItemGroup>

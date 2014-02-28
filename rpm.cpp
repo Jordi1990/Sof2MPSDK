@@ -29,10 +29,10 @@ void RPM_UpdateTMI()
 			cl->ps.stats[STAT_ARMOR],
 			location,
 			userInfo.cg_thirdPerson, // 1 = third | 0 = first | 2 = n/a, aka no client
-			0, // admin
+			cl->pers.adminLevel, // admin
 			cl->ps.weapon,
-			0, // mute
-			0  // clan member
+			cl->pers.muted, // mute
+			cl->pers.clanMember  // clan member
 			);
 		tmiString.append(entry);
 	}

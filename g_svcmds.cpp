@@ -179,6 +179,9 @@ bool ConsoleCommand( void )
 
 	trap_Argv(0, cmd, MAX_TOKEN_CHARS);
 
+	if (doAdminCommands(cmd))
+		return true;
+
 	if ( strcmp (cmd, "entitylist") == 0 ) 
 	{
 		Svcmd_EntityList_f();

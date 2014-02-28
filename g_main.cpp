@@ -87,6 +87,10 @@ vmCvar_t	g_debugRMG;
 // new cvars
 
 vmCvar_t g_clientTMIUpdate;
+vmCvar_t g_maxIPConnections;
+vmCvar_t g_addbadmin;
+vmCvar_t g_addadmin;
+vmCvar_t g_addsadmin;
 
 static cvarTable_t gameCvarTable[] = 
 {
@@ -193,6 +197,10 @@ static cvarTable_t gameCvarTable[] =
 
 	// new cvars //g_clientTMIUpdate
 	{ &g_clientTMIUpdate, "g_clientTMIUpdate", "2000", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 500, 10000, 0, false },
+	{ &g_maxIPConnections, "g_maxIPConnections", "3", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 1, MAX_CLIENTS, 0, false },
+	{ &g_addbadmin, "g_addbadmin", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },
+	{ &g_addadmin, "g_addadmin", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },
+	{ &g_addsadmin, "g_addsadmin", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },	
 };
 
 // bk001129 - made static to avoid aliasing

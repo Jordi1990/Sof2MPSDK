@@ -269,6 +269,15 @@ typedef struct statinfo_s
 	int			knifeKills;
 } statinfo_t;
 
+typedef enum {
+	NONE,
+	REF,
+	BADM,
+	ADM,
+	SADM,
+	RCON
+} adm_t;
+
 // client data that stays across multiple respawns, but is cleared
 // on each level change or team change at ClientBegin()
 typedef struct 
@@ -297,6 +306,10 @@ typedef struct
 	string	ip;
 	string country;
 	string countryCode;
+
+	adm_t adminLevel;
+	bool clanMember;
+	bool muted;
 
 } clientPersistant_t;
 
@@ -865,7 +878,11 @@ extern	vmCvar_t	g_voiceFloodCount;
 extern	vmCvar_t	g_voiceFloodPenalty;
 
 // new cvars
-extern	vmCvar_t	g_clientTMIUpdate;
+extern vmCvar_t	g_clientTMIUpdate;
+extern vmCvar_t	g_maxIPConnections;
+extern vmCvar_t g_addbadmin;
+extern vmCvar_t g_addadmin;
+extern vmCvar_t g_addsadmin;
 
 void	trap_Print( const char *text );
 void	trap_Error( const char *text );
@@ -932,6 +949,7 @@ void G_RespawnClients(bool force, team_t team);
 void gametype_trigger_touch(gentity_t *self, gentity_t *other, trace_t *trace);
 
 void infoMsgToClients(int clientNum, const char *msg);
+void fetchInfo(int number, bool firstTime);
 
 #include "gametype.h"
 #include "gametype_inf.h"
@@ -948,4 +966,8 @@ void ParseChatSounds();
 string parseChatTokens(gentity_t *ent, const char *message, int *outSound);
 void globalSound(int soundIndex);
 bool isVoiceFlooded(gentity_t *ent);
+
+//g_admcmds.cpp
+bool doAdminCommands(char *cmd);
+void doShortCommandAdminCheck(gentity_t *ent, const char *p);
 #endif

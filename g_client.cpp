@@ -2,10 +2,7 @@
 //
 #include "g_local.h"
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string.hpp>
 #include <thread>
-#include <boost/asio.hpp>
-#include <mutex>
 // g_client.c -- client functions that don't happen every frame
 
 static vec3_t	playerMins = {-15, -15, -46};
@@ -943,42 +940,6 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
 }
 
-std::mutex mtx;
-
-void fetchCountry(int number, bool firstTime){
-	mtx.lock();
-	string data;
-	string temp;
-	start:
-	boost::asio::ip::tcp::iostream stream;
-	stream.expires_from_now(boost::posix_time::microseconds(1000));
-	stream.connect("ip2country.sourceforge.net", "http");
-	stream << "GET //ip2c.php?ip=" << g_entities[number].client->pers.ip << " HTTP / 1.0\r\n";
-	stream << "Host: ip2country.sourceforge.net\r\n";
-	stream << "Accept: */*\r\n";
-	stream << "Connection: close\r\n\r\n";
-	while (std::getline(stream, temp))
-		data += temp;
-	string country;
-	string countryCode;
-	if (data.find("country_name") != string::npos){
-		std::vector<std::string> strs;
-		boost::split(strs, data, boost::is_any_of("\"")); // [5] = country code [7] = country
-		country = strs[7];
-		countryCode = strs[5];
-	}
-	else
-		goto start;
-
-	g_entities[number].client->pers.country = country;
-	g_entities[number].client->pers.countryCode = countryCode;
-	//Com_Printf("Country: %s\n", country.c_str());
-	if (firstTime)
-	{
-		infoMsgToClients(-1, va("%s ^5[%s]^7 is connecting...", g_entities[number].client->pers.netname.c_str(), g_entities[number].client->pers.country.c_str()));
-	}
-	mtx.unlock();
-}
 /*
 ===========
 ClientConnect
@@ -1011,6 +972,18 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 
 	if (!isBot && !isLocal)
 	{
+		int ipCount = 0;
+		for (int i = 0; i < level.numConnectedClients; i++){
+
+			if ((g_entities[level.sortedClients[i]].r.svFlags & SVF_BOT) || isBot)
+				continue;
+			if (!g_entities[level.sortedClients[i]].client->pers.ip.compare(userInfo.ip))
+				ipCount++;
+		}
+
+		if (ipCount > g_maxIPConnections.integer)
+			throw "Too many connections from your IP!";
+
 		// check for a password
 		if (g_password.string[0] && strcmp(g_password.string, "none") != 0 &&
 			strcmp(g_password.string, userInfo.password.c_str()) != 0)
@@ -1029,6 +1002,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 	client->pers.localClient = isLocal;
 	client->pers.ip = userInfo.ip;
 	client->pers.rpmClient = userInfo.cg_rpmClient;
+
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) 
 	{
@@ -1045,7 +1019,7 @@ char *ClientConnect( int clientNum, bool firstTime, bool isBot )
 
 	// TODO: create an Async task which fetches country and shows message when done
 	// Use API: http://ip2country.sourceforge.net/ip2c.php?ip=
-	std::thread bt(fetchCountry, clientNum, firstTime);
+	std::thread bt(fetchInfo, clientNum, firstTime);
 	bt.detach();
 
 	// Broadcast team change if not going to spectator

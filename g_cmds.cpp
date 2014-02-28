@@ -1,7 +1,7 @@
 // Copyright (C) 2001-2002 Raven Software.
 //
 #include "g_local.h"
-
+#include <boost/algorithm/string.hpp>
 // Henk 23/02/14 -> New command system for normal commands
 typedef struct
 {
@@ -418,28 +418,46 @@ Let everyone know about a team change
 */
 void BroadcastTeamChange( gclient_t *client, int oldTeam )
 {
+	string adminStr;
+	switch (client->pers.adminLevel){
+	case NONE:
+		adminStr = "";
+		break;
+	case BADM:
+		adminStr = "B-Admin";
+		break;
+	case ADM:
+		adminStr = "Admin";
+		break;
+	case SADM:
+		adminStr = "S-Admin";
+		break;
+	}
+
+	string clanStr = client->pers.clanMember ? "Clan\n" : "";
+
 	switch ( client->sess.team )
 	{
 		case TEAM_RED:
-			trap_SendServerCommand(-1, va("cp \"%s ^7joined the red team.\n\"", client->pers.netname.c_str()));
+			trap_SendServerCommand(-1, va("cp \"@%s%s %s ^7joined the red team.\n\"", clanStr.c_str(), adminStr.c_str(), client->pers.netname.c_str()));
 			infoMsgToClients(-1, va("%s ^7joined the red team", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_BLUE:
-			trap_SendServerCommand(-1, va("cp \"%s ^7joined the blue team.\n\"", client->pers.netname.c_str()));
+			trap_SendServerCommand(-1, va("cp \"@%s%s %s ^7joined the blue team.\n\"", clanStr.c_str(), adminStr.c_str(), client->pers.netname.c_str()));
 			infoMsgToClients(-1, va("%s ^7joined the blue team", client->pers.netname.c_str()));
 			break;
 
 		case TEAM_SPECTATOR:
 			if ( oldTeam != TEAM_SPECTATOR )
 			{
-				trap_SendServerCommand(-1, va("cp \"%s ^7joined the spectators.\n\"", client->pers.netname.c_str()));
+				trap_SendServerCommand(-1, va("cp \"@%s%s %s ^7joined the spectators.\n\"", clanStr.c_str(), adminStr.c_str(), client->pers.netname.c_str()));
 				infoMsgToClients(-1, va("%s ^7joined the spectators", client->pers.netname.c_str()));
 			}
 			break;
 
 		case TEAM_FREE:
-			trap_SendServerCommand( -1, va("cp \"%s ^7joined the battle.\n\"", client->pers.netname.c_str()));
+			trap_SendServerCommand(-1, va("cp \"@%s%s %s ^7joined the battle.\n\"", clanStr.c_str(), adminStr.c_str(), client->pers.netname.c_str()));
 			infoMsgToClients(-1, va("%s ^7joined the battle", client->pers.netname.c_str()));
 			break;
 	}
@@ -1046,10 +1064,26 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, const char *nam
 		type = "^7[^Cs^7] ";
 	}
 
-	trap_SendServerCommand( other-g_entities, va("%s %d \"%s%s%s\"", 
+	string admin;
+	switch (ent->client->pers.adminLevel){
+	case NONE:
+		admin = "";
+		break;
+	case BADM:
+		admin = "B-Admin";
+		break;
+	case ADM:
+		admin = "Admin";
+		break;
+	case SADM:
+		admin = "S-Admin";
+		break;
+	}
+
+	trap_SendServerCommand( other-g_entities, va("%s %d \"%s%s %s%s\"", 
 							mode == SAY_TEAM ? "tchat" : "chat",
 							ent->s.number,
-							type.c_str(), name, message));
+							type.c_str(), admin.c_str(), name, message));
 }
 
 /*
@@ -1228,6 +1262,9 @@ static void Cmd_Say_f( gentity_t *ent, int mode, bool arg0 ) {
 	{
 		p = ConcatArgs( 1 );
 	}
+
+	if (ent->client->pers.adminLevel > NONE)
+		doShortCommandAdminCheck(ent, p);
 
 	G_Say( ent, NULL, mode, p );
 }
@@ -1776,7 +1813,7 @@ void ClientCommand( int clientNum ) {
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
 	for (int i = 0; i < consoleCommandsSize; i++){
-		if (consoleCommands[i].cmd == cmd){
+		if (boost::iequals(consoleCommands[i].cmd, cmd)){
 			consoleCommands[i].Function(ent);
 			return;
 		}
