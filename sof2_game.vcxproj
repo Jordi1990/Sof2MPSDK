@@ -81,7 +81,7 @@
       <OutputFile>D:\sof2\sof2mp_gamex86.dll</OutputFile>
       <ImportLibrary>.\..\Debug\sof2mp_gamex86.lib</ImportLibrary>
       <BaseAddress>0x20000000</BaseAddress>
-      <AdditionalDependencies>%(AdditionalDependencies); "C:\Program Files\boost\boost_1_55_0\stage\lib\libboost_regex-vc120-mt-gd-1_55.lib"</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);"C:\Program Files\boost\boost_1_55_0\stage\lib\libboost_regex-vc120-mt-gd-1_55.lib";"C:\Program Files\boost\boost_1_55_0\stage\lib\libboost_system-vc120-mt-gd-1_55.lib";"C:\Program Files\boost\boost_1_55_0\stage\lib\libboost_date_time-vc120-mt-gd-1_55.lib"</AdditionalDependencies>
       <NoEntryPoint>false</NoEntryPoint>
       <EntryPointSymbol>
       </EntryPointSymbol>

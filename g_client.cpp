@@ -4,9 +4,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string.hpp>
 #include <thread>
-#include "curl/curl.h"
+#include <boost/asio.hpp>
 #include <mutex>
-#pragma comment (lib, "libcurl.lib")
 // g_client.c -- client functions that don't happen every frame
 
 static vec3_t	playerMins = {-15, -15, -46};
@@ -943,36 +942,23 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
 }
-string data;
-std::mutex mtx;
-size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up)
-{ //callback must have this declaration
-	//buf is a pointer to the data that curl has for us
-	//size*nmemb is the size of the buffer
 
-	for (unsigned int c = 0; c<size*nmemb; c++)
-	{
-		data.push_back(buf[c]);
-	}
-	return size*nmemb; //tell curl how many bytes we handled
-}
+std::mutex mtx;
 
 void fetchCountry(int number, bool firstTime){
 	mtx.lock();
-	CURL *curl;
-	CURLcode res;
-	data = "";
-	curl = curl_easy_init();
-	if (curl) {
-		start:
-		string url = "http://ip2country.sourceforge.net/ip2c.php?ip=" + g_entities[number].client->pers.ip;
-		//Com_Printf("%s\n",url.c_str());
-		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 1000);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
-		res = curl_easy_perform(curl);
-	}
-
+	string data;
+	string temp;
+	start:
+	boost::asio::ip::tcp::iostream stream;
+	stream.expires_from_now(boost::posix_time::microseconds(1000));
+	stream.connect("ip2country.sourceforge.net", "http");
+	stream << "GET //ip2c.php?ip=" << g_entities[number].client->pers.ip << " HTTP / 1.0\r\n";
+	stream << "Host: ip2country.sourceforge.net\r\n";
+	stream << "Accept: */*\r\n";
+	stream << "Connection: close\r\n\r\n";
+	while (std::getline(stream, temp))
+		data += temp;
 	string country;
 	string countryCode;
 	if (data.find("country_name") != string::npos){
@@ -991,9 +977,6 @@ void fetchCountry(int number, bool firstTime){
 	{
 		infoMsgToClients(-1, va("%s ^5[%s]^7 is connecting...", g_entities[number].client->pers.netname.c_str(), g_entities[number].client->pers.country.c_str()));
 	}
-
-	/* always cleanup */
-	curl_easy_cleanup(curl);
 	mtx.unlock();
 }
 /*
