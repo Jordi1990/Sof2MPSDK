@@ -103,6 +103,12 @@ void trap_DropClient( int clientNum, const char *reason ) {
 }
 
 void trap_SendServerCommand( int clientNum, const char *text ) {
+	if (strlen(text) > 4096)
+		return;
+	else if (clientNum != -1 && clientNum > 0 && clientNum < MAX_CLIENTS){ // protection against server command overflow causing short lag to all clients
+		if (g_entities[clientNum].client->ps.ping < 0 || g_entities[clientNum].client->ps.ping >= 999)
+			return;
+	}
 	syscall( G_SEND_SERVER_COMMAND, clientNum, text );
 }
 

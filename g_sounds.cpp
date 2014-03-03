@@ -170,13 +170,15 @@ string parseChatTokens(gentity_t *ent, const char *message, int *outSound){
 	string result;
 	string sound;
 	bool parseSound = false;
+	bool soundDone = false;
 	*outSound = -1;
 	for (unsigned int i = 0; i < strlen(message); i++){
 		if (message[i] == '@'){
 			sound = "";
 			parseSound = true;
+			soundDone = false;
 		}
-		else if (parseSound && !isdigit(message[i])){
+		else if (parseSound && !isdigit(message[i]) && soundDone){
 			int soundIndex = boost::lexical_cast<int>(sound)-1;
 			if (soundIndex >= 0 && soundIndex < numChatSounds){
 				result.append(chatSounds[soundIndex].text);
@@ -190,12 +192,13 @@ string parseChatTokens(gentity_t *ent, const char *message, int *outSound){
 		}
 		else if (parseSound && isdigit(message[i])){
 			sound += message[i];
+			soundDone = true;
 		}
 		else
 			result.insert(result.end(), message[i]);
 	}
 
-	if (parseSound){
+	if (parseSound && soundDone){
 		int soundIndex = boost::lexical_cast<int>(sound)-1;
 		if (soundIndex >= 0 && soundIndex < numChatSounds){
 			result.append(chatSounds[soundIndex].text);

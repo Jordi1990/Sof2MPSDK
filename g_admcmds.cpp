@@ -12,14 +12,14 @@ typedef struct
 	int param;
 } admCmd_t;
 
-int getParamClient(int argNum, bool shortCmd){
+int getParamClient(gentity_t *ent, int argNum, bool shortCmd){
 	char argBuf[16];
 	bool space = false;
 	string multipleClientString;
 	trap_Argv(argNum, argBuf, 16);
 	string arg = argBuf;
 	int num = -1;
-	if (shortCmd){ // Henk 04/05/10 -> Handle the short admin commands.
+	if (shortCmd){ // Henk 03/03/14 -> Handle the short admin commands.
 		for (unsigned int i = 0; i < arg.length(); i++){
 			if (arg[i] == ' ' && arg.length() > 3){
 				string idStr;
@@ -34,13 +34,25 @@ int getParamClient(int argNum, bool shortCmd){
 							break;
 						argName += arg[z];
 					}
+					num = -1;
+					string multipleMessage;
+					int numClientsFound = 0;
 					for (int i = 0; i<level.numConnectedClients; i++){
 						//trap_SendServerCommand(-1, va("print\"^3[Debug] ^7%s comparing with %s.\n\"", g_entities[level.sortedClients[i]].client->pers.cleanName.c_str(), arg.c_str()));
 						if (boost::icontains(g_entities[level.sortedClients[i]].client->pers.cleanName.c_str(), argName.c_str())){
 							num = level.sortedClients[i];
-							break;
+							numClientsFound++;
+							char test[64];
+							sprintf_s<64>(test, "^1[#%i] ^7 %s, ", level.sortedClients[i], g_entities[level.sortedClients[i]].client->pers.cleanName.c_str());
+							multipleMessage += test;
 						}
-						num = -1;
+					}
+					if (numClientsFound > 1){
+						if (ent && ent->client)
+							infoMsgToClients(ent->s.number, va("Multiple names found with: ^3%s^7: %s", arg.c_str(), multipleMessage.c_str()));
+						else
+							Com_Printf("Multiple names found with: ^3%s^7: %s", arg.c_str(), multipleMessage.c_str());
+						return -1;
 					}
 				}
 			}
@@ -51,16 +63,45 @@ int getParamClient(int argNum, bool shortCmd){
 			num = boost::lexical_cast<int>(arg);
 		}
 		catch (...){
+			int numClientsFound = 0;
+			num = -1;
+			string multipleMessage;
 			for (int i = 0; i<level.numConnectedClients; i++){
 				//trap_SendServerCommand(-1, va("print\"^3[Debug] ^7%s comparing with %s.\n\"", g_entities[level.sortedClients[i]].client->pers.cleanName.c_str(), arg.c_str()));
 				if (boost::icontains(g_entities[level.sortedClients[i]].client->pers.cleanName.c_str(), arg.c_str())){
 					num = level.sortedClients[i];
-					break;
+					numClientsFound++;
+					char test[64];
+					sprintf_s<64>(test, "^1[#%i] ^7%s, ", level.sortedClients[i], g_entities[level.sortedClients[i]].client->pers.cleanName.c_str());
+					multipleMessage += test;
 				}
-				num = -1;
+			}
+			if (numClientsFound > 1){
+				if (ent && ent->client)
+					infoMsgToClients(ent->s.number, va("Multiple names found with: ^3%s^7: %s", arg.c_str(), multipleMessage.c_str()));
+				else
+					Com_Printf("Multiple names found with: ^3%s^7: %s", arg.c_str(), multipleMessage.c_str());
+				return -1;
 			}
 		}
 	}
+
+	if (num < 0 || num >= g_maxclients.integer)
+	{
+		if (ent && ent->client)
+			infoMsgToClients(ent - g_entities, va("You haven't entered a valid player ID/player name"));
+		else
+			Com_Printf("You haven't entered a valid player ID/player name.\n");
+		return -1;
+	}
+	else if (g_entities[num].client->pers.connected != CON_CONNECTED){
+		if (ent && ent->client)
+			infoMsgToClients(ent - g_entities, va("This player is not connected"));
+		else
+			Com_Printf("This player is not connected.\n");
+		return -1;
+	}
+
 	return num;
 }
 
@@ -75,8 +116,14 @@ void uppercut(gentity_t *other, gentity_t *ent, int param){
 
 	G_Sound(other, G_SoundIndex("sound/weapons/rpg7/fire01.mp3"));
 
-	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut by %s", level.time + 5000, other->client->pers.netname.c_str(), ent->client->pers.netname.c_str()));
-	trap_SendServerCommand(-1, va("print\"^3[Admin Action] %s ^7was uppercut by %s.\n\"", other->client->pers.netname.c_str(), ent->client->pers.netname.c_str()));
+	if (ent && ent->client){
+		trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut by %s", level.time + 5000, other->client->pers.netname.c_str(), ent->client->pers.netname.c_str()));
+		trap_SendServerCommand(-1, va("print\"^3[Admin Action] %s ^7was uppercut by %s.\n\"", other->client->pers.netname.c_str(), ent->client->pers.netname.c_str()));
+	}
+	else{
+		trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
+		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] %s ^7was uppercut.\n\"", other->client->pers.netname.c_str()));
+	}
 }
 
 static admCmd_t AdminCommands[] =
@@ -261,22 +308,9 @@ bool IsValidCommand(const string &cmd, const string &str){
 // It will process the given arguments and do all the checks before executing the command
 // After the execution it will call the proper logging functions
 void doAdminCommand(int commandIndex, gentity_t *ent, bool shortCmd, int argNum){
-	int paramClientId = getParamClient(argNum, shortCmd);
-	if (paramClientId < 0 || paramClientId >= g_maxclients.integer)
-	{
-		if (ent && ent->client)
-			infoMsgToClients(ent - g_entities, va("You haven't entered a valid player ID/player name"));
-		else
-			Com_Printf("You haven't entered a valid player ID/player name.\n");
+	int paramClientId = getParamClient(ent, argNum, shortCmd);
+	if (paramClientId < 0)
 		return;
-	}
-	else if (g_entities[paramClientId].client->pers.connected != CON_CONNECTED){
-		if (ent && ent->client)
-			infoMsgToClients(ent - g_entities, va("This player is not connected"));
-		else
-			Com_Printf("This player is not connected.\n");
-		return;
-	}
 	gentity_t *other = &g_entities[paramClientId];
 	globalSound(G_SoundIndex("sound/misc/menus/click.wav"));
 	AdminCommands[commandIndex].Function(other, ent, AdminCommands[commandIndex].param);
