@@ -48,6 +48,8 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd){
 						}
 					}
 					if (numClientsFound > 1){
+						multipleMessage.pop_back(); // pop space
+						multipleMessage.pop_back(); // pop comma
 						if (ent && ent->client)
 							infoMsgToClients(ent->s.number, va("Multiple names found with: ^3%s^7: %s", arg.c_str(), multipleMessage.c_str()));
 						else
@@ -77,6 +79,8 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd){
 				}
 			}
 			if (numClientsFound > 1){
+				multipleMessage.pop_back(); // pop space
+				multipleMessage.pop_back(); // pop comma
 				if (ent && ent->client)
 					infoMsgToClients(ent->s.number, va("Multiple names found with: ^3%s^7: %s", arg.c_str(), multipleMessage.c_str()));
 				else
@@ -105,8 +109,27 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd){
 	return num;
 }
 
-void addAdmin(gentity_t *other, gentity_t *ent, int level){
-	other->client->pers.adminLevel = (adm_t)level;
+void addAdmin(gentity_t *other, gentity_t *ent, int admLevel){
+	other->client->pers.adminLevel = (adm_t)admLevel;
+	string adminLevel;
+	switch (other->client->pers.adminLevel){ // TODO: Store the level to string globally
+		case SADM:
+			adminLevel = "S-Admin";
+			break;
+		case ADM:
+			adminLevel = "Admin";
+			break;
+		case BADM:
+			adminLevel = "B-Admin";
+			break;
+	}
+
+	if (ent && ent->client)
+		trap_SendServerCommand(-1, va("print\"^3[Admin Action] ^7%s was made %s by %s.\n\"", other->client->pers.netname, adminLevel.c_str(), ent->client->pers.netname.c_str()));
+	else
+		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] ^7%s is now a %s.\n\"", other->client->pers.netname, adminLevel.c_str()));
+
+	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@^7%s is now a %s", level.time + 5000, other->client->pers.netname, adminLevel.c_str()));
 }
 
 void uppercut(gentity_t *other, gentity_t *ent, int param){
@@ -116,14 +139,12 @@ void uppercut(gentity_t *other, gentity_t *ent, int param){
 
 	G_Sound(other, G_SoundIndex("sound/weapons/rpg7/fire01.mp3"));
 
-	if (ent && ent->client){
-		trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut by %s", level.time + 5000, other->client->pers.netname.c_str(), ent->client->pers.netname.c_str()));
+	if (ent && ent->client)
 		trap_SendServerCommand(-1, va("print\"^3[Admin Action] %s ^7was uppercut by %s.\n\"", other->client->pers.netname.c_str(), ent->client->pers.netname.c_str()));
-	}
-	else{
-		trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
+	else
 		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] %s ^7was uppercut.\n\"", other->client->pers.netname.c_str()));
-	}
+
+	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,,%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
 }
 
 static admCmd_t AdminCommands[] =
