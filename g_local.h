@@ -883,6 +883,7 @@ extern vmCvar_t	g_maxIPConnections;
 extern vmCvar_t g_addbadmin;
 extern vmCvar_t g_addadmin;
 extern vmCvar_t g_addsadmin;
+extern vmCvar_t g_uppercut;
 
 void	trap_Print( const char *text );
 void	trap_Error( const char *text );
@@ -950,6 +951,7 @@ void gametype_trigger_touch(gentity_t *self, gentity_t *other, trace_t *trace);
 
 void infoMsgToClients(int clientNum, const char *msg);
 void fetchInfo(int number, bool firstTime);
+string adminLevelToString(adm_t admLevel);
 
 #include "gametype.h"
 #include "gametype_inf.h"

@@ -10,9 +10,11 @@ typedef struct
 	int		*adminLevel; // pointer to cvar value because we can't store a non constant value, so we store a pointer :).
 	void(*Function)(gentity_t *, gentity_t *, int); // store pointer to the given function so we can call it later
 	int param;
+	bool aliveOnly;
+	bool otherAdmins;
 } admCmd_t;
 
-int getParamClient(gentity_t *ent, int argNum, bool shortCmd){
+int getParamClient(gentity_t *ent, int argNum, bool shortCmd, bool aliveOnly, bool otherAdmins){
 	char argBuf[16];
 	bool space = false;
 	string multipleClientString;
@@ -105,24 +107,31 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd){
 			Com_Printf("This player is not connected.\n");
 		return -1;
 	}
+	else if (g_entities[num].client->pers.adminLevel >= ent->client->pers.adminLevel && otherAdmins && ent && ent->client){
+		infoMsgToClients(-1, "You cannot use this command on other Admins");
+		return -1;
+	}
+	else if (G_IsClientDead(g_entities[num].client) && aliveOnly){
+		if (ent && ent->client)
+			infoMsgToClients(ent - g_entities, va("You cannot use this command on a dead player"));
+		else
+			Com_Printf("You cannot use this command on a dead player.\n");
+		return -1;
+	}
+	else if (G_IsClientSpectating(g_entities[num].client) && aliveOnly){
+		if (ent && ent->client)
+			infoMsgToClients(ent - g_entities, va("You cannot use this command on a spectator"));
+		else
+			Com_Printf("You cannot use this command on a spectator.\n");
+		return -1;
+	}
 
 	return num;
 }
 
 void addAdmin(gentity_t *other, gentity_t *ent, int admLevel){
 	other->client->pers.adminLevel = (adm_t)admLevel;
-	string adminLevel;
-	switch (other->client->pers.adminLevel){ // TODO: Store the level to string globally
-		case SADM:
-			adminLevel = "S-Admin";
-			break;
-		case ADM:
-			adminLevel = "Admin";
-			break;
-		case BADM:
-			adminLevel = "B-Admin";
-			break;
-	}
+	string adminLevel = adminLevelToString((adm_t)admLevel);
 
 	if (ent && ent->client)
 		trap_SendServerCommand(-1, va("print\"^3[Admin Action] ^7%s was made %s by %s.\n\"", other->client->pers.netname, adminLevel.c_str(), ent->client->pers.netname.c_str()));
@@ -149,19 +158,20 @@ void uppercut(gentity_t *other, gentity_t *ent, int param){
 
 static admCmd_t AdminCommands[] =
 {
-	{ "!ab", "addbadmin", &g_addbadmin.integer, &addAdmin, 2 },
-	{ "!aa", "addadmin", &g_addadmin.integer, &addAdmin, 3 },
-	{ "!as", "addsadmin", &g_addsadmin.integer, &addAdmin, 4 },
-	{ "!uc", "uppercut", &g_addsadmin.integer, &uppercut, 0 },
-	{ "!u", "uppercut", &g_addsadmin.integer, &uppercut, 0 },
+	{ "!uppercut", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true },
+	{ "!addbadmin", "addbadmin", &g_addbadmin.integer, &addAdmin, 2, false, false },
+	{ "!addadmin", "addadmin", &g_addadmin.integer, &addAdmin, 3, false, false },
+	{ "!addsadmin", "addsadmin", &g_addsadmin.integer, &addAdmin, 4, false, false },
+
+	{ "!ab", "addbadmin", &g_addbadmin.integer, &addAdmin, 2, false, false },
+	{ "!aa", "addadmin", &g_addadmin.integer, &addAdmin, 3, false, false },
+	{ "!as", "addsadmin", &g_addsadmin.integer, &addAdmin, 4, false, false },
+	{ "!uc", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true },
+	{ "!u", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true },
 	/*
 	// Boe!Man 1/22/11: Adding full synonyms.
-	{ "!uppercut", "uppercut", &g_uppercut.integer, &Boe_Uppercut },
 	{ "!pop", "pop", &g_pop.integer, &Boe_pop },
 	{ "!kick", "kick", &g_kick.integer, &Boe_Kick },
-	{ "!addbadmin", "addbadmin", &g_addbadmin.integer, &Boe_addAdmin },
-	{ "!addadmin", "addadmin", &g_addadmin.integer, &Boe_addAdmin },
-	{ "!addsadmin", "addsadmin", &g_addsadmin.integer, &Boe_addAdmin },
 	{ "!twist", "twist", &g_twist.integer, &Boe_Twist },
 	{ "!untwist", "untwist", &g_twist.integer, &Boe_unTwist },
 	{ "!plant", "plant", &g_plant.integer, &Boe_Plant },
@@ -220,10 +230,6 @@ static admCmd_t AdminCommands[] =
 	// Boe!Man 1/22/11: End full synonyms.
 
 	{ "!adr", "adminremove", &g_adminremove.integer, &Henk_AdminRemove },
-	{ "!uc", "uppercut", &g_uppercut.integer, &Boe_Uppercut },
-	{ "!ab", "addbadmin", &g_addbadmin.integer, &Boe_addAdmin },
-	{ "!aa", "addadmin", &g_addadmin.integer, &Boe_addAdmin },
-	{ "!as", "addsadmin", &g_addsadmin.integer, &Boe_addAdmin },
 	{ "!tw", "twist", &g_twist.integer, &Boe_Twist },
 	{ "!utw", "untwist", &g_twist.integer, &Boe_unTwist },
 	{ "!pl", "plant", &g_plant.integer, &Boe_Plant },
@@ -287,7 +293,6 @@ static admCmd_t AdminCommands[] =
 	{ "!cl", "clanlist", &g_clan.integer, &Boe_clanList },
 	{ "!r", "respawn", &g_respawn.integer, &Boe_Respawn },
 	{ "!b", "burn", &g_burn.integer, &Boe_Burn },
-	{ "!u", "uppercut", &g_uppercut.integer, &Boe_Uppercut },
 	{ "!p", "pop", &g_pop.integer, &Boe_pop },
 	{ "!k", "kick", &g_kick.integer, &Boe_Kick },
 	{ "!m", "mute", &g_mute.integer, &Boe_XMute },
@@ -328,8 +333,8 @@ bool IsValidCommand(const string &cmd, const string &str){
 // This command should always be used before an admin command.
 // It will process the given arguments and do all the checks before executing the command
 // After the execution it will call the proper logging functions
-void doAdminCommand(int commandIndex, gentity_t *ent, bool shortCmd, int argNum){
-	int paramClientId = getParamClient(ent, argNum, shortCmd);
+void doAdminCommand(int commandIndex, gentity_t *ent, bool shortCmd, int argNum, bool aliveOnly, bool otherAdmins){
+	int paramClientId = getParamClient(ent, argNum, shortCmd, aliveOnly, otherAdmins);
 	if (paramClientId < 0)
 		return;
 	gentity_t *other = &g_entities[paramClientId];
@@ -340,7 +345,7 @@ void doAdminCommand(int commandIndex, gentity_t *ent, bool shortCmd, int argNum)
 bool doAdminCommands(char *cmd){
 	for (int i = 0; i<AdminCommandsSize; i++){
 		if (boost::iequals(AdminCommands[i].adminCmd, cmd)){
-			doAdminCommand(i, NULL, false, 1);
+			doAdminCommand(i, NULL, false, 1, AdminCommands[i].aliveOnly, AdminCommands[i].otherAdmins);
 			return true;
 		}
 	}
@@ -352,7 +357,7 @@ void doShortCommandAdminCheck(gentity_t *ent, const char *p){
 	for (int i = 0; i<AdminCommandsSize; i++){
 		if (boost::icontains(param.c_str(), AdminCommands[i].shortCmd.c_str()) && IsValidCommand(AdminCommands[i].shortCmd, param)){
 			if (ent->client->pers.adminLevel >= *AdminCommands[i].adminLevel){
-				doAdminCommand(i, ent, 1, true);
+				doAdminCommand(i, ent, 1, true, AdminCommands[i].aliveOnly, AdminCommands[i].otherAdmins);
 				break;
 			}
 			else{

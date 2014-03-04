@@ -409,6 +409,24 @@ void Cmd_Kill_f( gentity_t *ent )
 	player_die (ent, ent, ent, 100000, MOD_SUICIDE, HL_NONE, vec3_origin );
 }
 
+string adminLevelToString(adm_t admLevel){
+	string adminLevel;
+	switch (admLevel){ // TODO: Store the level to string globally
+	case SADM:
+		adminLevel = "S-Admin";
+		break;
+	case ADM:
+		adminLevel = "Admin";
+		break;
+	case BADM:
+		adminLevel = "B-Admin";
+		break;
+	default:
+		adminLevel = "";
+	}
+	return adminLevel;
+}
+
 /*
 =================
 BroadCastTeamChange
@@ -418,21 +436,7 @@ Let everyone know about a team change
 */
 void BroadcastTeamChange( gclient_t *client, int oldTeam )
 {
-	string adminStr;
-	switch (client->pers.adminLevel){
-	case NONE:
-		adminStr = "";
-		break;
-	case BADM:
-		adminStr = "B-Admin";
-		break;
-	case ADM:
-		adminStr = "Admin";
-		break;
-	case SADM:
-		adminStr = "S-Admin";
-		break;
-	}
+	string adminStr = adminLevelToString(client->pers.adminLevel);
 
 	string clanStr = client->pers.clanMember ? "Clan\n" : "";
 
