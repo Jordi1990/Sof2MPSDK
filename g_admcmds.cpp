@@ -60,6 +60,23 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd, bool aliveOnly, bo
 					}
 				}
 			}
+			else if (isdigit(arg[i]) && isalpha(arg[i - 1])){ // Henk 10/03/11 -> Add support for !u1/!r1 commands
+				string strId;
+				for (unsigned int x = i; x <= arg.length(); x++){
+					if (isdigit(arg[x])){
+						strId += arg[x];
+					}
+					else
+						break;
+				}
+				try{
+					num = boost::lexical_cast<int>(strId);
+				}
+				catch (...){
+					num = -1;
+				}
+				trap_SendServerCommand(ent->s.number, va("print\"^3[Debug] ^7Short command style, Client number: %i.\n\"", num));
+			}
 		}
 	}
 	else{
@@ -107,8 +124,8 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd, bool aliveOnly, bo
 			Com_Printf("This player is not connected.\n");
 		return -1;
 	}
-	else if (g_entities[num].client->pers.adminLevel >= ent->client->pers.adminLevel && otherAdmins && ent && ent->client){
-		infoMsgToClients(-1, "You cannot use this command on other Admins");
+	else if ((ent && ent->client) && g_entities[num].client->pers.adminLevel >= ent->client->pers.adminLevel && !otherAdmins && ent && ent->client){
+		infoMsgToClients(ent - g_entities, "You cannot use this command on other Admins");
 		return -1;
 	}
 	else if (G_IsClientDead(g_entities[num].client) && aliveOnly){
@@ -134,11 +151,11 @@ void addAdmin(gentity_t *other, gentity_t *ent, int admLevel){
 	string adminLevel = adminLevelToString((adm_t)admLevel);
 
 	if (ent && ent->client)
-		trap_SendServerCommand(-1, va("print\"^3[Admin Action] ^7%s was made %s by %s.\n\"", other->client->pers.netname, adminLevel.c_str(), ent->client->pers.netname.c_str()));
+		trap_SendServerCommand(-1, va("print\"^3[Admin Action] ^7%s ^7was made %s ^7by %s.\n\"", other->client->pers.netname.c_str(), adminLevel.c_str(), ent->client->pers.netname.c_str()));
 	else
-		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] ^7%s is now a %s.\n\"", other->client->pers.netname, adminLevel.c_str()));
+		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] ^7%s ^7is now a %s.\n\"", other->client->pers.netname.c_str(), adminLevel.c_str()));
 
-	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@^7%s is now a %s", level.time + 5000, other->client->pers.netname, adminLevel.c_str()));
+	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@^7%s ^7is now a %s", level.time + 5000, other->client->pers.netname.c_str(), adminLevel.c_str()));
 }
 
 void uppercut(gentity_t *other, gentity_t *ent, int param){
@@ -153,7 +170,7 @@ void uppercut(gentity_t *other, gentity_t *ent, int param){
 	else
 		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] %s ^7was uppercut.\n\"", other->client->pers.netname.c_str()));
 
-	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,,%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
+	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
 }
 
 static admCmd_t AdminCommands[] =

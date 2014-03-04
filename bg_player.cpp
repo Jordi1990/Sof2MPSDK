@@ -1281,55 +1281,38 @@ bool BG_ParseAnimationFile ( const char *filename, animation_t* animations )
 }
 
 /*
-========================
-BG_SetAvailableOutfitting
+===============
+BG_UpdateAvailableWeapons
 
-Set the current availability table
-========================
+Updates available weapons using disable_ cvars
+===============
 */
-void BG_SetAvailableOutfitting ( const char* available )
+void BG_UpdateAvailableWeapons(void)
 {
-	int		len;
-
-	len = strlen ( available );
-	if ( len > WP_NUM_WEAPONS )
+	char available[WP_NUM_WEAPONS + 1];
+	memset(available, 0, sizeof(available));
+	for (int weapon = WP_KNIFE; weapon < WP_NUM_WEAPONS; weapon++)
 	{
-		len = WP_NUM_WEAPONS;
-	}
+		gitem_t* item = BG_FindWeaponItem((weapon_t)weapon);
+		if (!item)
+		{
+			continue;
+		}
 
-	// IF the availability has changed force a reload of the outfitting groups
-	if ( strncmp ( available, bg_availableOutfitting, min((int)sizeof(bg_availableOutfitting),len) ) )
-	{
-		bg_outfittingCount = 0;
+		int value = (int)trap_Cvar_VariableValue(va("disable_%s", item->classname));
+		bg_availableOutfitting[weapon-1] = (value == 0) ? '0' : '1';
+		available[weapon - 1] = (value == 0) ? '2' : '0';
 	}
-
-	// Initialize it to all on.
-	memset ( &bg_availableOutfitting[0], '2', sizeof(bg_availableOutfitting) );
-	memcpy ( &bg_availableOutfitting[0], available, len );
+	trap_Cvar_Set("g_availableWeapons", available);
+	trap_Cvar_Update(&g_availableWeapons);
 }
 
-/*
-========================
-BG_IsWeaponAvailableForOutfitting
-
-Is the given weapon available for outfitting?
-========================
-*/
-bool BG_IsWeaponAvailableForOutfitting ( weapon_t weapon, int level )
-{
-	if ( bg_availableOutfitting[0] == -1 )
-	{
+bool BG_IsWeaponAvailableForOutfitting(weapon_t weapon){
+	if (bg_availableOutfitting[weapon - 1] == '1')
+		return false;
+	else
 		return true;
-	}
-	
-	if ( bg_availableOutfitting[weapon-1] - '0' >= level )
-	{
-		return true;
-	}
-
-	return false;
 }
-
 /*
 ========================
 BG_DecompressOutfitting
@@ -1380,7 +1363,7 @@ void BG_DecompressOutfitting ( const char* compressed, goutfitting_t* outfitting
 		if ( bg_itemlist[bg_outfittingGroups[group][item]].giType == IT_WEAPON )
 		{
 			int origitem = item;
-			while ( !BG_IsWeaponAvailableForOutfitting ( (weapon_t)bg_itemlist[bg_outfittingGroups[group][item]].giTag, 2 ) )
+			while (!BG_IsWeaponAvailableForOutfitting((weapon_t)bg_itemlist[bg_outfittingGroups[group][item]].giTag))
 			{
 				item++;
 				if ( bg_outfittingGroups[group][item] == -1 )
@@ -1505,7 +1488,7 @@ bool BG_ParseOutfittingTemplate ( const char* fileName, goutfitting_t* outfittin
 	
 				// Make sure outfitting groups that have weapons that are not available
 				// do not show up
-				if (!BG_IsWeaponAvailableForOutfitting((weapon_t)item->giTag, 2))
+				if (!BG_IsWeaponAvailableForOutfitting((weapon_t)item->giTag))
 				{
 					trap_GP_Delete(&file);
 					return false;

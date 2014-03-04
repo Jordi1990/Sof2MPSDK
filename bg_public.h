@@ -943,8 +943,6 @@ TCharacterTemplate*	BG_FindCharacterTemplate			( const char *name );
 bool			BG_ParseNPCFiles					( void );
 int					BG_ParseSkin						( const char* filename, char* pairs, int pairsSize ); 
 
-bool			BG_IsWeaponAvailableForOutfitting	( weapon_t weapon, int level );
-void				BG_SetAvailableOutfitting			( const char* available );
 void				BG_DecompressOutfitting				( const char* compressed, goutfitting_t* outfitting );
 														
 /*******************************************************************************

@@ -972,4 +972,7 @@ bool isVoiceFlooded(gentity_t *ent);
 //g_admcmds.cpp
 bool doAdminCommands(char *cmd);
 void doShortCommandAdminCheck(gentity_t *ent, const char *p);
+
+void BG_UpdateAvailableWeapons();
+bool BG_IsWeaponAvailableForOutfitting(weapon_t weapon);
 #endif

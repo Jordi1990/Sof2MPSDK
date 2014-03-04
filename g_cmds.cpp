@@ -855,7 +855,7 @@ void Cmd_Team_f( gentity_t *ent )
 	// Limit how often one can switch team
 	if ( ent->client->switchTeamTime > level.time ) 
 	{
-		infoMsgToClients(ent->client->ps.clientNum, "May not switch teams more than once per 5 seconds");
+		infoMsgToClients(ent - g_entities, "May not switch teams more than once per 5 seconds");
 		return;
 	}
 
@@ -1068,21 +1068,7 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, const char *nam
 		type = "^7[^Cs^7] ";
 	}
 
-	string admin;
-	switch (ent->client->pers.adminLevel){
-	case NONE:
-		admin = "";
-		break;
-	case BADM:
-		admin = "B-Admin";
-		break;
-	case ADM:
-		admin = "Admin";
-		break;
-	case SADM:
-		admin = "S-Admin";
-		break;
-	}
+	string admin = adminLevelToString(ent->client->pers.adminLevel);
 
 	trap_SendServerCommand( other-g_entities, va("%s %d \"%s%s %s%s\"", 
 							mode == SAY_TEAM ? "tchat" : "chat",
@@ -1392,6 +1378,9 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, bool 
 	{
 		return;
 	}
+
+	if (strlen(id) > 64) // Com_Sprintf overflow fix
+		return;
 
 	// Voice flooding protection on?
 	if (isVoiceFlooded(ent))

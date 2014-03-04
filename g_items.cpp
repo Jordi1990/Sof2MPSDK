@@ -843,7 +843,7 @@ void G_SpawnItem (gentity_t *ent, gitem_t *item)
 	// Weapons can be disabled
 	if ( item->giType == IT_WEAPON )
 	{
-		if ( !BG_IsWeaponAvailableForOutfitting ( (weapon_t)item->giTag, 1 ) )
+		if ( !BG_IsWeaponAvailableForOutfitting ( (weapon_t)item->giTag ))
 		{
 			return;
 		}

@@ -671,7 +671,7 @@ void G_UpdateOutfitting ( int clientNum )
 	client->ps.clip[ATTACK_NORMAL][WP_KNIFE]=weaponData[WP_KNIFE].attack[ATTACK_NORMAL].clipSize;
 	client->ps.firemode[WP_KNIFE] = BG_FindFireMode ( WP_KNIFE, ATTACK_NORMAL, WP_FIREMODE_AUTO );
 
-	if ( BG_IsWeaponAvailableForOutfitting ( WP_KNIFE, 2 ) )
+	if (BG_IsWeaponAvailableForOutfitting(WP_KNIFE))
 	{
 		client->ps.ammo[ammoIndex]=ammoData[ammoIndex].max;
 	}
@@ -892,7 +892,7 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 	{
 		if ( client->pers.identity && oldidentity && client->pers.identity != oldidentity && team != TEAM_SPECTATOR )
 		{
-			infoMsgToClients(-1, va("%s ^7has changed identities", client->pers.netname.c_str()));
+			//infoMsgToClients(-1, va("%s ^7has changed identities", client->pers.netname.c_str()));
 		}
 
 		// If the client is changing their name then handle some delayed name changes
@@ -901,13 +901,13 @@ void ClientUserinfoChanged( int clientNum, userinfo *userInfo )
 			// Dont let them change their name too much
 			if ( level.time - client->pers.netnameTime < 5000 )
 			{
-				infoMsgToClients(client->ps.clientNum, "You must wait 5 seconds before changing your name again");
+				infoMsgToClients(clientNum, "You must wait 5 seconds before changing your name again");
 				client->pers.netname = oldname;
 			}
 			// If they are a ghost or spectating in an inf game their name is deferred
 			else if ( level.gametypeData->respawnType == RT_NONE && (client->sess.ghost || G_IsClientDead ( client ) ) )
 			{
-				infoMsgToClients(client->ps.clientNum, "Name changes while dead will be deferred until you spawn again");
+				infoMsgToClients(clientNum, "Name changes while dead will be deferred until you spawn again");
 				strcpy ( client->pers.deferredname, client->pers.netname.c_str() );
 				client->pers.netname = oldname;
 			}

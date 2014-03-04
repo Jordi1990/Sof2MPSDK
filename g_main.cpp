@@ -178,7 +178,7 @@ static cvarTable_t gameCvarTable[] =
 
 	{ &g_roundstartdelay,	"g_roundstartdelay", "5",		CVAR_ARCHIVE, 0.0, 0.0, 0, false },
 
-	{ &g_availableWeapons,	"g_availableWeapons", "2222222222211", CVAR_ARCHIVE|CVAR_SERVERINFO|CVAR_LATCH, 0.0, 0.0, 0, false },
+	{ &g_availableWeapons,	"g_availableWeapons", "2222222222211", CVAR_ARCHIVE|CVAR_SERVERINFO|CVAR_INTERNAL, 0.0, 0.0, 0, false },
 
 	{ &g_forceFollow,		"g_forceFollow",	 "0",			  CVAR_ARCHIVE, 0.0, 0.0, 0, false },
 	{ &g_followEnemy,		"g_followEnemy",	 "1",			  CVAR_ARCHIVE, 0.0, 0.0, 0, false },
@@ -196,13 +196,35 @@ static cvarTable_t gameCvarTable[] =
 	{ &g_teamkillDamageMax,		"g_teamkillDamageMax",		"300",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
 	{ &g_teamkillDamageForgive,	"g_teamkillDamageForgive",	"50",		CVAR_ARCHIVE,	0.0f,	0.0f,	0,  false },
 
-	// new cvars //g_clientTMIUpdate
+	// new cvars
 	{ &g_clientTMIUpdate, "g_clientTMIUpdate", "2000", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 500, 10000, 0, false },
 	{ &g_maxIPConnections, "g_maxIPConnections", "3", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 1, MAX_CLIENTS, 0, false },
 	{ &g_addbadmin, "g_addbadmin", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },
 	{ &g_addadmin, "g_addadmin", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },
 	{ &g_addsadmin, "g_addsadmin", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },	
 	{ &g_uppercut, "g_uppercut", "4", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0, 5, 0, false },
+
+	{ NULL, "disable_weapon_knife", "0", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_US_SOCOM", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M19", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_microuzi", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M3A1", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_USAS_12", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M590", "0", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_MSG90A1", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M4", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_AK_74", "0", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M60", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_RPG_7", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_MM_1", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M84", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M15", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_SMOHG92", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_AN_M14", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_M67", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_F1", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_L2A2", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
+	{ NULL, "disable_pickup_weapon_MDN11", "1", CVAR_ARCHIVE, 0.0, 0.0, 0, false },
 };
 
 // bk001129 - made static to avoid aliasing
@@ -633,7 +655,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 	G_RemapTeamShaders();
 
 	// Set the available outfitting
-	BG_SetAvailableOutfitting ( g_availableWeapons.string );
+	BG_UpdateAvailableWeapons();
 
 	// Music
 	if ( RMG.integer )
