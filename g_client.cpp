@@ -694,6 +694,12 @@ void G_UpdateOutfitting ( int clientNum )
 		// Grab the item that represents the weapon
 		item = &bg_itemlist[bg_outfittingGroups[group][client->pers.outfitting.items[group]]];
 
+		// Henk 06/10/10 -> Fix for ravensoft's crappy weapon check
+		if (!BG_IsWeaponAvailableForOutfitting((weapon_t)item->giTag)){
+			//trap_SendServerCommand(ent->s.number, va("print\"^3[Info] ^7Your outfitting contains a disabled weapon.\n\""));
+			continue;
+		}
+
 		client->ps.stats[STAT_WEAPONS] |= (1 << item->giTag);
 		ammoIndex = weaponData[item->giTag].attack[ATTACK_NORMAL].ammoIndex;
 		client->ps.ammo[ammoIndex] += weaponData[item->giTag].attack[ATTACK_NORMAL].extraClips * weaponData[item->giTag].attack[ATTACK_NORMAL].clipSize;
@@ -1297,6 +1303,8 @@ void ClientSpawn(gentity_t *ent)
 	// Give the client their weapons depending on whether or not pickups are enabled
 	if ( level.pickupsDisabled )
 	{
+		// Henk 05/03/14: Real fix for having disabled weapons in the outfitting, reparse the client's outfitting before every spawn
+		BG_DecompressOutfitting(userInfo.outfitting.c_str(), &client->pers.outfitting);
 		G_UpdateOutfitting ( ent->s.number );
 
 		// Prevent the client from picking up a whole bunch of stuff

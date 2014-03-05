@@ -10,8 +10,9 @@ typedef struct
 	int		*adminLevel; // pointer to cvar value because we can't store a non constant value, so we store a pointer :).
 	void(*Function)(gentity_t *, gentity_t *, int); // store pointer to the given function so we can call it later
 	int param;
-	bool aliveOnly;
-	bool otherAdmins;
+	bool aliveOnly; // commands only on alive ppl?
+	bool otherAdmins; // command can be used on other admins
+	bool getClient; // true if a commands needs a client parameter, false for commands with a string parameter or no parameter
 } admCmd_t;
 
 int getParamClient(gentity_t *ent, int argNum, bool shortCmd, bool aliveOnly, bool otherAdmins){
@@ -21,7 +22,9 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd, bool aliveOnly, bo
 	trap_Argv(argNum, argBuf, 16);
 	string arg = argBuf;
 	int num = -1;
+	bool secondTry = false;
 	if (shortCmd){ // Henk 03/03/14 -> Handle the short admin commands.
+		secondtry:
 		for (unsigned int i = 0; i < arg.length(); i++){
 			if (arg[i] == ' ' && arg.length() > 3){
 				string idStr;
@@ -77,6 +80,13 @@ int getParamClient(gentity_t *ent, int argNum, bool shortCmd, bool aliveOnly, bo
 				}
 				trap_SendServerCommand(ent->s.number, va("print\"^3[Debug] ^7Short command style, Client number: %i.\n\"", num));
 			}
+		}
+
+		if (num == -1 && !secondTry){ // Get second argument because they use it from the console
+			trap_Argv(2, argBuf, 16);
+			arg = argBuf;
+			secondTry = true;
+			goto secondtry;
 		}
 	}
 	else{
@@ -170,21 +180,74 @@ void uppercut(gentity_t *other, gentity_t *ent, int param){
 	else
 		trap_SendServerCommand(-1, va("print\"^3[Rcon Action] %s ^7was uppercut.\n\"", other->client->pers.netname.c_str()));
 
-	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
+	trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@%s ^7was uppercut", level.time + 5000, other->client->pers.netname.c_str()));
+}
+
+void weaponEdit(gentity_t *, gentity_t *ent, int argNum){
+	char argBuf[16];
+	trap_Argv(argNum, argBuf, 16);
+	string arg = argBuf;
+	string weaponName;
+	bool spaceDone = false;
+	for (unsigned int i = 0; i < arg.length(); i++){
+		if (arg[i] == ' ')
+			spaceDone = true;
+		else if (spaceDone)
+			weaponName += arg[i];			
+	}
+
+	for (int weapon = WP_KNIFE; weapon < WP_NUM_WEAPONS; weapon++)
+	{
+		gitem_t* item = BG_FindWeaponItem((weapon_t)weapon);
+		if (!item)
+		{
+			continue;
+		}
+
+		if (boost::icontains(item->pickup_name, weaponName.c_str())){
+			// disable or enable weapon
+			int value = (int)trap_Cvar_VariableValue(va("disable_%s", item->classname));
+			trap_Cvar_Set(va("disable_%s", item->classname), (value == 0)?"1":"0");
+			if (ent && ent->client)
+				trap_SendServerCommand(-1, va("print\"^3[Admin Action] ^7Weapon %s has been %s by %s.\n\"", item->pickup_name, (value == 1) ? "enabled" : "disabled", ent->client->pers.netname.c_str()));
+			else
+				trap_SendServerCommand(-1, va("print\"^3[Rcon Action] ^7Weapon %s has been %s.\n\"", item->pickup_name, (value == 1) ? "enabled" : "disabled"));
+
+			trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@Weapon %s has been %s", level.time + 5000, item->pickup_name, (value == 1) ? "enabled" : "disabled"));
+			globalSound(G_SoundIndex("sound/misc/menus/click.wav"));
+			BG_UpdateAvailableWeapons();
+			return;
+		}
+	}
+	infoMsgToClients(ent->s.clientNum, va("Weapon %s does not exist", weaponName.c_str()));
+}
+
+void gameTypeRestart(gentity_t *, gentity_t *ent, int argNum){
+		trap_SetConfigstring(CS_GAMETYPE_MESSAGE, va("%i,@Gametype restart!", level.time + 5000));
+		globalSound(G_SoundIndex("sound/misc/menus/click.wav"));
+		if (ent && ent->client){
+			trap_SendServerCommand(-1, va("print\"^3[Admin Action] ^7Gametype restart by %s.\n\"", ent->client->pers.netname.c_str()));
+		}
+		else{
+			trap_SendServerCommand(-1, va("print\"^3[Rcon Action] ^7Gametype restart.\n\""));
+		}
+		trap_SendConsoleCommand(EXEC_APPEND, va("gametype_restart\n"));
 }
 
 static admCmd_t AdminCommands[] =
 {
-	{ "!uppercut", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true },
-	{ "!addbadmin", "addbadmin", &g_addbadmin.integer, &addAdmin, 2, false, false },
-	{ "!addadmin", "addadmin", &g_addadmin.integer, &addAdmin, 3, false, false },
-	{ "!addsadmin", "addsadmin", &g_addsadmin.integer, &addAdmin, 4, false, false },
+	{ "!uppercut", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true, true },
+	{ "!addbadmin", "addbadmin", &g_addbadmin.integer, &addAdmin, 2, false, false, true },
+	{ "!addadmin", "addadmin", &g_addadmin.integer, &addAdmin, 3, false, false, true },
+	{ "!addsadmin", "addsadmin", &g_addsadmin.integer, &addAdmin, 4, false, false, true },
 
-	{ "!ab", "addbadmin", &g_addbadmin.integer, &addAdmin, 2, false, false },
-	{ "!aa", "addadmin", &g_addadmin.integer, &addAdmin, 3, false, false },
-	{ "!as", "addsadmin", &g_addsadmin.integer, &addAdmin, 4, false, false },
-	{ "!uc", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true },
-	{ "!u", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true },
+	{ "!gr", "gametyperestart", &g_uppercut.integer, &gameTypeRestart, 0, true, true, false },
+	{ "!wp", "weapon", &g_uppercut.integer, &weaponEdit, 0, true, true, false },
+	{ "!ab", "addbadmin", &g_addbadmin.integer, &addAdmin, 2, false, false, true },
+	{ "!aa", "addadmin", &g_addadmin.integer, &addAdmin, 3, false, false, true },
+	{ "!as", "addsadmin", &g_addsadmin.integer, &addAdmin, 4, false, false, true },
+	{ "!uc", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true, true },
+	{ "!u", "uppercut", &g_uppercut.integer, &uppercut, 0, true, true, true },
 	/*
 	// Boe!Man 1/22/11: Adding full synonyms.
 	{ "!pop", "pop", &g_pop.integer, &Boe_pop },
@@ -350,19 +413,24 @@ bool IsValidCommand(const string &cmd, const string &str){
 // This command should always be used before an admin command.
 // It will process the given arguments and do all the checks before executing the command
 // After the execution it will call the proper logging functions
-void doAdminCommand(int commandIndex, gentity_t *ent, bool shortCmd, int argNum, bool aliveOnly, bool otherAdmins){
-	int paramClientId = getParamClient(ent, argNum, shortCmd, aliveOnly, otherAdmins);
-	if (paramClientId < 0)
-		return;
-	gentity_t *other = &g_entities[paramClientId];
-	globalSound(G_SoundIndex("sound/misc/menus/click.wav"));
-	AdminCommands[commandIndex].Function(other, ent, AdminCommands[commandIndex].param);
+void doAdminCommand(int commandIndex, gentity_t *ent, bool shortCmd, int argNum, bool aliveOnly, bool otherAdmins, bool getClient){
+	if (getClient){
+			int paramClientId = getParamClient(ent, argNum, shortCmd, aliveOnly, otherAdmins);
+			if (paramClientId < 0)
+				return;
+			gentity_t *other = &g_entities[paramClientId];
+			AdminCommands[commandIndex].Function(other, ent, AdminCommands[commandIndex].param);
+			globalSound(G_SoundIndex("sound/misc/menus/click.wav"));
+	}
+	else{ // no client, commands like !cm / !gt
+		AdminCommands[commandIndex].Function(NULL, ent, argNum);
+	}
 }
 
 bool doAdminCommands(char *cmd){
 	for (int i = 0; i<AdminCommandsSize; i++){
 		if (boost::iequals(AdminCommands[i].adminCmd, cmd)){
-			doAdminCommand(i, NULL, false, 1, AdminCommands[i].aliveOnly, AdminCommands[i].otherAdmins);
+			doAdminCommand(i, NULL, false, 1, AdminCommands[i].aliveOnly, AdminCommands[i].otherAdmins, AdminCommands[i].getClient);
 			return true;
 		}
 	}
@@ -374,7 +442,7 @@ void doShortCommandAdminCheck(gentity_t *ent, const char *p){
 	for (int i = 0; i<AdminCommandsSize; i++){
 		if (boost::icontains(param.c_str(), AdminCommands[i].shortCmd.c_str()) && IsValidCommand(AdminCommands[i].shortCmd, param)){
 			if (ent->client->pers.adminLevel >= *AdminCommands[i].adminLevel){
-				doAdminCommand(i, ent, 1, true, AdminCommands[i].aliveOnly, AdminCommands[i].otherAdmins);
+				doAdminCommand(i, ent, 1, true, AdminCommands[i].aliveOnly, AdminCommands[i].otherAdmins, AdminCommands[i].getClient);
 				break;
 			}
 			else{
